@@ -4,46 +4,61 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Utils;
 
+import edu.wpi.first.wpilibj2.command.Command;
+
 public class Elevator extends SubsystemBase {
-  private TalonFX m_motor1;
-  private TalonFX m_motor2;
-  private MotionMagicVoltage m_mmReq;
-  private DigitalInput m_limitSwitch;
+  private TalonFX _motor1;
+  private TalonFX _motor2;
+  private MotionMagicVoltage _mmReq;
+  private DigitalInput _limitSwitch;
+  private SysIdRoutine _routine;
 
   public Elevator() {
-    m_motor1 = new TalonFX(Constants.kElevatorMotor1);
-    m_motor2 = new TalonFX(Constants.kElevatorMotor2);
-    m_limitSwitch = new DigitalInput(Constants.kElevatorLimitSwitch);
+    _motor1 = new TalonFX(Constants.kElevatorMotor1);
+    _motor2 = new TalonFX(Constants.kElevatorMotor2);
+    _limitSwitch = new DigitalInput(Constants.kElevatorLimitSwitch);
     
-    Follower m_followReq = new Follower(Constants.kElevatorMotor1, true);
+    Follower _followReq = new Follower(Constants.kElevatorMotor1, true);
 
-    m_motor2.setControl(m_followReq);
-    m_mmReq = Utils.getMotionMagicConfig();
+    _motor2.setControl(_followReq);
+    _mmReq = Utils.getMotionMagicConfig();
+
+    _routine = Utils.getSysIdRoutine(_motor1, this);
   }
 
   public void setHeight(double height){
-    m_motor1.setControl(m_mmReq.withPosition(height).withSlot(0));
+    _motor1.setControl(_mmReq.withPosition(height).withSlot(0));
   }
   
   public double getHeight(){
-    return m_motor1.getPosition().getValue();
+    return _motor1.getPosition().getValue();
   }
 
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return _routine.quasistatic(direction);
+  }
+  
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return _routine.dynamic(direction);
+  }
+  
   public void Reset() {
-    m_motor1.setPosition(0);
-    m_motor2.setPosition(0);
+    _motor1.setPosition(0);
+    _motor2.setPosition(0);
   }
 
   @Override
   public void periodic() {
-    if(m_limitSwitch.get())
-      m_motor1.setPosition(0);
+    if(_limitSwitch.get())
+      _motor1.setPosition(0);
 
     SmartDashboard.putNumber("Height", getHeight());
   }

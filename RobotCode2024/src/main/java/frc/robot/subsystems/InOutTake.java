@@ -44,4 +44,8 @@ public class InOutTake extends SubsystemBase {
   public void stopMotors(){
     _motor1.set(0);
   }
+  @Override
+  public void periodic() {
+      super.periodic();
+  }
 }

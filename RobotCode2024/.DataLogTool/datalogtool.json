@@ -1,0 +1,10 @@
+{
+  "download": {
+    "deleteAfter": false,
+    "localDir": "C:\\Users\\ninja\\Documents",
+    "serverTeam": "4744"
+  },
+  "output": {
+    "outputFolder": "C:\\Users\\ninja\\Documents"
+  }
+}
