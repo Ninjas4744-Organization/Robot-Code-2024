@@ -6,12 +6,10 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants;
-import frc.robot.Utils;
-
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class Elevator extends SubsystemBase {
   private TalonFX _motor1;
@@ -37,6 +35,12 @@ public class Elevator extends SubsystemBase {
   public double getHeight(){
     return _motor1.getPosition().getValue();
   }
+
+  public void Override(){
+    MotionMagicVoltage mmReq = new MotionMagicVoltage(getHeight());
+    _motor1.setControl(mmReq);
+    _motor1.set(0);
+  }
   
   public void Reset() {
     _motor1.setPosition(0);
@@ -53,5 +57,12 @@ public class Elevator extends SubsystemBase {
     SmartDashboard.putNumber("Height", getHeight());
     SmartDashboard.putBoolean("Elevator Top", _limitSwitchTop.get());
     SmartDashboard.putBoolean("Elevator Bottom", _limitSwitchBottom.get());
+  }
+
+  public Command runElevate(){
+    return new StartEndCommand(
+        () -> { this.setHeight(Constants.kMaxElevator); }, 
+        () -> { this.setHeight(0); }
+    );
   }
 }

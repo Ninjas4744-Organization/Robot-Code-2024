@@ -21,4 +21,11 @@ public final class Constants {
   public static final int kInOutTakeLimitSwitchBottom = 0;
   public static final double kMaxInOutTakeElevator = 10;
   public static final double kMaxInOutTakeRotation = 10;
+  public static final double kTimeToOpenCloseSystem = 1;
+  public static final double kSourceOpenHeight = 9;
+  public static final double kSourceOpenRotation = 10;
+  public static final double kAmpOpenHeight = 4;
+  public static final double kAmpOpenRotation = 5;
+  public static final double kTrapOpenHeight = 6;
+  public static final double kTrapOpenRotation = 7;
 }

@@ -8,6 +8,11 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -50,6 +55,10 @@ public class InOutTake extends SubsystemBase {
     _collectionMotor.set(TalonSRXControlMode.PercentOutput, -0.7);
   }
 
+  public void stopTake(){
+    _collectionMotor.set(TalonSRXControlMode.PercentOutput, 0);
+  }
+
   public void setRotation(double rotation){
     MotionMagicVoltage mmReq = new MotionMagicVoltage(rotation);
     _rotationMotor.setControl(mmReq);
@@ -59,14 +68,9 @@ public class InOutTake extends SubsystemBase {
     return _rotationMotor.getPosition().getValue();
   }
 
-  public void Override(){
-    MotionMagicVoltage mmReq1 = new MotionMagicVoltage(getHeight());
-    MotionMagicVoltage mmReq2 = new MotionMagicVoltage(getRotation());
-    _elevatorMotor.setControl(mmReq1);
-    _rotationMotor.setControl(mmReq2);
-
-    _collectionMotor.set(TalonSRXControlMode.PercentOutput, 0);
-    _elevatorMotor.set(0);
+  public void stopRotation(){
+    MotionMagicVoltage mmReq = new MotionMagicVoltage(getRotation());
+    _rotationMotor.setControl(mmReq);
     _rotationMotor.set(0);
   }
 
@@ -79,6 +83,18 @@ public class InOutTake extends SubsystemBase {
     return _elevatorMotor.getPosition().getValue();
   }
 
+  public void stopElevator(){
+    MotionMagicVoltage mmReq = new MotionMagicVoltage(getHeight());
+    _elevatorMotor.setControl(mmReq);
+    _elevatorMotor.set(0);
+  }
+
+  public void Override(){
+    stopElevator();
+    stopRotation();
+    _collectionMotor.set(TalonSRXControlMode.PercentOutput, 0);
+  }
+
   public void Reset() {
     _elevatorMotor.setPosition(0);
     _rotationMotor.setPosition(0);
@@ -89,6 +105,52 @@ public class InOutTake extends SubsystemBase {
     if(_limitSwitchElevator.get())
       _elevatorMotor.setPosition(0);
 
+    if(_limitSwitchRotationTop.get())
+      _rotationMotor.setPosition(Constants.kMaxInOutTakeRotation);
+
+    if(_limitSwitchRotationBottom.get())
+      _rotationMotor.setPosition(0);
+
     SmartDashboard.putNumber("Collection Height", getHeight());
+  }
+
+  public Command runOpen(double height, double rotation){
+    return new InstantCommand(() -> { this.setHeight(height); this.setRotation(rotation); });
+  }
+
+  public Command runClose(){
+    return new InstantCommand(() -> { this.setHeight(0); this.setRotation(0); });
+  }
+
+  public Command runOpenClose(double height, double rotation){
+    return new ConditionalCommand(
+      runOpen(height, rotation),
+      runClose(),
+      () -> { return this.getHeight() == 0; }
+    );
+  }
+
+  public Command runInOutTake(){
+    return new ConditionalCommand(
+      new StartEndCommand(
+        this::outake,
+        this::stopTake
+      ).withTimeout(1),
+
+      new StartEndCommand(
+        this::intake,
+        this::stopTake
+      ).until(this::isNote),
+
+      this::isNote
+    );
+  }
+
+  public Command runAutoInOutTake(double height, double rotation){
+    return Commands.sequence(
+      this.runOpen(height, rotation),
+      Commands.waitSeconds(Constants.kTimeToOpenCloseSystem),
+      this.runInOutTake()
+    );
   }
 }
