@@ -35,11 +35,11 @@ public class RobotContainer {
   }
 
   public HashMap<String, Command> getCommands() {
-    _commands.put("Elevate", 
+    _commands.put("ClimbElevate", 
       new StartEndCommand(
         () -> { _elevator.setHeight(Constants.kMaxElevator); }, 
         () -> { _elevator.setHeight(0); }
-      ));
+    ));
 
     _commands.put("InOutTake", new ConditionalCommand(
       new StartEndCommand(
@@ -55,21 +55,37 @@ public class RobotContainer {
 
       () -> { return _inOutTake.isNote(); } // CONDITION
     ));
+
+    _commands.put("CollectionElevate", 
+      new StartEndCommand(
+        () -> { _inOutTake.setHeight(Constants.kMaxInOutTakeElevator); }, 
+        () -> { _inOutTake.setHeight(0); }
+    ));
+
+    _commands.put("RotateUp", new StartEndCommand(
+        () -> { _inOutTake.setRotation(Constants.kMaxInOutTakeRotation); },
+        () -> { _inOutTake.stopMotors(); }
+      ).until(() -> { return _inOutTake.isRotationTop();})
+    );
+
+    _commands.put("RotateDown", new StartEndCommand(
+        () -> { _inOutTake.setRotation(0); },
+        () -> { _inOutTake.stopMotors(); }
+      ).until(() -> { return _inOutTake.isRotationBottom();})
+    );
+
     return _commands;
   }
   
   private void configureBindings() {
-    //SysId
-    _joystick.square().whileTrue(_elevator.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    _joystick.circle().whileTrue(_elevator.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    _joystick.R2().whileTrue(_elevator.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    _joystick.R1().whileTrue(_elevator.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
     //Elevator
-    _joystick.cross().toggleOnTrue(new SelectCommand<String>( getCommands(), () -> { return "Elevate"; }));
+    _joystick.triangle().toggleOnTrue(new SelectCommand<String>( getCommands(), () -> { return "ClimbElevate"; }));
 
     //Collection
-    _joystick.triangle().onTrue(new SelectCommand<String>( getCommands(), () -> { return "InOutTake"; }));
+    _joystick.cross().onTrue(new SelectCommand<String>( getCommands(), () -> { return "InOutTake"; }));
+    _joystick.square().toggleOnTrue(new SelectCommand<String>( getCommands(), () -> { return "CollectionElevate"; }));
+    _joystick.R1().onTrue(new SelectCommand<String>( getCommands(), () -> { return "RotateUp"; }));
+    _joystick.L1().onTrue(new SelectCommand<String>( getCommands(), () -> { return "RotateDown"; }));
   }
 
   public void disableActions(){
