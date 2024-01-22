@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
@@ -20,31 +19,31 @@ public class InOutTake extends SubsystemBase {
   private TalonSRX _collectionMotor;
   private TalonFX _elevatorMotor;
   private TalonFX _rotationMotor;
-  //private DigitalInput _limitSwitchNote;
-  private DigitalInput _limitSwitchElevator;
-  private DigitalInput _limitSwitchRotationTop;
-  private DigitalInput _limitSwitchRotationBottom;
+  private DigitalInput _beamBreakerNote;
+  //private DigitalInput _limitSwitchElevator;
+  //private DigitalInput _limitSwitchRotationTop;
+  //private DigitalInput _limitSwitchRotationBottom;
   
   public InOutTake() {
     _collectionMotor = new TalonSRX(Constants.kInOutTakeMotor);
-    _elevatorMotor = new TalonFX(Constants.kInOutTakeElevatorMotor);
     _rotationMotor = new TalonFX(Constants.kInOutTakeRotationMotor);
-    //_limitSwitchNote = new DigitalInput(Constants.kInOutTakeLimitSwitchNote);
-    _limitSwitchElevator = new DigitalInput(Constants.kInOutTakeLimitSwitchElevator);
-    _limitSwitchRotationTop = new DigitalInput(Constants.kInOutTakeLimitSwitchTop);
-    _limitSwitchRotationBottom = new DigitalInput(Constants.kInOutTakeLimitSwitchBottom);
+    _elevatorMotor = new TalonFX(Constants.kInOutTakeElevatorMotor);
+    //_beamBreakerNote = new DigitalInput(Constants.kInOutTakeBeamBreakerNote);
+    //_limitSwitchElevator = new DigitalInput(Constants.kInOutTakeLimitSwitchElevator);
+    //_limitSwitchRotationTop = new DigitalInput(Constants.kInOutTakeLimitSwitchTop);
+    //_limitSwitchRotationBottom = new DigitalInput(Constants.kInOutTakeLimitSwitchBottom);
   }
 
   public boolean isNote(){
-    return false;
+    return _beamBreakerNote.get();
   }
 
   public boolean isRotationTop(){
-    return _limitSwitchRotationTop.get();
+    return false;//_limitSwitchRotationTop.get();
   }
 
   public boolean isRotationBottom(){
-    return _limitSwitchRotationBottom.get();
+    return false;//_limitSwitchRotationBottom.get();
   }
 
   public void intake(){
@@ -102,14 +101,14 @@ public class InOutTake extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if(_limitSwitchElevator.get())
-      _elevatorMotor.setPosition(0);
+    //if(_limitSwitchElevator.get())
+    //  _elevatorMotor.setPosition(0);
 
-    if(_limitSwitchRotationTop.get())
-      _rotationMotor.setPosition(Constants.kMaxInOutTakeRotation);
+    //if(_limitSwitchRotationTop.get())
+    //  _rotationMotor.setPosition(Constants.kMaxInOutTakeRotation);
 
-    if(_limitSwitchRotationBottom.get())
-      _rotationMotor.setPosition(0);
+    //if(_limitSwitchRotationBottom.get())
+    //  _rotationMotor.setPosition(0);
 
     SmartDashboard.putNumber("Collection Height", getHeight());
   }

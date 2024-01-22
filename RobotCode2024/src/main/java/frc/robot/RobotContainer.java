@@ -1,8 +1,9 @@
 package frc.robot;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -34,7 +35,7 @@ public class RobotContainer {
     HashMap<Integer, Command> _acceptCommands = new HashMap<Integer, Command>();
 
     for(int i = 11; i <= 16; i++)
-      _acceptCommands.put(i, _inOutTake.runAutoInOutTake(Constants.kTrapOpenHeight, Constants.kTrapOpenRotation));
+      _acceptCommands.put(i, _elevator.runAutoElevate(_inOutTake));
 
     _acceptCommands.put(1, _inOutTake.runAutoInOutTake(Constants.kSourceOpenHeight, Constants.kSourceOpenRotation));
     _acceptCommands.put(2, _inOutTake.runAutoInOutTake(Constants.kSourceOpenHeight, Constants.kSourceOpenRotation));
@@ -56,11 +57,12 @@ public class RobotContainer {
     //_joystick.R2().onFalse(new InstantCommand(() -> { _vision.go(); }));
 
     //Semi-Auto:
-    _joystick.triangle().toggleOnTrue(_elevator.runElevate());
     _joystick.square().toggleOnTrue(_inOutTake.runClose());
+    _joystick.povUp().toggleOnTrue(_elevator.runElevate());
     _joystick.povDown().onTrue(_inOutTake.runAutoInOutTake(Constants.kSourceOpenHeight, Constants.kSourceOpenRotation));
     _joystick.povRight().onTrue(_inOutTake.runAutoInOutTake(Constants.kAmpOpenHeight, Constants.kAmpOpenRotation));
-    _joystick.povRight().onTrue(_inOutTake.runAutoInOutTake(Constants.kTrapOpenHeight, Constants.kTrapOpenRotation));
+    _joystick.povLeft().onTrue(_inOutTake.runAutoInOutTake(Constants.kTrapOpenHeight, Constants.kTrapOpenRotation));
+    //_joystick.L1().onTrue(new InstantCommand(() -> {_elevator.Tag = (_elevator.Tag + 1) % 17; }));
 
     //Manual:
     // TODO: add manual controls
@@ -72,16 +74,30 @@ public class RobotContainer {
   }
 
   private int getTagID(){
-    return new Random().nextInt(16) + 1;
+    return 0;//_elevator.Tag;
   }
 
   private int getJoe(){
     Optional<Alliance> ally = DriverStation.getAlliance();
+    int tag = getTagID();
+    List<Integer> blueIDs = Arrays.asList(6, 14, 15, 16, 1, 2);
+    List<Integer> redIDs = Arrays.asList(5, 11, 12, 13, 9, 10);
 
-    return getTagID();
-  }
+    if(ally.get() == Alliance.Blue){
+      if(blueIDs.contains(tag))
+        return tag;
+    }
+    else
+    {
+      if(redIDs.contains(tag))
+        return tag;
+    }
+
+  return -1;
+}
 
   public void disableActions(){
     _elevator.Reset();
+    _inOutTake.Reset();
   }
 }

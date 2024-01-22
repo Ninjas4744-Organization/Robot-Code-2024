@@ -7,27 +7,29 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Elevator extends SubsystemBase {
   private TalonFX _motor1;
   private TalonFX _motor2;
-  private DigitalInput _limitSwitchTop;
-  private DigitalInput _limitSwitchBottom;
+  private DigitalInput _limitSwitch;
+  ///public int Tag = 0;
 
   public Elevator() {
     _motor1 = new TalonFX(Constants.kElevatorMotor1);
     _motor2 = new TalonFX(Constants.kElevatorMotor2);
-    _limitSwitchTop = new DigitalInput(Constants.kElevatorLimitSwitchTop);
-    _limitSwitchBottom = new DigitalInput(Constants.kElevatorLimitSwitchBottom);
+    _limitSwitch = new DigitalInput(Constants.kElevatorLimitSwitch);
     
     Follower _followReq = new Follower(Constants.kElevatorMotor1, true);
     _motor2.setControl(_followReq);
   }
 
   public void setHeight(double height){
+    System.out.println(height);
     MotionMagicVoltage mmReq = new MotionMagicVoltage(height);
     _motor1.setControl(mmReq);
   }
@@ -48,21 +50,38 @@ public class Elevator extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if(_limitSwitchBottom.get())
+    if(_limitSwitch.get())
       _motor1.setPosition(0);
-    
-    if(_limitSwitchTop.get())
-      _motor1.setPosition(Constants.kElevatorLimitSwitchTop);
 
     SmartDashboard.putNumber("Height", getHeight());
-    SmartDashboard.putBoolean("Elevator Top", _limitSwitchTop.get());
-    SmartDashboard.putBoolean("Elevator Bottom", _limitSwitchBottom.get());
+    //SmartDashboard.putBoolean("Elevator Bottom", _limitSwitch.get());
+    //SmartDashboard.putNumber("Tag", Tag);
+  }
+
+  public Command runElevateUp(){
+    return new InstantCommand(
+        () -> { this.setHeight(Constants.kMaxElevator); }
+    );
+  }
+
+  public Command runElevateDown(){
+    return new InstantCommand(
+        () -> { this.setHeight(0); }
+    );
   }
 
   public Command runElevate(){
-    return new StartEndCommand(
-        () -> { this.setHeight(Constants.kMaxElevator); }, 
-        () -> { this.setHeight(0); }
+    return new ConditionalCommand(
+        this.runElevateUp(), 
+        this.runElevateDown(),
+        () -> { return this.getHeight() == 0; }
+    ).withTimeout(Constants.kTimeToClimbUntilTrap);
+  }
+
+  public Command runAutoElevate(InOutTake inOutTake){
+    return Commands.sequence(
+      this.runElevate(),
+      inOutTake.runAutoInOutTake(Constants.kTrapOpenHeight, Constants.kTrapOpenRotation)
     );
   }
 }
