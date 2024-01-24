@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
+
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -17,7 +19,8 @@ public class Elevator extends SubsystemBase {
   private TalonFX _motor1;
   private TalonFX _motor2;
   private DigitalInput _limitSwitch;
-  ///public int Tag = 0;
+  //Temp
+  public int Tag = 0;
 
   public Elevator() {
     _motor1 = new TalonFX(Constants.kElevatorMotor1);
@@ -28,8 +31,11 @@ public class Elevator extends SubsystemBase {
     _motor2.setControl(_followReq);
   }
 
+  public void setMotor(double percent){
+    _motor1.set(percent);
+  }
+
   public void setHeight(double height){
-    System.out.println(height);
     MotionMagicVoltage mmReq = new MotionMagicVoltage(height);
     _motor1.setControl(mmReq);
   }
@@ -46,6 +52,7 @@ public class Elevator extends SubsystemBase {
   
   public void Reset() {
     _motor1.setPosition(0);
+    _motor1.set(0);
   }
 
   @Override
@@ -55,7 +62,8 @@ public class Elevator extends SubsystemBase {
 
     SmartDashboard.putNumber("Height", getHeight());
     //SmartDashboard.putBoolean("Elevator Bottom", _limitSwitch.get());
-    //SmartDashboard.putNumber("Tag", Tag);
+    //Temp
+    SmartDashboard.putNumber("Tag", Tag);
   }
 
   public Command runElevateUp(){
@@ -74,14 +82,15 @@ public class Elevator extends SubsystemBase {
     return new ConditionalCommand(
         this.runElevateUp(), 
         this.runElevateDown(),
-        () -> { return this.getHeight() == 0; }
+        () -> { return Math.abs(this.getHeight()) < 0.2; }
     ).withTimeout(Constants.kTimeToClimbUntilTrap);
   }
 
-  public Command runAutoElevate(InOutTake inOutTake){
+  public Command runAutoElevate(InOutTake inOutTake, BooleanSupplier override, Runnable disableOverride){
     return Commands.sequence(
       this.runElevate(),
-      inOutTake.runAutoInOutTake(Constants.kTrapOpenHeight, Constants.kTrapOpenRotation)
-    );
+      Commands.waitSeconds(Constants.kTimeToClimbUntilTrap),
+      inOutTake.runAutoInOutTake(Constants.kTrapOpenHeight, Constants.kTrapOpenRotation, override, disableOverride)
+    ).until(override).andThen(disableOverride);
   }
 }
