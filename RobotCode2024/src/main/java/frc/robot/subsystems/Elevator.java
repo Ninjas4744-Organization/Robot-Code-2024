@@ -19,8 +19,6 @@ public class Elevator extends SubsystemBase {
   private TalonFX _motor1;
   private TalonFX _motor2;
   private DigitalInput _limitSwitch;
-  //Temp
-  public int Tag = 0;
 
   public Elevator() {
     _motor1 = new TalonFX(Constants.kElevatorMotor1);
@@ -61,9 +59,6 @@ public class Elevator extends SubsystemBase {
       _motor1.setPosition(0);
 
     SmartDashboard.putNumber("Height", getHeight());
-    //SmartDashboard.putBoolean("Elevator Bottom", _limitSwitch.get());
-    //Temp
-    SmartDashboard.putNumber("Tag", Tag);
   }
 
   public Command runElevateUp(){
