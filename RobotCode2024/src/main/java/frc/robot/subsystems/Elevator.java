@@ -50,7 +50,7 @@ public class Elevator extends SubsystemBase {
   
   public void Reset() {
     _motor1.setPosition(0);
-    _motor1.set(0);
+    Override();
   }
 
   @Override
@@ -58,18 +58,24 @@ public class Elevator extends SubsystemBase {
     if(_limitSwitch.get())
       _motor1.setPosition(0);
 
-    SmartDashboard.putNumber("Height", getHeight());
+    SmartDashboard.putNumber("Elevator Height", getHeight());
+    SmartDashboard.putBoolean("Elevator Bottom", _limitSwitch.get());
+    //Temp
+    SmartDashboard.putNumber("Tag", Tag);
   }
-
+  
   public Command runElevateUp(){
+    
     return new InstantCommand(
-        () -> { this.setHeight(Constants.kMaxElevator); }
+        () -> { this.setHeight(Constants.kMaxElevator); }, 
+        this
     );
   }
 
   public Command runElevateDown(){
     return new InstantCommand(
-        () -> { this.setHeight(0); }
+        () -> { this.setHeight(0); }, 
+        this
     );
   }
 
