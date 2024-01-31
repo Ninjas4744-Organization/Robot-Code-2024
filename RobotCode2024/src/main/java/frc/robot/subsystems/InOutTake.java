@@ -96,28 +96,30 @@ public class InOutTake extends SubsystemBase {
   }
 
   public void Reset() {
-    stopRotation();
-    stopElevator();
+    _elevatorMotor.setPosition(0);
+    _rotationMotor.setPosition(0);
+    Override();
   }
 
   @Override
   public void periodic() {
-    if(_limitSwitchElevator.get())
+    if(!_limitSwitchElevator.get())
       _elevatorMotor.setPosition(0);
 
-    if(_limitSwitchRotation.get())
+    if(!_limitSwitchRotation.get())
       _rotationMotor.setPosition(0);
 
+    SmartDashboard.putBoolean("Note", isNote());
     SmartDashboard.putNumber("Collection Height", getHeight());
     SmartDashboard.putNumber("Collection Rotation", getRotation());
   }
 
   public Command runOpen(double height, double rotation){
-    return new InstantCommand(() -> { this.setHeight(height); this.setRotation(rotation); });
+    return new InstantCommand(() -> { this.setHeight(height); this.setRotation(rotation); }, this);
   }
 
   public Command runClose(){
-    return new InstantCommand(() -> { this.setHeight(0); this.setRotation(0); });
+    return new InstantCommand(() -> { this.setHeight(0); this.setRotation(0); }, this);
   }
 
   public Command runOpenClose(double height, double rotation){
@@ -132,12 +134,14 @@ public class InOutTake extends SubsystemBase {
     return new ConditionalCommand(
       new StartEndCommand(
         this::outake,
-        this::stopTake
+        this::stopTake, 
+        this
       ).withTimeout(1),
 
       new StartEndCommand(
         this::intake,
-        this::stopTake
+        this::stopTake, 
+        this
       ).until(this::isNote),
 
       this::isNote

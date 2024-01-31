@@ -20,7 +20,7 @@ public class RobotContainer {
   private final Elevator _elevator;
   private final InOutTake _inOutTake;
 
-  // Other
+  // // Other
   private final CommandPS5Controller _joystick;
   private final CommandPS5Controller _joystick2;
   private boolean override = false;
@@ -54,7 +54,7 @@ public class RobotContainer {
     //Driving:
     // TODO: add driving controls for both PS5 and Logitech with swerve
 
-    //Auto:
+    // //Auto:
     _joystick.cross().onTrue(new SelectCommand<Integer>(getAcceptCommands(), () -> { return getJoe(); }));
     _joystick.circle().onTrue(new InstantCommand(() -> { Override(); }));
     //_joystick.R2().onFalse(new InstantCommand(() -> { _vision.go(); }));
@@ -66,18 +66,17 @@ public class RobotContainer {
     _joystick.povRight().onTrue(_inOutTake.runAutoInOutTake(Constants.kAmpOpenHeight, Constants.kAmpOpenRotation, () -> { return override; }, () -> {override = false;}));
     _joystick.povLeft().onTrue(_inOutTake.runAutoInOutTake(Constants.kTrapOpenHeight, Constants.kTrapOpenRotation, () -> { return override; }, () -> {override = false;}));
     //Temp
-    _joystick.L1().onTrue(new InstantCommand(() -> {_elevator.Tag = (_elevator.Tag + 1) % 17; }));
+    _joystick.L1().onTrue(new InstantCommand(() -> {_elevator.Tag = (_elevator.Tag + 1) % 17; }, _elevator));
 
     //Manual:
-    // TODO: add manual controls
-    _joystick2.L2().whileTrue(new StartEndCommand(() -> {_inOutTake.intake();}, () -> {_inOutTake.stopTake();}));
-    _joystick2.R2().whileTrue(new StartEndCommand(() -> {_inOutTake.outake();}, () -> {_inOutTake.stopTake();}));
-    _joystick2.povUp().whileTrue(new StartEndCommand(() -> {_elevator.setMotor(1);}, () -> {_elevator.Reset();}));
-    _joystick2.povDown().whileTrue(new StartEndCommand(() -> {_elevator.setMotor(-1);}, () -> {_elevator.Reset();}));
-    _joystick2.L1().whileTrue(new StartEndCommand(() -> {_inOutTake.setElevatorMotor(-1);}, () -> {_inOutTake.stopElevator();}));
-    _joystick2.R1().whileTrue(new StartEndCommand(() -> {_inOutTake.setElevatorMotor(1);}, () -> {_inOutTake.stopElevator();}));
-    _joystick2.triangle().whileTrue(new StartEndCommand(() -> {_inOutTake.setRotationMotor(1);}, () -> {_inOutTake.stopRotation();}));
-    _joystick2.cross().whileTrue(new StartEndCommand(() -> {_inOutTake.setRotationMotor(-1);}, () -> {_inOutTake.stopRotation();}));
+    _joystick2.L2().whileTrue(new StartEndCommand(() -> {_inOutTake.intake();}, () -> {_inOutTake.stopTake();}, _inOutTake));
+    _joystick2.R2().whileTrue(new StartEndCommand(() -> {_inOutTake.outake();}, () -> {_inOutTake.stopTake();}, _inOutTake));
+    _joystick2.povUp().whileTrue(new StartEndCommand(() -> {_elevator.setMotor(1);}, () -> {_elevator.Reset();}, _elevator));
+    _joystick2.povDown().whileTrue(new StartEndCommand(() -> {_elevator.setMotor(-1);}, () -> {_elevator.Reset();}, _elevator));
+    _joystick2.L1().whileTrue(new StartEndCommand(() -> {_inOutTake.setElevatorMotor(-1);}, () -> {_inOutTake.stopElevator();}, _inOutTake));
+    _joystick2.R1().whileTrue(new StartEndCommand(() -> {_inOutTake.setElevatorMotor(1);}, () -> {_inOutTake.stopElevator();}, _inOutTake));
+    _joystick2.triangle().whileTrue(new StartEndCommand(() -> {_inOutTake.setRotationMotor(1);}, () -> {_inOutTake.stopRotation();}, _inOutTake));
+    _joystick2.cross().whileTrue(new StartEndCommand(() -> {_inOutTake.setRotationMotor(-1);}, () -> {_inOutTake.stopRotation();}, _inOutTake));
   }
 
   private void Override(){
