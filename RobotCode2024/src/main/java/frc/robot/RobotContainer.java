@@ -54,7 +54,7 @@ public class RobotContainer {
     //Driving:
     // TODO: add driving controls for both PS5 and Logitech with swerve
 
-    // //Auto:
+    //Auto:
     _joystick.cross().onTrue(new SelectCommand<Integer>(getAcceptCommands(), () -> { return getJoe(); }));
     _joystick.circle().onTrue(new InstantCommand(() -> { Override(); }));
     //_joystick.R2().onFalse(new InstantCommand(() -> { _vision.go(); }));
