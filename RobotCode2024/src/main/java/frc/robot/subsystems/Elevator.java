@@ -60,8 +60,6 @@ public class Elevator extends SubsystemBase {
 
     SmartDashboard.putNumber("Elevator Height", getHeight());
     SmartDashboard.putBoolean("Elevator Bottom", _limitSwitch.get());
-    //Temp
-    SmartDashboard.putNumber("Tag", Tag);
   }
   
   public Command runElevateUp(){

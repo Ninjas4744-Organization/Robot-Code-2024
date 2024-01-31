@@ -111,8 +111,6 @@ public class RobotContainer {
     _joystick.povDown().onTrue(_inOutTake.runAutoInOutTake(Constants.kSourceOpenHeight, Constants.kSourceOpenRotation, () -> { return override; }, () -> {override = false;}));
     _joystick.povRight().onTrue(_inOutTake.runAutoInOutTake(Constants.kAmpOpenHeight, Constants.kAmpOpenRotation, () -> { return override; }, () -> {override = false;}));
     _joystick.povLeft().onTrue(_inOutTake.runAutoInOutTake(Constants.kTrapOpenHeight, Constants.kTrapOpenRotation, () -> { return override; }, () -> {override = false;}));
-    //Temp
-    _joystick.L1().onTrue(new InstantCommand(() -> {_elevator.Tag = (_elevator.Tag + 1) % 17; }, _elevator));
 
     //Manual:
     _joystick2.L2().whileTrue(new StartEndCommand(() -> {_inOutTake.intake();}, () -> {_inOutTake.stopTake();}, _inOutTake));
