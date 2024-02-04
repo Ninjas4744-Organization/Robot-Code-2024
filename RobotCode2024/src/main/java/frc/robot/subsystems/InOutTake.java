@@ -19,8 +19,6 @@ import frc.robot.Constants;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 
-
-
 public class InOutTake extends SubsystemBase {
   private TalonSRX _collectionMotor;
   private TalonFX _elevatorMotor;

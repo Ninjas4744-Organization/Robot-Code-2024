@@ -1,0 +1,91 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.6465019492093177,
+      "y": 4.0
+    },
+    "rotation": -90.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CenterToAmp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Outake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "AmpToGround"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "GroundToAmp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Outake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "AmpToSecondGround"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SecondGroundToAmp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Outake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "ExitAmp"
+          }
+        }
+      ]
+    }
+  },
+  "folder": "Center Autos",
+  "choreoAuto": false
+}

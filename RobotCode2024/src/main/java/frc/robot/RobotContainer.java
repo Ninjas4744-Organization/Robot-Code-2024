@@ -8,15 +8,18 @@ import java.util.Optional;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import frc.robot.commands.TeleopSwerve;
@@ -127,6 +130,27 @@ public class RobotContainer {
     _joystick2.cross().whileTrue(new StartEndCommand(() -> {_inOutTake.setRotationMotor(-1);}, () -> {_inOutTake.stopRotation();}, _inOutTake));
   }
 
+  public void periodic(){
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+    NetworkTableEntry tx = table.getEntry("tx");
+    NetworkTableEntry ty = table.getEntry("ty");
+    NetworkTableEntry ta = table.getEntry("ta");
+
+    //read values periodically
+    double x = tx.getDouble(0.0);
+    double y = ty.getDouble(0.0);
+    double area = ta.getDouble(0.0);
+
+    //post to smart dashboard periodically
+    SmartDashboard.putNumber("LimelightX", x);
+    SmartDashboard.putNumber("LimelightY", y);
+    SmartDashboard.putNumber("LimelightArea", area);
+
+    Pose2d targetPose = _vision.getTagPose();
+    Pose2d current_pos = _swerve.getLastCalculatedPosition();
+    SmartDashboard.putNumber("distance", Math.hypot(targetPose.getX() - current_pos.getX(),targetPose.getY() - current_pos.getY()));
+  }
+
   private void Override(){
     _inOutTake.Override();
     _elevator.Override();
@@ -171,5 +195,14 @@ public class RobotContainer {
     Pose2d current_pos = _swerve.getLastCalculatedPosition();
     return !LimelightHelpers.getTV(null) ||
     Math.hypot(targetPose.getX() - current_pos.getX(),targetPose.getY() - current_pos.getY()) > 2;
+  }
+
+  public Command autoCommand(String auto){
+    PathPlannerPath _path = PathPlannerPath.fromPathFile("GoToAmp");//GoToAmp only??
+    
+    return Commands.sequence(
+      new InstantCommand(() -> { _swerve.resetOdometry(_path.getPreviewStartingHolonomicPose()); }),
+      AutoBuilder.buildAuto(auto)
+    );
   }
 }

@@ -52,10 +52,10 @@ public class Vision extends SubsystemBase {
   @Override
   public void periodic() {
     SmartDashboard.putNumber("current Tag",_currentTag.ID);
-     if (LimelightHelpers.getTV(null) && (int)LimelightHelpers.getFiducialID(null) != -1){
+     if (LimelightHelpers.getTV("") && (int)LimelightHelpers.getFiducialID("") != -1){
       _currentTag = false?
-      BLUE_FIELD_LAYOUT.getTags().get((int)LimelightHelpers.getFiducialID(null)-1):
-      RED_FIELD_LAYOUT.getTags().get((int)LimelightHelpers.getFiducialID(null)-1);
+      BLUE_FIELD_LAYOUT.getTags().get((int)LimelightHelpers.getFiducialID("")-1):
+      RED_FIELD_LAYOUT.getTags().get((int)LimelightHelpers.getFiducialID("")-1);
       
     }
   

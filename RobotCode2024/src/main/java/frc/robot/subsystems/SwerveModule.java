@@ -120,7 +120,7 @@ public class SwerveModule {
     
     private void configAngleEncoder(){        
         CANCoderUtil.setCANCoderBusUsage(angleEncoder, CCUsage.kSensorDataOnly);
-       CANcoderConfigurator d = angleEncoder.getConfigurator();
+        CANcoderConfigurator d = angleEncoder.getConfigurator();
     }
 
     private void configAngleMotor(){
