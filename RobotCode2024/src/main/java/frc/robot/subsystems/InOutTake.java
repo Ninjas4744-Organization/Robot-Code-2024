@@ -16,6 +16,10 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import edu.wpi.first.wpilibj.AddressableLED;
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+
+
 
 public class InOutTake extends SubsystemBase {
   private TalonSRX _collectionMotor;
@@ -24,6 +28,10 @@ public class InOutTake extends SubsystemBase {
   private DigitalInput _beamBreakerNote;
   private DigitalInput _limitSwitchElevator;
   private DigitalInput _limitSwitchRotation;
+  ///////////////////////////////////////////
+  // private AddressableLED _led;
+  // private AddressableLEDBuffer _ledBuffer;
+  //////////////////////////////////////////
   
   public InOutTake() {
     _collectionMotor = new TalonSRX(Constants.kInOutTakeMotor);
@@ -32,10 +40,22 @@ public class InOutTake extends SubsystemBase {
     _beamBreakerNote = new DigitalInput(Constants.kInOutTakeBeamBreakerNote);
     _limitSwitchElevator = new DigitalInput(Constants.kInOutTakeLimitSwitchElevator);
     _limitSwitchRotation = new DigitalInput(Constants.kInOutTakeLimitSwitchRotation);
+    //////////////////////////////////
+    // _led = new AddressableLED(0);
+    // _ledBuffer = new AddressableLEDBuffer(60);
+    // _led.setLength(_ledBuffer.getLength());
+    //////////////////////////////////
+
+
   }
 
   public boolean isNote(){
+    //////////////
+    // _led.setData(_ledBuffer);
+    // _led.start();
+    //////////////
     return _beamBreakerNote.get();
+
   }
 
   public void intake(){
@@ -48,6 +68,9 @@ public class InOutTake extends SubsystemBase {
 
   public void stopTake(){
     _collectionMotor.set(TalonSRXControlMode.PercentOutput, 0);
+    //////////////
+    // _led.stop();
+    //////////////
   }
 
   public void setRotation(double rotation){
@@ -151,7 +174,7 @@ public class InOutTake extends SubsystemBase {
   public Command runAutoInOutTake(double height, double rotation, BooleanSupplier override, Runnable disableOverride){
     return Commands.sequence(
       this.runOpen(height, rotation),
-      Commands.waitSeconds(Constants.kTimeToOpenCloseSystem),
+      Commands.waitSeconds(Constants.kTimeToOpenCollection),//fix later: maybe the system is already open, waste of time
       this.runInOutTake()
     ).until(override).andThen(disableOverride);
   }

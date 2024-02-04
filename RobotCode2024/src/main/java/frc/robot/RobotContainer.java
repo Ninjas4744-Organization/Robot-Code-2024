@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.FloorIntake;
 import frc.robot.subsystems.InOutTake;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Vision;
@@ -31,6 +32,7 @@ public class RobotContainer {
   private final InOutTake _inOutTake;
   private final Swerve _swerve;
   private final Vision _vision;
+  private final FloorIntake _floorIntake;
   
   // Other
   private final CommandPS5Controller _joystick;
@@ -45,6 +47,7 @@ public class RobotContainer {
     _inOutTake = new InOutTake();
     _swerve = new Swerve();
     _vision = new Vision();
+    _floorIntake = new FloorIntake();
 
     configureBindings();
   }
@@ -86,6 +89,7 @@ public class RobotContainer {
     //Auto:
     _joystick.cross().onTrue(new SelectCommand<Integer>(getAcceptCommands(), () -> { return getJoe(); }));
     _joystick.circle().onTrue(new InstantCommand(() -> { Override(); }));
+    _joystick.triangle().onTrue(new InstantCommand(() -> { _floorIntake.runAutoFloorIntake(() -> { return override; }, () -> {override = false;}); }));
     _joystick.R2().whileTrue(new TeleopSwerve(
       _swerve,
       _vision,
@@ -110,7 +114,7 @@ public class RobotContainer {
     _joystick.povUp().toggleOnTrue(_elevator.runElevate());
     _joystick.povDown().onTrue(_inOutTake.runAutoInOutTake(Constants.kSourceOpenHeight, Constants.kSourceOpenRotation, () -> { return override; }, () -> {override = false;}));
     _joystick.povRight().onTrue(_inOutTake.runAutoInOutTake(Constants.kAmpOpenHeight, Constants.kAmpOpenRotation, () -> { return override; }, () -> {override = false;}));
-    _joystick.povLeft().onTrue(_inOutTake.runAutoInOutTake(Constants.kTrapOpenHeight, Constants.kTrapOpenRotation, () -> { return override; }, () -> {override = false;}));
+    _joystick.povLeft().onTrue(_inOutTake.runAutoInOutTake(Constants.kTrapOpenHeight, Constants.kTrapOpenRotation, () -> { return override; }, () -> {override = false;})); //who puts a joystick input for auto
 
     //Manual:
     _joystick2.L2().whileTrue(new StartEndCommand(() -> {_inOutTake.intake();}, () -> {_inOutTake.stopTake();}, _inOutTake));
@@ -127,6 +131,7 @@ public class RobotContainer {
     _inOutTake.Override();
     _elevator.Override();
     _swerve.Override();
+    _floorIntake.Override();
     override = true;
   }
 
@@ -150,12 +155,13 @@ public class RobotContainer {
         return tag;
     }
 
-  return -1;
-}
+    return -1;
+  }
 
   public void disableActions(){
     _elevator.Reset();
     _inOutTake.Reset();
+    _floorIntake.Reset();
     _swerve.zeroGyro();
     _swerve.resetOdometry(new Pose2d());
   }
@@ -165,16 +171,5 @@ public class RobotContainer {
     Pose2d current_pos = _swerve.getLastCalculatedPosition();
     return !LimelightHelpers.getTV(null) ||
     Math.hypot(targetPose.getX() - current_pos.getX(),targetPose.getY() - current_pos.getY()) > 2;
-  }
-
-  public Command autoCommand(){
-    PathPlannerPath _path = PathPlannerPath.fromPathFile("Init");
-    
-    return new SequentialCommandGroup(
-      new InstantCommand(() -> {
-        _swerve.resetOdometry(_path.getPreviewStartingHolonomicPose());
-      }),
-      AutoBuilder.buildAuto("basic")
-    );
   }
 }
