@@ -77,7 +77,7 @@ public class FloorIntake extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if(!_limitSwitchRotation.get())
+    if(!_limitSwitchRotation.get())//Check ! later
       _rotationMotor.setPosition(0); 
 
     SmartDashboard.putBoolean("Note", isNote());

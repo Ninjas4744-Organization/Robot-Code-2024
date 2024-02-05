@@ -124,10 +124,10 @@ public class InOutTake extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if(!_limitSwitchElevator.get())
+    if(!_limitSwitchElevator.get())//Check ! later
       _elevatorMotor.setPosition(0);
 
-    if(!_limitSwitchRotation.get())
+    if(!_limitSwitchRotation.get())//Check ! later
       _rotationMotor.setPosition(0);
 
     SmartDashboard.putBoolean("Note", isNote());
