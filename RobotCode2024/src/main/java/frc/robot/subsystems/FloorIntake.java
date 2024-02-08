@@ -24,10 +24,10 @@ public class FloorIntake extends SubsystemBase {
   private DigitalInput _limitSwitchRotation;
   
   public FloorIntake() {
-    _collectionMotor = new TalonSRX(Constants.kFloorIntakeMotor);
-    _rotationMotor = new TalonFX(Constants.kFloorIntakeRotationMotor);
-    _beamBreakerNote = new DigitalInput(Constants.kFloorIntakeBeamBreaker);
-    _limitSwitchRotation = new DigitalInput(Constants.kFloorIntakeLimitSwitch);
+    _collectionMotor = new TalonSRX(Constants.Ports.kFloorIntakeMotor);
+    _rotationMotor = new TalonFX(Constants.Ports.kFloorIntakeRotationMotor);
+    _beamBreakerNote = new DigitalInput(Constants.Ports.kFloorIntakeBeamBreaker);
+    _limitSwitchRotation = new DigitalInput(Constants.Ports.kFloorIntakeLimitSwitch);
   }
 
   public boolean isNote(){

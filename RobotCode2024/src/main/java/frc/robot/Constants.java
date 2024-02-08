@@ -11,42 +11,42 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.util.SwerveModuleConstants;
 
 public final class Constants {
-  //Constants
-  public static final double kMaxElevator = 100;
-  public static final double kMaxInOutTakeElevator = 100;
-  public static final double kTimeToOpenCollection = 3;
-  public static final double kTimeToOpenFloorIntake = 3;
-  public static final double kTimeToClimbUntilTrap = 3;
-  public static final double kSourceOpenHeight = 90;
-  public static final double kSourceOpenRotation = 100;
-  public static final double kAmpOpenHeight = 40;
-  public static final double kAmpOpenRotation = 50;
-  public static final double kTrapOpenHeight = 60;
-  public static final double kTrapOpenRotation = 70;
+  public static final double kMaxClimber = 100;
+  public static final double kTimeToOutake = 1;
   public static final double kFloorUpPositon = 55;
-  
-  //Ports
-  public static final int kJoystickPort = 0;
-  public static final int kJoystick2Port = 1;
-  
-  //Elevator Ports
-  public static final int kElevatorMotor1 = 2;
-  public static final int kElevatorMotor2 = 4;
-  public static final int kElevatorLimitSwitch = 0;
-  
-  //InOutTake Ports
-  public static final int kInOutTakeMotor = 5;
-  public static final int kInOutTakeElevatorMotor = 3;
-  public static final int kInOutTakeRotationMotor = 1;
-  public static final int kInOutTakeLimitSwitchElevator = 1;
-  public static final int kInOutTakeLimitSwitchRotation = 2;
-  public static final int kInOutTakeBeamBreakerNote = 9;
 
-  //FloorIntake ports
-  public static final int kFloorIntakeMotor = 5;
-  public static final int kFloorIntakeRotationMotor = 5;
-  public static final int kFloorIntakeLimitSwitch = 2;
-  public static final int kFloorIntakeBeamBreaker = 9;
+  public final static class IntakeStates{
+    public static final double kSourceOpenHeight = 90;
+    public static final double kSourceOpenRotation = 100;
+    public static final double kAmpOpenHeight = 40;
+    public static final double kAmpOpenRotation = 50;
+    public static final double kTrapOpenHeight = 60;
+    public static final double kTrapOpenRotation = 70;
+  }
+  
+  public final static class Ports{
+    public static final int kJoystickPort = 0;
+    public static final int kJoystick2Port = 1;
+    
+    //Climber Ports
+    public static final int kClimberMotor1 = 2;
+    public static final int kClimberMotor2 = 4;
+    public static final int kClimberLimitSwitch = 0;
+    
+    //Intake Ports
+    public static final int kIntakeMotor = 5;
+    public static final int kIntakeElevatorMotor = 3;
+    public static final int kIntakeRotationMotor = 1;
+    public static final int kIntakeLimitSwitchElevator = 1;
+    public static final int kIntakeLimitSwitchRotation = 2;
+    public static final int kIntakeBeamBreakerNote = 9;
+  
+    //FloorIntake ports
+    public static final int kFloorIntakeMotor = 5;
+    public static final int kFloorIntakeRotationMotor = 5;
+    public static final int kFloorIntakeLimitSwitch = 2;
+    public static final int kFloorIntakeBeamBreaker = 9;
+  }
   
   public static final class Swerve {
     public static final double kDriveCoefficient = 0.7;

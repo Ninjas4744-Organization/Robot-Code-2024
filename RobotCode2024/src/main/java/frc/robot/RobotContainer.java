@@ -20,19 +20,22 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import frc.robot.commands.TeleopSwerve;
-import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.FloorIntake;
-import frc.robot.subsystems.InOutTake;
+import frc.robot.subsystems.IntakeElevator;
+import frc.robot.subsystems.IntakeRollers;
+import frc.robot.subsystems.IntakeRotation;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Vision;
 
 public class RobotContainer {
   // Subsystems
-  private final Elevator _elevator;
-  private final InOutTake _inOutTake;
+  private final Climber _climber;
+  private final IntakeElevator _intakeElevator;
+  private final IntakeRotation _intakeRotation;
+  private final IntakeRollers _intakeRollers;
   private final Swerve _swerve;
   private final Vision _vision;
   private final FloorIntake _floorIntake;
@@ -44,10 +47,12 @@ public class RobotContainer {
   private boolean manual = false;
 
   public RobotContainer() { 
-    _joystick = new CommandPS5Controller(Constants.kJoystickPort);
-    _joystick2 = new CommandPS5Controller(Constants.kJoystick2Port);
-    _elevator = new Elevator();
-    _inOutTake = new InOutTake();
+    _joystick = new CommandPS5Controller(Constants.Ports.kJoystickPort);
+    _joystick2 = new CommandPS5Controller(Constants.Ports.kJoystick2Port);
+    _climber = new Climber();
+    _intakeElevator = new IntakeElevator();
+    _intakeRotation = new IntakeRotation();
+    _intakeRollers = new IntakeRollers();
     _swerve = new Swerve();
     _vision = new Vision();
     _floorIntake = new FloorIntake();
@@ -59,14 +64,14 @@ public class RobotContainer {
     HashMap<Integer, Command> _acceptCommands = new HashMap<Integer, Command>();
 
     for(int i = 11; i <= 16; i++)
-      _acceptCommands.put(i, _elevator.runAutoElevate(_inOutTake, () -> { return override; }, () -> {override = false;}));
+      _acceptCommands.put(i, runAutoClimb());
 
-    _acceptCommands.put(1, _inOutTake.runAutoInOutTake(Constants.kSourceOpenHeight, Constants.kSourceOpenRotation, () -> { return override; }, () -> {override = false;}));
-    _acceptCommands.put(2, _inOutTake.runAutoInOutTake(Constants.kSourceOpenHeight, Constants.kSourceOpenRotation, () -> { return override; }, () -> {override = false;}));
-    _acceptCommands.put(9, _inOutTake.runAutoInOutTake(Constants.kSourceOpenHeight, Constants.kSourceOpenRotation, () -> { return override; }, () -> {override = false;}));
-    _acceptCommands.put(10, _inOutTake.runAutoInOutTake(Constants.kSourceOpenHeight, Constants.kSourceOpenRotation, () -> { return override; }, () -> {override = false;}));
-    _acceptCommands.put(5, _inOutTake.runAutoInOutTake(Constants.kAmpOpenHeight, Constants.kAmpOpenRotation, () -> { return override; }, () -> {override = false;}));
-    _acceptCommands.put(6, _inOutTake.runAutoInOutTake(Constants.kAmpOpenHeight, Constants.kAmpOpenRotation, () -> { return override; }, () -> {override = false;}));
+    _acceptCommands.put(1, runAutoIntake());
+    _acceptCommands.put(2, runAutoIntake());
+    _acceptCommands.put(9, runAutoIntake());
+    _acceptCommands.put(10,runAutoIntake());
+    _acceptCommands.put(5, runAutoOutake(Constants.IntakeStates.kAmpOpenHeight, Constants.IntakeStates.kAmpOpenRotation));
+    _acceptCommands.put(6, runAutoOutake(Constants.IntakeStates.kAmpOpenHeight, Constants.IntakeStates.kAmpOpenRotation));
 
     return _acceptCommands;
   }
@@ -90,7 +95,7 @@ public class RobotContainer {
     );
 
     //Auto:
-    _joystick.cross().onTrue(new SelectCommand<Integer>(getAcceptCommands(), () -> { return getJoe(); }));
+    _joystick.cross().onTrue(new SelectCommand<Integer>(getAcceptCommands(), () -> { return getAcceptId(); }));
     _joystick.circle().onTrue(new InstantCommand(() -> { Override(); }));
     _joystick.triangle().onTrue(new InstantCommand(() -> { _floorIntake.runAutoFloorIntake(() -> { return override; }, () -> {override = false;}); }));
     _joystick.R2().whileTrue(new TeleopSwerve(
@@ -113,21 +118,24 @@ public class RobotContainer {
     })));
     
     //Semi-Auto:
-    _joystick.square().toggleOnTrue(_inOutTake.runClose());
-    _joystick.povUp().toggleOnTrue(_elevator.runElevate());
-    _joystick.povDown().onTrue(_inOutTake.runAutoInOutTake(Constants.kSourceOpenHeight, Constants.kSourceOpenRotation, () -> { return override; }, () -> {override = false;}));
-    _joystick.povRight().onTrue(_inOutTake.runAutoInOutTake(Constants.kAmpOpenHeight, Constants.kAmpOpenRotation, () -> { return override; }, () -> {override = false;}));
-    _joystick.povLeft().onTrue(_inOutTake.runAutoInOutTake(Constants.kTrapOpenHeight, Constants.kTrapOpenRotation, () -> { return override; }, () -> {override = false;})); //who puts a joystick input for auto
+    _joystick.square().onTrue(Commands.sequence(
+      _intakeElevator.runClose(),
+      _intakeRotation.runClose()
+    ));
+    _joystick.povUp().toggleOnTrue(_climber.runElevate());
+    _joystick.povDown().onTrue(runAutoIntake());
+    _joystick.povRight().onTrue(runAutoOutake(Constants.IntakeStates.kAmpOpenHeight, Constants.IntakeStates.kAmpOpenRotation));
+    _joystick.povLeft().onTrue(runAutoOutake(Constants.IntakeStates.kTrapOpenHeight, Constants.IntakeStates.kTrapOpenRotation));
 
     //Manual:
-    _joystick2.L2().whileTrue(new StartEndCommand(() -> {_inOutTake.intake();}, () -> {_inOutTake.stopTake();}, _inOutTake));
-    _joystick2.R2().whileTrue(new StartEndCommand(() -> {_inOutTake.outake();}, () -> {_inOutTake.stopTake();}, _inOutTake));
-    _joystick2.povUp().whileTrue(new StartEndCommand(() -> {_elevator.setMotor(1);}, () -> {_elevator.Reset();}, _elevator));
-    _joystick2.povDown().whileTrue(new StartEndCommand(() -> {_elevator.setMotor(-1);}, () -> {_elevator.Reset();}, _elevator));
-    _joystick2.L1().whileTrue(new StartEndCommand(() -> {_inOutTake.setElevatorMotor(-1);}, () -> {_inOutTake.stopElevator();}, _inOutTake));
-    _joystick2.R1().whileTrue(new StartEndCommand(() -> {_inOutTake.setElevatorMotor(1);}, () -> {_inOutTake.stopElevator();}, _inOutTake));
-    _joystick2.triangle().whileTrue(new StartEndCommand(() -> {_inOutTake.setRotationMotor(1);}, () -> {_inOutTake.stopRotation();}, _inOutTake));
-    _joystick2.cross().whileTrue(new StartEndCommand(() -> {_inOutTake.setRotationMotor(-1);}, () -> {_inOutTake.stopRotation();}, _inOutTake));
+    _joystick2.L2().whileTrue(      Commands.startEnd(() -> { _intakeRollers.intake(); }, () -> { _intakeRollers.stopTake(); }, _intakeRollers));
+    _joystick2.R2().whileTrue(      Commands.startEnd(() -> { _intakeRollers.outake(); }, () -> { _intakeRollers.stopTake(); }, _intakeRollers));
+    _joystick2.povUp().whileTrue(   Commands.startEnd(() -> { _climber.setMotor(1); }, () -> { _climber.Reset(); }, _climber));
+    _joystick2.povDown().whileTrue( Commands.startEnd(() -> { _climber.setMotor(-1); }, () -> { _climber.Reset(); }, _climber));
+    _joystick2.L1().whileTrue(      Commands.startEnd(() -> { _intakeElevator.setElevatorMotor(-1); }, () -> { _intakeElevator.stopElevator(); }, _intakeElevator));
+    _joystick2.R1().whileTrue(      Commands.startEnd(() -> { _intakeElevator.setElevatorMotor(1); }, () -> { _intakeElevator.stopElevator(); }, _intakeElevator));
+    _joystick2.triangle().whileTrue(Commands.startEnd(() -> { _intakeRotation.setRotationMotor(1); }, () -> { _intakeRotation.stopRotation(); }, _intakeRotation));
+    _joystick2.cross().whileTrue(   Commands.startEnd(() -> { _intakeRotation.setRotationMotor(-1); }, () -> { _intakeRotation.stopRotation(); }, _intakeRotation));
   }
 
   public void periodic(){
@@ -151,9 +159,40 @@ public class RobotContainer {
     SmartDashboard.putNumber("distance", Math.hypot(targetPose.getX() - current_pos.getX(),targetPose.getY() - current_pos.getY()));
   }
 
+  private Command runAutoClimb(){
+    return Commands.sequence(
+      _climber.runElevateUp(),
+      _intakeElevator.runOpen(Constants.IntakeStates.kTrapOpenHeight),
+      _intakeRotation.runOpen(Constants.IntakeStates.kTrapOpenRotation),
+      Commands.waitUntil(() -> { return _climber.isMax(); }),
+      _intakeRollers.runOutake()
+    ).until(() -> { return override; }).andThen(() -> { override = false; });
+  }
+
+  private Command runAutoIntake(){
+    return Commands.sequence(
+      _intakeElevator.runOpen(Constants.IntakeStates.kSourceOpenHeight),
+      _intakeRotation.runOpen(Constants.IntakeStates.kSourceOpenRotation),
+      Commands.waitUntil(() -> { return _intakeElevator.isMax(Constants.IntakeStates.kSourceOpenHeight) 
+        && _intakeRotation.isMax(Constants.IntakeStates.kSourceOpenRotation); }),
+      _intakeRollers.runIntake()
+    ).until(() -> { return override; }).andThen(() -> { override = false; });
+  }
+
+  private Command runAutoOutake(double height, double rotation){
+    return Commands.sequence(
+      _intakeElevator.runOpen(height),
+      _intakeRotation.runOpen(rotation),
+      Commands.waitUntil(() -> { return _intakeElevator.isMax(height) && _intakeRotation.isMax(rotation); }),
+      _intakeRollers.runOutake()
+    ).until(() -> { return override; }).andThen(() -> { override = false; });
+  }
+
   private void Override(){
-    _inOutTake.Override();
-    _elevator.Override();
+    _intakeElevator.Override();
+    _intakeRotation.Override();
+    _intakeRollers.Override();
+    _climber.Override();
     _swerve.Override();
     _floorIntake.Override();
     override = true;
@@ -163,7 +202,7 @@ public class RobotContainer {
     return _vision.getTag().ID;
   }
 
-  private int getJoe(){
+  private int getAcceptId(){
     Optional<Alliance> ally = DriverStation.getAlliance();
     int tag = getTagID();
     List<Integer> blueIDs = Arrays.asList(6, 14, 15, 16, 1, 2);
@@ -183,8 +222,10 @@ public class RobotContainer {
   }
 
   public void disableActions(){
-    _elevator.Reset();
-    _inOutTake.Reset();
+    _climber.Reset();
+    _intakeElevator.Reset();
+    _intakeRotation.Reset();
+    _intakeRollers.Reset();
     _floorIntake.Reset();
     _swerve.zeroGyro();
     _swerve.resetOdometry(new Pose2d());
@@ -198,7 +239,7 @@ public class RobotContainer {
   }
 
   public Command autoCommand(String auto){
-    PathPlannerPath _path = PathPlannerPath.fromPathFile("GoToAmp");//GoToAmp only??
+    PathPlannerPath _path = PathPlannerPath.fromPathFile("GoToAmp");
     
     return Commands.sequence(
       new InstantCommand(() -> { _swerve.resetOdometry(_path.getPreviewStartingHolonomicPose()); }),
