@@ -1,116 +1,160 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
 package frc.robot;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathPlannerPath;
 
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SelectCommand;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
-import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.InOutTake;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Commands.TeleopSwerve;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Lift;
+import frc.robot.subsystems.Rollers;
+import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.Vision;
 
 public class RobotContainer {
-  // Subsystems
-  private final Elevator _elevator;
-  private final InOutTake _inOutTake;
+  private static final double DRIVE_COEFFICIENT = 0.7;
 
-  // // Other
-  private final CommandPS5Controller _joystick;
-  private final CommandPS5Controller _joystick2;
-  private boolean override = false;
+  final Swerve _swerve;
+  private final CommandPS4Controller _driveController;
+  private final Intake _intakes;
+  private final Vision _vision;
+  private final Rollers _rollers;
+  private final Trigger _autoScorer;
+  private final Trigger _autoReconfigurator;
+  private final Lift _lift;
+  ProfiledPIDController thetaController;
 
-  public RobotContainer() { 
-    _joystick = new CommandPS5Controller(Constants.kJoystickPort);
-    _joystick2 = new CommandPS5Controller(Constants.kJoystick2Port);
-    _elevator = new Elevator();
-    _inOutTake = new InOutTake();
-    
+  Map<String, Command> _commands;
+
+  public RobotContainer() {
+
+    _driveController = new CommandPS4Controller(Constants.DRIVE_CONTROLLER_PORT);
+        _vision = new Vision();
+
+    _swerve = new Swerve(_vision::getEstimatedGlobalPose);
+    _intakes = new Intake();
+    _rollers = new Rollers();
+    _lift = new Lift();
+
+    _autoScorer = new Trigger(() -> {
+      Pose2d targetPose = _vision.getTagPose();
+      Pose2d current_pos = _swerve.getLastCalculatedPosition();
+      return Math.hypot(targetPose.getX() - current_pos.getX(), targetPose.getY() - current_pos.getY()) < 0.3
+          && targetPose.getX() - current_pos.getX() < 0.1;
+    });
+
+    _autoReconfigurator = new Trigger(() -> {
+      Pose2d targetPose = _vision.getTagPose();
+      Pose2d current_pos = _swerve.getLastCalculatedPosition();
+      return Math.hypot(targetPose.getX() - current_pos.getX(), targetPose.getY() - current_pos.getY()) < 1;
+    });
+
+    _intakes.setDefaultCommand(_intakes.defaultCommand());
+    _rollers.setDefaultCommand(_rollers.defaultCommand());
+    _lift.setDefaultCommand(_lift.defaultCommand());
+    _swerve.setDefaultCommand(
+        new TeleopSwerve(
+            _swerve,
+            _vision,
+            () -> -_driveController.getLeftY() * DRIVE_COEFFICIENT,
+            () -> -_driveController.getLeftX() * DRIVE_COEFFICIENT,
+            () -> -_driveController.getRightX() * DRIVE_COEFFICIENT,
+            () -> false,
+            () -> false).alongWith(new RunCommand(() -> LimelightHelpers.setLEDMode_ForceOff(null))));
+
+    NamedCommands.registerCommand("Outake", _rollers.runIntake(true).withTimeout(0.5));
+    NamedCommands.registerCommand("Intake", _rollers.runIntake(true).withTimeout(0.5));
+
     configureBindings();
+
   }
 
-  public HashMap<Integer, Command> getAcceptCommands() {
-    HashMap<Integer, Command> _acceptCommands = new HashMap<Integer, Command>();
-
-    for(int i = 11; i <= 16; i++)
-      _acceptCommands.put(i, _elevator.runAutoElevate(_inOutTake, () -> { return override; }, () -> {override = false;}));
-
-    _acceptCommands.put(1, _inOutTake.runAutoInOutTake(Constants.kSourceOpenHeight, Constants.kSourceOpenRotation, () -> { return override; }, () -> {override = false;}));
-    _acceptCommands.put(2, _inOutTake.runAutoInOutTake(Constants.kSourceOpenHeight, Constants.kSourceOpenRotation, () -> { return override; }, () -> {override = false;}));
-    _acceptCommands.put(9, _inOutTake.runAutoInOutTake(Constants.kSourceOpenHeight, Constants.kSourceOpenRotation, () -> { return override; }, () -> {override = false;}));
-    _acceptCommands.put(10, _inOutTake.runAutoInOutTake(Constants.kSourceOpenHeight, Constants.kSourceOpenRotation, () -> { return override; }, () -> {override = false;}));
-    _acceptCommands.put(5, _inOutTake.runAutoInOutTake(Constants.kAmpOpenHeight, Constants.kAmpOpenRotation, () -> { return override; }, () -> {override = false;}));
-    _acceptCommands.put(6, _inOutTake.runAutoInOutTake(Constants.kAmpOpenHeight, Constants.kAmpOpenRotation, () -> { return override; }, () -> {override = false;}));
-
-    return _acceptCommands;
-  }
-  
   private void configureBindings() {
-    //Driving:
-    // TODO: add driving controls for both PS5 and Logitech with swerve
 
-    //Auto:
-    _joystick.cross().onTrue(new SelectCommand<Integer>(getAcceptCommands(), () -> { return getJoe(); }));
-    _joystick.circle().onTrue(new InstantCommand(() -> { Override(); }));
-    //_joystick.R2().onFalse(new InstantCommand(() -> { _vision.go(); }));
+    _driveController.triangle().whileTrue(_rollers.runIntake(false));
+    _driveController.square().whileTrue(_rollers.runIntake(true));
 
-    //Semi-Auto:
-    _joystick.square().toggleOnTrue(_inOutTake.runClose());
-    _joystick.povUp().toggleOnTrue(_elevator.runElevate());
-    _joystick.povDown().onTrue(_inOutTake.runAutoInOutTake(Constants.kSourceOpenHeight, Constants.kSourceOpenRotation, () -> { return override; }, () -> {override = false;}));
-    _joystick.povRight().onTrue(_inOutTake.runAutoInOutTake(Constants.kAmpOpenHeight, Constants.kAmpOpenRotation, () -> { return override; }, () -> {override = false;}));
-    _joystick.povLeft().onTrue(_inOutTake.runAutoInOutTake(Constants.kTrapOpenHeight, Constants.kTrapOpenRotation, () -> { return override; }, () -> {override = false;}));
-    //Temp
-    _joystick.L1().onTrue(new InstantCommand(() -> {_elevator.Tag = (_elevator.Tag + 1) % 17; }, _elevator));
+    _driveController.R2().whileTrue(new TeleopSwerve(
+        _swerve,
+        _vision,
+        () -> -_driveController.getLeftY() * DRIVE_COEFFICIENT,
+        () -> -_driveController.getLeftX() * DRIVE_COEFFICIENT,
+        () -> -_driveController.getRightX() * DRIVE_COEFFICIENT,
+        () -> true,
+        () -> false).alongWith(new RunCommand(() -> {
+          if (!isNotTarget()) {
+            LimelightHelpers.setLEDMode_ForceOn(null);
 
-    //Manual:
-    _joystick2.L2().whileTrue(new StartEndCommand(() -> {_inOutTake.intake();}, () -> {_inOutTake.stopTake();}, _inOutTake));
-    _joystick2.R2().whileTrue(new StartEndCommand(() -> {_inOutTake.outake();}, () -> {_inOutTake.stopTake();}, _inOutTake));
-    _joystick2.povUp().whileTrue(new StartEndCommand(() -> {_elevator.setMotor(1);}, () -> {_elevator.Reset();}, _elevator));
-    _joystick2.povDown().whileTrue(new StartEndCommand(() -> {_elevator.setMotor(-1);}, () -> {_elevator.Reset();}, _elevator));
-    _joystick2.L1().whileTrue(new StartEndCommand(() -> {_inOutTake.setElevatorMotor(-1);}, () -> {_inOutTake.stopElevator();}, _inOutTake));
-    _joystick2.R1().whileTrue(new StartEndCommand(() -> {_inOutTake.setElevatorMotor(1);}, () -> {_inOutTake.stopElevator();}, _inOutTake));
-    _joystick2.triangle().whileTrue(new StartEndCommand(() -> {_inOutTake.setRotationMotor(1);}, () -> {_inOutTake.stopRotation();}, _inOutTake));
-    _joystick2.cross().whileTrue(new StartEndCommand(() -> {_inOutTake.setRotationMotor(-1);}, () -> {_inOutTake.stopRotation();}, _inOutTake));
+          } else {
+            LimelightHelpers.setLEDMode_ForceOff(null);
+          }
+        }))
+
+    );
+
+    _autoScorer.whileTrue(_rollers.runIntake(true));
+
+    _autoReconfigurator.whileTrue(Commands.either(Commands.parallel(
+        _intakes.outakeConfiguration(),
+        _lift.outakeConfiguration()),
+        Commands.parallel(
+            _intakes.intakeConfiguration(),
+            _lift.intakeConfiguration()),
+        _vision::isAmp));
+
   }
 
-  private void Override(){
-    _inOutTake.Override();
-    _elevator.Override();
-    override = true;
+  public Boolean isNotTarget() {
+    Pose2d targetPose = _vision.getTagPose();
+    Pose2d current_pos = _swerve.getLastCalculatedPosition();
+    return !LimelightHelpers.getTV(null) ||
+        Math.hypot(targetPose.getX() - current_pos.getX(), targetPose.getY() - current_pos.getY()) > 2;
+
   }
 
-  private int getTagID(){
-    //Temp
-    return _elevator.Tag;
+  public void periodic() {
+    Pose2d targetPose = _vision.getTagPose();
+    Pose2d current_pos = _swerve.getLastCalculatedPosition();
+    SmartDashboard.putNumber("distance",
+        Math.hypot(targetPose.getX() - current_pos.getX(), targetPose.getY() - current_pos.getY()));
   }
 
-  private int getJoe(){
-    Optional<Alliance> ally = DriverStation.getAlliance();
-    int tag = getTagID();
-    List<Integer> blueIDs = Arrays.asList(6, 14, 15, 16, 1, 2);
-    List<Integer> redIDs = Arrays.asList(5, 11, 12, 13, 9, 10);
-
-    if(ally.get() == Alliance.Blue){
-      if(blueIDs.contains(tag))
-        return tag;
-    }
-    else
-    {
-      if(redIDs.contains(tag))
-        return tag;
-    }
-
-  return -1;
-}
-
-  public void disableActions(){
-    _elevator.Reset();
-    _inOutTake.Reset();
+  private void resetModuleZeros() {
+    _swerve.zeroGyro();
+    // _swerve.resetModuleZeros();
   }
+
+  public void disabledActions() {
+    resetModuleZeros();
+    _swerve.resetOdometry(new Pose2d());
+
+  }
+
+  public Command autoCommand() {
+
+    PathPlannerPath _path = PathPlannerPath.fromPathFile("Init");
+
+    return Commands.sequence(
+      Commands.run(() -> _swerve.resetOdometry(_path.getPreviewStartingHolonomicPose())
+, _swerve),
+      AutoBuilder.buildAuto("basic")
+    );
+
+  }
+
 }

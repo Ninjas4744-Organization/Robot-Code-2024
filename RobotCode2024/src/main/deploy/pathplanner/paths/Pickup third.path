@@ -1,0 +1,87 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.878732900322944,
+        "y": 7.6082586450887195
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.9227112739939773,
+        "y": 7.2857505715011435
+      },
+      "isLocked": false,
+      "linkedName": "End 1"
+    },
+    {
+      "anchor": {
+        "x": 1.8200950687615667,
+        "y": 6.7580100874487465
+      },
+      "prevControl": {
+        "x": 1.8200950687615667,
+        "y": 7.153815450488042
+      },
+      "nextControl": {
+        "x": 1.8200950687615667,
+        "y": 6.303566892848072
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.863752734623031,
+        "y": 6.5586414601400636
+      },
+      "prevControl": {
+        "x": 1.931838878404161,
+        "y": 6.5586414601400636
+      },
+      "nextControl": {
+        "x": 2.916431047097218,
+        "y": 6.5586414601400636
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.863752734623031,
+        "y": 5.626299938314163
+      },
+      "prevControl": {
+        "x": 3.0030175845813023,
+        "y": 6.568170107768786
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "end third pickup"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.85,
+      "rotationDegrees": -86.8869624646534,
+      "rotateFast": false
+    }
+  ],
+  "constraintZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -88.63607246839709,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "Two Piece auto",
+  "previewStartingState": null,
+  "useDefaultConstraints": false
+}

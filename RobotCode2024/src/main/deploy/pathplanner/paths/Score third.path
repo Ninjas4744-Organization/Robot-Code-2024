@@ -1,0 +1,55 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.863752734623031,
+        "y": 5.626299938314163
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.333176094923619,
+        "y": 6.112993940273595
+      },
+      "isLocked": false,
+      "linkedName": "end third pickup"
+    },
+    {
+      "anchor": {
+        "x": 1.878732900322944,
+        "y": 7.6082586450887195
+      },
+      "prevControl": {
+        "x": 2.2891977212525836,
+        "y": 6.46482092964186
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "End 1"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.3,
+      "rotationDegrees": 88.44299737958816,
+      "rotateFast": false
+    }
+  ],
+  "constraintZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 90.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "Two Piece auto",
+  "previewStartingState": null,
+  "useDefaultConstraints": false
+}
