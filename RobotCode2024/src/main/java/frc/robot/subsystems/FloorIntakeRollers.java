@@ -10,20 +10,16 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-public class IntakeRollers extends SubsystemBase {
+public class FloorIntakeRollers extends SubsystemBase {
   private TalonSRX _collectionMotor;
   private DigitalInput _beamBreakerNote;
   
-  public IntakeRollers() { 
-    _collectionMotor = new TalonSRX(Constants.Ports.kIntakeMotor);
-    _beamBreakerNote = new DigitalInput(Constants.Ports.kIntakeBeamBreakerNote);
+  public FloorIntakeRollers() {
+    _collectionMotor = new TalonSRX(Constants.Ports.kFloorIntakeMotor);
+    _beamBreakerNote = new DigitalInput(Constants.Ports.kFloorIntakeBeamBreaker);
   }
 
   public boolean isNote(){
-    //////////////
-    // _led.setData(_ledBuffer);
-    // _led.start();
-    //////////////
     return _beamBreakerNote.get();
   }
 
@@ -37,11 +33,8 @@ public class IntakeRollers extends SubsystemBase {
 
   public void stopTake(){
     _collectionMotor.set(TalonSRXControlMode.PercentOutput, 0);
-    //////////////
-    // _led.stop();
-    //////////////
   }
-
+  
   public void Override(){
     _collectionMotor.set(TalonSRXControlMode.PercentOutput, 0);
   }
@@ -52,7 +45,7 @@ public class IntakeRollers extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putBoolean("Intake Note", isNote());
+    SmartDashboard.putBoolean("FloorIntake Note", isNote());
   }
 
   public Command runIntake(){

@@ -10,13 +10,13 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-public class IntakeRotation extends SubsystemBase {
+public class FloorIntakeRotation extends SubsystemBase {
   private TalonFX _rotationMotor;
   private DigitalInput _limitSwitchRotation;
   
-  public IntakeRotation() {
-    _rotationMotor = new TalonFX(Constants.Ports.kIntakeRotationMotor);
-    _limitSwitchRotation = new DigitalInput(Constants.Ports.kIntakeLimitSwitchRotation);
+  public FloorIntakeRotation() {
+    _rotationMotor = new TalonFX(Constants.Ports.kFloorIntakeRotationMotor);
+    _limitSwitchRotation = new DigitalInput(Constants.Ports.kFloorIntakeLimitSwitch);
   }
 
   public void setRotation(double rotation){
@@ -28,8 +28,8 @@ public class IntakeRotation extends SubsystemBase {
     return _rotationMotor.getPosition().getValue();
   }
 
-  public boolean isMax(double max){
-    return Math.abs(max - getRotation()) < 0.2;
+  public boolean isMax(){
+    return Math.abs(Constants.kFloorUpPositon - getRotation()) < 0.2;
   }
 
   public void setRotationMotor(double percent){
@@ -41,7 +41,7 @@ public class IntakeRotation extends SubsystemBase {
     _rotationMotor.setControl(mmReq);
     _rotationMotor.set(0);
   }
-
+  
   public void Override(){
     stopRotation();
   }
@@ -54,22 +54,22 @@ public class IntakeRotation extends SubsystemBase {
   @Override
   public void periodic() {
     if(!_limitSwitchRotation.get())//Check ! later
-      _rotationMotor.setPosition(0);
+      _rotationMotor.setPosition(0); 
 
-    SmartDashboard.putNumber("Intake Rotation", getRotation());
+    SmartDashboard.putNumber("Floor Intake Rotation", getRotation());
   }
 
-  public Command runOpen(double rotation){
-    return Commands.run(() -> { this.setRotation(rotation); }, this);
+  public Command runOpen(){
+    return Commands.run(() -> { this.setRotation(Constants.kFloorUpPositon); }, this);
   }
 
   public Command runClose(){
     return Commands.run(() -> { this.setRotation(0); }, this);
   }
 
-  public Command runOpenClose(double rotation){
+  public Command runOpenClose(){
     return Commands.either(
-      runOpen(rotation),
+      runOpen(),
       runClose(),
       () -> { return this.getRotation() == 0; }
     );
