@@ -211,11 +211,16 @@ public class Constants {
   }
   public static class LEDs{
     
-    public static final int[] dfault = new int[]{255,0,0};
     public static final int LED_LENGTH = 0;
+
     public static final int FL_LED_INDEX =0;
     public static final int FR_LED_INDEX =0;
     public static final int BL_LED_INDEX =0;
     public static final int BR_LED_INDEX =0;
+
+    public static final int FL_PORT = 0;
+    public static final int FR_PORT = 0;
+    public static final int BL_PORT = 0;
+    public static final int BR_PORT = 0;
   }
 }
