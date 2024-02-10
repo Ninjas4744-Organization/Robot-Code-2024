@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import java.util.function.BooleanSupplier;
-
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -10,24 +8,20 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-public class Elevator extends SubsystemBase {
+public class Climber extends SubsystemBase {
   private TalonFX _motor1;
   private TalonFX _motor2;
   private DigitalInput _limitSwitch;
-  //Temp
-  public int Tag = 0;
 
-  public Elevator() {
-    _motor1 = new TalonFX(Constants.kElevatorMotor1);
-    _motor2 = new TalonFX(Constants.kElevatorMotor2);
-    _limitSwitch = new DigitalInput(Constants.kElevatorLimitSwitch);
+  public Climber() {
+    _motor1 = new TalonFX(Constants.Ports.kClimberMotor1);
+    _motor2 = new TalonFX(Constants.Ports.kClimberMotor2);
+    _limitSwitch = new DigitalInput(Constants.Ports.kClimberLimitSwitch);
     
-    Follower _followReq = new Follower(Constants.kElevatorMotor1, true);
+    Follower _followReq = new Follower(Constants.Ports.kClimberMotor1, true);
     _motor2.setControl(_followReq);
   }
 
@@ -42,6 +36,10 @@ public class Elevator extends SubsystemBase {
   
   public double getHeight(){
     return _motor1.getPosition().getValue();
+  }
+
+  public boolean isMax(){
+    return Math.abs(Constants.kMaxClimber - getHeight()) < 0.2;
   }
 
   public void Override(){
@@ -62,38 +60,27 @@ public class Elevator extends SubsystemBase {
 
     SmartDashboard.putNumber("Elevator Height", getHeight());
     SmartDashboard.putBoolean("Elevator Bottom", _limitSwitch.get());
-    //Temp
-    SmartDashboard.putNumber("Tag", Tag);
   }
   
   public Command runElevateUp(){
-    
-    return new InstantCommand(
-        () -> { this.setHeight(Constants.kMaxElevator); }, 
+    return Commands.run(
+        () -> { this.setHeight(Constants.kMaxClimber); }, 
         this
     );
   }
 
   public Command runElevateDown(){
-    return new InstantCommand(
+    return Commands.run(
         () -> { this.setHeight(0); }, 
         this
     );
   }
 
   public Command runElevate(){
-    return new ConditionalCommand(
+    return Commands.either(
         this.runElevateUp(), 
         this.runElevateDown(),
         () -> { return Math.abs(this.getHeight()) < 0.2; }
-    ).withTimeout(Constants.kTimeToClimbUntilTrap);
-  }
-
-  public Command runAutoElevate(InOutTake inOutTake, BooleanSupplier override, Runnable disableOverride){
-    return Commands.sequence(
-      this.runElevate(),
-      Commands.waitSeconds(Constants.kTimeToClimbUntilTrap),
-      inOutTake.runAutoInOutTake(Constants.kTrapOpenHeight, Constants.kTrapOpenRotation, override, disableOverride)
-    ).until(override).andThen(disableOverride);
+    ).until(() -> { return this.isMax(); });
   }
 }
