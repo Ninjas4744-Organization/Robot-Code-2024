@@ -3,6 +3,7 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Autonomous Options": "String Chooser",
+      "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Field_Estimation": "Field2d",
       "/SmartDashboard/Field_odo": "Field2d"
     }

@@ -3,7 +3,9 @@
   "robotLength": 0.9,
   "holonomicMode": true,
   "pathFolders": [
-    "Two Piece auto"
+    "Amp Paths",
+    "Exit Paths",
+    "Ground Paths"
   ],
   "autoFolders": [
     "Center Autos",

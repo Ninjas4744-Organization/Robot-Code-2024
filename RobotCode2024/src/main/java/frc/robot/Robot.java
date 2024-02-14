@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -22,6 +23,8 @@ public class Robot extends TimedRobot {
     ctreConfigs = new CTREConfigs();
     _robotContainer = new RobotContainer();
     LimelightHelpers.setLEDMode_ForceOff(null);
+    CameraServer.startAutomaticCapture();
+    CameraServer.startAutomaticCapture();
     
     _chooser.setDefaultOption("LeftAmp", "LeftAmp");
     _chooser.addOption("LeftAmp Alternate End", "LeftAmpAltEnd");
@@ -54,7 +57,6 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
 
     _robotContainer.periodic();
-
   }
 
   @Override

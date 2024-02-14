@@ -3,24 +3,18 @@
   "startingPose": {
     "position": {
       "x": 0.6465019492093177,
-      "y": 4.0
+      "y": 7.0
     },
-    "rotation": -90.0
+    "rotation": 0
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
-          }
-        },
-        {
           "type": "path",
           "data": {
-            "pathName": "CenterToAmp"
+            "pathName": "LeftToAmp"
           }
         },
         {
@@ -36,9 +30,9 @@
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 3.0
+            "name": "Floor Intake"
           }
         },
         {
@@ -50,18 +44,18 @@
         {
           "type": "named",
           "data": {
-            "name": "Outake"
+            "name": "Floor Outake"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "ExitAmp"
+            "pathName": "ExitAmpAltPlace"
           }
         }
       ]
     }
   },
-  "folder": "Center Autos",
+  "folder": "Left Autos",
   "choreoAuto": false
 }

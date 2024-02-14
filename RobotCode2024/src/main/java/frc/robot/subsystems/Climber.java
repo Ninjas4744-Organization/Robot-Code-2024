@@ -58,8 +58,7 @@ public class Climber extends SubsystemBase {
     if(_limitSwitch.get())
       _motor1.setPosition(0);
 
-    SmartDashboard.putNumber("Elevator Height", getHeight());
-    SmartDashboard.putBoolean("Elevator Bottom", _limitSwitch.get());
+    SmartDashboard.putNumber("Climber Height", getHeight());
   }
   
   public Command runElevateUp(){

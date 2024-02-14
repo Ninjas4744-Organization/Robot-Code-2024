@@ -56,7 +56,7 @@ public class IntakeElevator extends SubsystemBase {
     if(!_limitSwitchElevator.get())//Check ! later
       _elevatorMotor.setPosition(0);
 
-    SmartDashboard.putNumber("Intake Height", getHeight());
+    SmartDashboard.putNumber("Intake Elevator Height", getHeight());
   }
 
   public Command runOpen(double height){

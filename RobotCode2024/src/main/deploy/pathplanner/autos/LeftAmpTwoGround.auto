@@ -30,9 +30,9 @@
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 3.0
+            "name": "Floor Intake"
           }
         },
         {
@@ -44,7 +44,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Outake"
+            "name": "Floor Outake"
           }
         },
         {
@@ -54,9 +54,9 @@
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 3.0
+            "name": "Floor Intake"
           }
         },
         {
@@ -68,13 +68,13 @@
         {
           "type": "named",
           "data": {
-            "name": "Outake"
+            "name": "Floor Outake"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "ExitAmpAltPlace"
+            "pathName": "ExitAmp"
           }
         }
       ]

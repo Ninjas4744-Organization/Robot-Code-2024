@@ -4,8 +4,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -34,6 +36,7 @@ import frc.robot.subsystems.IntakeRotation;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Vision;
 
+
 public class RobotContainer {
   // Subsystems
   private final Swerve _swerve;
@@ -49,7 +52,7 @@ public class RobotContainer {
   private final CommandPS5Controller _joystick;
   private final CommandPS5Controller _joystick2;
   private boolean override = false;
-  private boolean manual = false;
+  private boolean withTag = false;
 
   public RobotContainer() { 
     _joystick = new CommandPS5Controller(Constants.Ports.kJoystickPort);
@@ -62,6 +65,11 @@ public class RobotContainer {
     // _intakeRollers = new IntakeRollers();
     // _floorIntakeRollers = new FloorIntakeRollers();
     // _floorIntakeRotation = new FloorIntakeRotation();
+
+    //NamedCommands.registerCommand("Outake", _intakeRollers.runOutake());
+    //NamedCommands.registerCommand("Intake", _intakeRollers.runIntake());
+    //NamedCommands.registerCommand("Floor Outake", runAutoFloorOutake());
+    //NamedCommands.registerCommand("Floor Intake", runAutoFloorIntake());
 
     configureBindings();
   }
@@ -83,45 +91,26 @@ public class RobotContainer {
   // }
   
   private void configureBindings() {
+
     //Driving:
     _swerve.setDefaultCommand(
       new TeleopSwerve(
           _swerve,
           _vision,
-          () -> -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient,
-          () -> -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient,
-          () -> -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient,
-          () -> -_joystick2.getLeftY() * Constants.Swerve.kDriveCoefficient,
-          () -> -_joystick2.getLeftX() * Constants.Swerve.kDriveCoefficient,
-          () -> -_joystick2.getRightX() * Constants.Swerve.kDriveCoefficient,
-          () -> false,
-          () -> false,
-          () -> { return manual; }
-      ).alongWith(new RunCommand(() -> LimelightHelpers.setLEDMode_ForceOff(null)))
+          () -> { return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient /*-_joystick2.getLeftY() * Constants.Swerve.kDriveCoefficient*/; },
+          () -> { return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient /*-_joystick2.getLeftX() * Constants.Swerve.kDriveCoefficient*/; },
+          () -> { return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient /*-_joystick2.getRightX() * Constants.Swerve.kDriveCoefficient*/; },
+          () -> { return withTag; },
+          () -> { return false; }
+      )
     );
 
     //Auto:
     // _joystick.cross().onTrue(Commands.select(getAcceptCommands(), () -> { return getAcceptId(); }));
     // _joystick.circle().onTrue(Commands.run(() -> { Override(); }));
     // _joystick.triangle().toggleOnTrue(Commands.startEnd(() -> { runAutoFloorIntake().execute(); }, () -> { runAutoFloorOutake().execute(); }));
-    _joystick.R2().whileTrue(new TeleopSwerve(
-      _swerve,
-      _vision,
-      () -> -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient,
-      () -> -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient,
-      () -> -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient,
-          () -> -_joystick2.getLeftY() * Constants.Swerve.kDriveCoefficient,
-          () -> -_joystick2.getLeftX() * Constants.Swerve.kDriveCoefficient,
-          () -> -_joystick2.getRightX() * Constants.Swerve.kDriveCoefficient,
-      () -> true,
-      () -> false,
-      () -> { return manual; }
-    ).alongWith(new RunCommand(() -> {
-      if (!isNotTarget())
-        LimelightHelpers.setLEDMode_ForceOn(null);
-      else
-        LimelightHelpers.setLEDMode_ForceOff(null);
-    })));
+    _joystick.R2().whileTrue(Commands.run(() -> withTag = true));
+    _joystick.R2().whileFalse(Commands.run(() -> withTag = false));
     
     //Semi-Auto:
     // _joystick.square().onTrue(Commands.sequence(
@@ -263,11 +252,11 @@ public class RobotContainer {
   }
 
   public Command autoCommand(String auto){
-    PathPlannerPath _path = PathPlannerPath.fromPathFile("GoToAmp");
+    PathPlannerPath _path = PathPlannerPath.fromPathFile("Amp");
     
     return Commands.sequence(
-      new InstantCommand(() -> { _swerve.resetOdometry(_path.getPreviewStartingHolonomicPose()); }),
-      AutoBuilder.buildAuto(auto)
+      Commands.run(() -> { _swerve.resetOdometry(_path.getPreviewStartingHolonomicPose()); }, _swerve).withTimeout(0.5),
+      AutoBuilder.buildAuto("Go")
     );
   }
 }

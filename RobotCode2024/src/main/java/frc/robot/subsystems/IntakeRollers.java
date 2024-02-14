@@ -8,15 +8,21 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import frc.robot.Constants;
 
 public class IntakeRollers extends SubsystemBase {
   private TalonSRX _collectionMotor;
   private DigitalInput _beamBreakerNote;
+  CommandPS5Controller _joystick;
+  CommandPS5Controller _joystick2;
+
   
   public IntakeRollers() { 
     _collectionMotor = new TalonSRX(Constants.Ports.kIntakeMotor);
     _beamBreakerNote = new DigitalInput(Constants.Ports.kIntakeBeamBreakerNote);
+    _joystick = new CommandPS5Controller(0);
+    _joystick2 = new CommandPS5Controller(1);
   }
 
   public boolean isNote(){

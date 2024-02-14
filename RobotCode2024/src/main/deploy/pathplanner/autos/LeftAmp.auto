@@ -28,6 +28,12 @@
           "data": {
             "pathName": "ExitAmp"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "test"
+          }
         }
       ]
     }

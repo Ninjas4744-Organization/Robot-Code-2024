@@ -50,7 +50,7 @@ public class Swerve extends SubsystemBase {
   StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault()
     .getStructTopic("MyPose", Pose2d.struct).publish();
 
-  private Field2d m_field_solution = new Field2d(); 
+  private Field2d _field = new Field2d(); 
   public SwerveDrivePoseEstimator _estimator;
   private String _commandKey ="Outake";
   
@@ -73,8 +73,10 @@ public class Swerve extends SubsystemBase {
     resetOdometry(initPose);
     _estimator = new SwerveDrivePoseEstimator(Constants.Swerve.swerveKinematics, getYaw(), getPositions(), initPose);// ROBOT MUST BE WITH FACE (LIMELIGHT) TOWARDS TAG AND CLOSE (1 METER MAX)
 
+    SmartDashboard.putData("Field", _field);
+
     AutoBuilder.configureHolonomic(
-      this::getLastCalculatedPosition, // Robot pose supplier
+      this::getPose, // Robot pose supplier
       this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
       this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
       this::drive, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
@@ -230,7 +232,6 @@ public class Swerve extends SubsystemBase {
     publisher.set(getLastCalculatedPosition());
     _estimator.update(getYaw(), getPositions());
     swerveOdometry.update(getYaw(), getPositions());
-    m_field_solution.setRobotPose(getLastCalculatedPosition());
-    SmartDashboard.putData("Field_Estimation", m_field_solution);
+    _field.setRobotPose(getPose());
   }
 }
