@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
+import frc.robot.Constants.Ports;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.FloorIntakeRollers;
@@ -35,7 +36,6 @@ import frc.robot.subsystems.IntakeRollers;
 import frc.robot.subsystems.IntakeRotation;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Vision;
-
 
 public class RobotContainer {
   // Subsystems
@@ -55,8 +55,8 @@ public class RobotContainer {
   private boolean withTag = false;
 
   public RobotContainer() { 
-    _joystick = new CommandPS5Controller(Constants.Ports.kJoystickPort);
-    _joystick2 = new CommandPS5Controller(Constants.Ports.kJoystick2Port);
+    _joystick = new CommandPS5Controller(Ports.Joystick.kJoystickPort);
+    _joystick2 = new CommandPS5Controller(Ports.Joystick.kJoystick2Port);
     _swerve = new Swerve();
     _vision = new Vision();
     // _climber = new Climber();

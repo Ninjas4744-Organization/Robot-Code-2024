@@ -1,35 +1,43 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.Constants.PIDConstants;
+import frc.robot.Constants.Ports;
 
 public class IntakeElevator extends SubsystemBase {
-  private TalonFX _elevatorMotor;
-  private DigitalInput _limitSwitchElevator;
+  private CANSparkMax _motor;
+  private DigitalInput _limitSwitch;
+  private ProfiledPIDController _controller;
     
   public IntakeElevator() {
-    _elevatorMotor = new TalonFX(Constants.Ports.kIntakeElevatorMotor);
-    _limitSwitchElevator = new DigitalInput(Constants.Ports.kIntakeLimitSwitchElevator);
+    _motor = new CANSparkMax(Ports.Intake.kElevatorMotor, MotorType.kBrushless);
+    _limitSwitch = new DigitalInput(Ports.Intake.kLimitSwitchElevator);
+
+    _controller = new ProfiledPIDController(
+        PIDConstants.IntakeElevator.kP,
+        PIDConstants.IntakeElevator.kI,
+        PIDConstants.IntakeElevator.kD,
+        PIDConstants.IntakeElevator.kConstraints);
   }
   
   public void setHeight(double height){
-    MotionMagicVoltage mmReq = new MotionMagicVoltage(height);
-    _elevatorMotor.setControl(mmReq);
+    _controller.setGoal(height);
   }
 
   public void setElevatorMotor(double percent){
-    _elevatorMotor.set(percent);
+    _motor.set(percent);
   }
   
   public double getHeight(){
-    return _elevatorMotor.getPosition().getValue();
+    return _motor.getEncoder().getPosition();
   }
 
   public boolean isMax(double max){
@@ -37,9 +45,8 @@ public class IntakeElevator extends SubsystemBase {
   }
   
   public void stopElevator(){
-    MotionMagicVoltage mmReq = new MotionMagicVoltage(getHeight());
-    _elevatorMotor.setControl(mmReq);
-    _elevatorMotor.set(0);
+    _controller.setGoal(getHeight());
+    _motor.set(0);
   }
 
   public void Override(){
@@ -47,14 +54,14 @@ public class IntakeElevator extends SubsystemBase {
   }
 
   public void Reset() {
-    _elevatorMotor.setPosition(0);
+    _motor.getEncoder().setPosition(0);
     Override();
   }
 
   @Override
   public void periodic() {
-    if(!_limitSwitchElevator.get())//Check ! later
-      _elevatorMotor.setPosition(0);
+    if(!_limitSwitch.get())//Check ! later
+      _motor.getEncoder().setPosition(0);
 
     SmartDashboard.putNumber("Intake Elevator Height", getHeight());
   }

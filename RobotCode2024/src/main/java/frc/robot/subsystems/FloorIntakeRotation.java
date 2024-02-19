@@ -15,8 +15,8 @@ public class FloorIntakeRotation extends SubsystemBase {
   private DigitalInput _limitSwitchRotation;
   
   public FloorIntakeRotation() {
-    _rotationMotor = new TalonFX(Constants.Ports.kFloorIntakeRotationMotor);
-    _limitSwitchRotation = new DigitalInput(Constants.Ports.kFloorIntakeLimitSwitch);
+    _rotationMotor = new TalonFX(Constants.Ports.FloorIntakeConstants.kFloorIntakeRotationMotor);
+    _limitSwitchRotation = new DigitalInput(Constants.Ports.FloorIntakeConstants.kFloorIntakeLimitSwitch);
   }
 
   public void setRotation(double rotation){

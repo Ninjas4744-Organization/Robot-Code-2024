@@ -1,28 +1,23 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
+import frc.robot.Constants.Ports;
 import frc.robot.Constants;
 
 public class IntakeRollers extends SubsystemBase {
-  private TalonSRX _collectionMotor;
-  private DigitalInput _beamBreakerNote;
-  CommandPS5Controller _joystick;
-  CommandPS5Controller _joystick2;
-
+  private CANSparkMax _motor;
+  private DigitalInput _beamBreaker;
   
   public IntakeRollers() { 
-    _collectionMotor = new TalonSRX(Constants.Ports.kIntakeMotor);
-    _beamBreakerNote = new DigitalInput(Constants.Ports.kIntakeBeamBreakerNote);
-    _joystick = new CommandPS5Controller(0);
-    _joystick2 = new CommandPS5Controller(1);
+    _motor = new CANSparkMax(Ports.Intake.kRollersMotor, MotorType.kBrushless);
+    _beamBreaker = new DigitalInput(Ports.Intake.kBeamBreaker);
   }
 
   public boolean isNote(){
@@ -30,26 +25,26 @@ public class IntakeRollers extends SubsystemBase {
     // _led.setData(_ledBuffer);
     // _led.start();
     //////////////
-    return _beamBreakerNote.get();
+    return _beamBreaker.get();
   }
 
   public void intake(){
-    _collectionMotor.set(TalonSRXControlMode.PercentOutput, 0.7);
+    _motor.set(0.7);
   }
 
   public void outake(){
-    _collectionMotor.set(TalonSRXControlMode.PercentOutput, -0.7);
+    _motor.set(-0.7);
   }
 
   public void stopTake(){
-    _collectionMotor.set(TalonSRXControlMode.PercentOutput, 0);
+    _motor.set(0);
     //////////////
     // _led.stop();
     //////////////
   }
 
   public void Override(){
-    _collectionMotor.set(TalonSRXControlMode.PercentOutput, 0);
+    stopTake();
   }
 
   public void Reset() {
