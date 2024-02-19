@@ -16,7 +16,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 public class TeleopSwerve extends Command {
-  private Swerve s_Swerve;
+  private Swerve _swerve;
   private Vision _vision;
   private DoubleSupplier translationSup;
   private DoubleSupplier strafeSup;
@@ -30,7 +30,7 @@ public class TeleopSwerve extends Command {
   SlewRateLimiter _rotationRateLimiter;
 
   public TeleopSwerve(
-      Swerve s_Swerve,
+      Swerve _swerve,
       Vision vision,
       DoubleSupplier translationSup,
       DoubleSupplier strafeSup,
@@ -39,7 +39,7 @@ public class TeleopSwerve extends Command {
       BooleanSupplier robotCentricSup
       ) {
 
-    this.s_Swerve = s_Swerve;
+    this._swerve = _swerve;
     this._vision = vision;
     this.translationSup = translationSup;
     this.strafeSup = strafeSup;
@@ -53,13 +53,13 @@ public class TeleopSwerve extends Command {
     _strafeRateLimiter = new SlewRateLimiter(2);//2
     _rotationRateLimiter = new SlewRateLimiter(1.5);//2
 
-    addRequirements(s_Swerve);
+    addRequirements(_swerve);
   }
 
   @Override
   public void execute() {
     Pose2d targetPose = _vision.getTagPose();
-    Pose2d current_pos = s_Swerve.getLastCalculatedPosition();
+    Pose2d current_pos = _swerve.getLastCalculatedPosition();
     SmartDashboard.putNumber("distance", Math.hypot(targetPose.getX() - current_pos.getX(),targetPose.getY() - current_pos.getY()));
 
     /* Get Values, Deadband*/
@@ -74,7 +74,7 @@ public class TeleopSwerve extends Command {
     strafeVal = _strafeRateLimiter.calculate(strafeVal);
     rotationVal = _rotationRateLimiter.calculate(rotationVal);
 
-    s_Swerve.drive(
+    _swerve.drive(
         new Translation2d(translationVal,
          _withTag.getAsBoolean() && inrange(targetPose,current_pos) ? 
          -_controller_x.calculate(targetPose.getX() - current_pos.getX() + 0.1) : strafeVal).times(Constants.Swerve.maxSpeed),

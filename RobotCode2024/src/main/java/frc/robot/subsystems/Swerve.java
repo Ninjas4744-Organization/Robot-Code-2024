@@ -37,20 +37,10 @@ public class Swerve extends SubsystemBase {
   private SwerveModule[] mSwerveMods;
   private Pose2d _lastUnFilterred;
   private AHRS gyro;
-  public Field2d m_field = new Field2d();
-  public Field2d m_field_tag = new Field2d();
-  public Field2d m_field_odo = new Field2d();
-  final int smaplesCamer = 10;
-  final int smaplesCOmbine = 5;
-
-  LinearFilter filterX = LinearFilter.movingAverage(smaplesCamer);
-  LinearFilter filterY = LinearFilter.movingAverage(smaplesCamer);
-  LinearFilter filterROT = LinearFilter.movingAverage(smaplesCamer);
 
   StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault()
     .getStructTopic("MyPose", Pose2d.struct).publish();
 
-  private Field2d _field = new Field2d(); 
   public SwerveDrivePoseEstimator _estimator;
   private String _commandKey ="Outake";
   
@@ -72,8 +62,6 @@ public class Swerve extends SubsystemBase {
     swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw(), getPositions());
     resetOdometry(initPose);
     _estimator = new SwerveDrivePoseEstimator(Constants.Swerve.swerveKinematics, getYaw(), getPositions(), initPose);// ROBOT MUST BE WITH FACE (LIMELIGHT) TOWARDS TAG AND CLOSE (1 METER MAX)
-
-    SmartDashboard.putData("Field", _field);
 
     AutoBuilder.configureHolonomic(
       this::getPose, // Robot pose supplier
@@ -232,6 +220,5 @@ public class Swerve extends SubsystemBase {
     publisher.set(getLastCalculatedPosition());
     _estimator.update(getYaw(), getPositions());
     swerveOdometry.update(getYaw(), getPositions());
-    _field.setRobotPose(getPose());
   }
 }
