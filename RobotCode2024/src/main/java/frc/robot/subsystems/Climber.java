@@ -20,7 +20,7 @@ import frc.robot.Constants;
 
 public class Climber extends SubsystemBase {
 
-  private CANSparkMax _climber_motor;
+  private CANSparkMax _climber_motor,_climber_motor_slave;
   private RelativeEncoder _climber_endcoder;
   private SparkPIDController _climber_pid;
   private TrapezoidProfile _climber_profile;
@@ -31,6 +31,8 @@ public class Climber extends SubsystemBase {
     _climber_endcoder = _climber_motor.getEncoder();
     _climber_pid = _climber_motor.getPIDController();
     _climber_profile = new TrapezoidProfile(Constants.Climber.ClimberConstants);
+    _climber_motor_slave = new CANSparkMax(Constants.Climber.slave_id,MotorType.kBrushless);
+
     configDriveMotor();
   }
 
@@ -38,11 +40,17 @@ public class Climber extends SubsystemBase {
     _climber_motor.restoreFactoryDefaults();
     _climber_motor.setInverted(Constants.Climber.toInvert);
     _climber_endcoder.setInverted(Constants.Climber.toInvert);
-    _climber_motor.setIdleMode(Constants.Climber.driveNeutralMode);
+    _climber_motor.setIdleMode(Constants.Climber.ClimberNeutralMode);
     _climber_endcoder.setPositionConversionFactor(Constants.Climber.ClimberConversionPositionFactor);
     _climber_endcoder.setVelocityConversionFactor(Constants.Climber.ClimberConversionVelocityFactor);
     _climber_pid.setP(Constants.Climber.climbKP);
     _climber_pid.setD(Constants.Climber.climbKD);
+
+    _climber_motor_slave.follow(_climber_motor);
+    _climber_motor_slave.setInverted(!Constants.Climber
+    .toInvert);
+
+
     // burns to spark max
     _climber_motor.burnFlash();
     // resets encoder position to 0

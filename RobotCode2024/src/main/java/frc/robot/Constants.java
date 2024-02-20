@@ -195,7 +195,7 @@ public class Constants {
   }
 
   public static class Intake {
-    final static double gear_ratio = 0;
+    final static double gear_ratio = 27;
     public static final double IntakeConversionVelocityFactor = 360/gear_ratio/60;
 
     public static final double IntakeConversionPositionFactor = 360/gear_ratio;
@@ -213,50 +213,49 @@ public class Constants {
 
     public static final double intakeKP = 0;
     public static final double intakeKD = 0;
-    public static final IdleMode intakeNeutralMode = null;
+    public static final IdleMode intakeNeutralMode = IdleMode.kBrake;
 
   }
 
   public static class Lift {
     
-    final static double gear_ratio = 0;
-    public static final double driveConversionVelocityFactor = 360/gear_ratio/60;
+    final static double gear_ratio = 16;
+    final static double winchDiameter = 1;
+    public static final double liftConversionVelocityFactor = (winchDiameter * Math.PI)/gear_ratio/60;
 
-    public static final double driveConversionPositionFactor = 360/gear_ratio;
+    public static final double liftConversionPositionFactor = (winchDiameter * Math.PI)/gear_ratio;
     public static final int motor_id = 1;
 
     public static final double default_setpoint = 0;
     public static final double intake_setpoint = 0;
     public static final double outake_setpoint = 0;
 
-    public static final Constraints IntakeConstants = null;
 
     public static final boolean toInvert = false;
 
-    public static final IdleMode driveNeutralMode = null;
-
-
-    public static final double LiftConversionPositionFactor = 0;
-    public static final double LiftConversionVelocityFactor = 0;
     public static final Constraints LiftConstants = new TrapezoidProfile.Constraints(0, 0);
-    public static final IdleMode liftNeutralMode = null;
+    public static final IdleMode liftNeutralMode = IdleMode.kBrake;
     public static final double liftKP = 0;
     public static final double liftKD = 0;
+    public static final int slave_id = 0;
 
   }
   public static class Climber {
-    final static double gear_ratio = 0;
-    public static final double IntakeConversionVelocityFactor = 360/gear_ratio/60;
+    final static double gear_ratio = 25;
+    final static double winchDiameter = 1;
+    public static final double liftConversionVelocityFactor = (winchDiameter * Math.PI)/gear_ratio/60;
 
-    public static final double IntakeConversionPositionFactor = 360/gear_ratio;
+    public static final double liftConversionPositionFactor = (winchDiameter * Math.PI)/gear_ratio;
     public static final double climbKP = 0;
     public static final double climbKD = 0;
     public static final double ClimberConversionVelocityFactor = 0;
     public static final double ClimberConversionPositionFactor = 0;
-    public static final IdleMode driveNeutralMode = null;
+    public static final IdleMode ClimberNeutralMode = IdleMode.kBrake;
     public static final boolean toInvert = false;
-    public static final Constraints ClimberConstants = null;
+    public static final Constraints ClimberConstants = new TrapezoidProfile.Constraints(0, 0);
+
     public static final int motor_id = 0;
+    public static final int slave_id = 0;
   }
   public static class LEDs{
     

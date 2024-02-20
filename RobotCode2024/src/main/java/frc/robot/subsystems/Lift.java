@@ -25,14 +25,18 @@ import frc.robot.Constants;
 
 public class Lift extends SubsystemBase {
 
-    private CANSparkMax _lift_motor;
+    private CANSparkMax _lift_motor,_lift_motor_slave;
     private RelativeEncoder _lift_endcoder;
     private SparkPIDController _lift_pid;
     private TrapezoidProfile _lift_profile;
 
     /** Creates a new Lift. */
     public Lift() {
+        
+        
         _lift_motor = new CANSparkMax(Constants.Lift.motor_id, MotorType.kBrushless);
+        _lift_motor_slave = new CANSparkMax(Constants.Lift.slave_id,MotorType.kBrushless);
+
         _lift_endcoder = _lift_motor.getEncoder();
         _lift_pid = _lift_motor.getPIDController();
         _lift_profile = new TrapezoidProfile(Constants.Lift.LiftConstants);
@@ -44,10 +48,14 @@ public class Lift extends SubsystemBase {
         _lift_motor.setInverted(Constants.Lift.toInvert);
         _lift_endcoder.setInverted(Constants.Lift.toInvert);
         _lift_motor.setIdleMode(Constants.Lift.liftNeutralMode);
-        _lift_endcoder.setPositionConversionFactor(Constants.Lift.LiftConversionPositionFactor);
-        _lift_endcoder.setVelocityConversionFactor(Constants.Lift.LiftConversionVelocityFactor);
+        _lift_endcoder.setPositionConversionFactor(Constants.Lift.liftConversionPositionFactor);
+        _lift_endcoder.setVelocityConversionFactor(Constants.Lift.liftConversionVelocityFactor);
         _lift_pid.setP(Constants.Lift.liftKP);
         _lift_pid.setD(Constants.Lift.liftKD);
+
+        _lift_motor_slave.follow(_lift_motor);
+        _lift_motor_slave.setInverted(!Constants.Lift.toInvert);
+        
         // burns to spark max
         _lift_motor.burnFlash();
         // resets encoder position to 0
