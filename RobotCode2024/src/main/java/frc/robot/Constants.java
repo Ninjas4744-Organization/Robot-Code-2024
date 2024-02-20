@@ -146,13 +146,14 @@ public class Constants {
     }
 
   }
-  public static final class Cameras{
-    public static final class Camera1  {
+
+  public static final class Cameras {
+    public static final class Camera1 {
       public static final String _name = "first";
       public static final Transform3d _camera_to_robot = new Transform3d();
 
     }
-    
+
   }
 
   public static final class AutoConstants {
@@ -181,7 +182,6 @@ public class Constants {
     public static final String highRefreshRate = "";
     public static final Transform3d robotToCam = new Transform3d();
 
-           
   }
 
   public static class Rollers {
@@ -196,9 +196,9 @@ public class Constants {
 
   public static class Intake {
     final static double gear_ratio = 27;
-    public static final double IntakeConversionVelocityFactor = 360/gear_ratio/60;
+    public static final double IntakeConversionVelocityFactor = 360 / gear_ratio / 60;
 
-    public static final double IntakeConversionPositionFactor = 360/gear_ratio;
+    public static final double IntakeConversionPositionFactor = 360 / gear_ratio;
 
     public static final int motor_id = 1;
 
@@ -218,18 +218,17 @@ public class Constants {
   }
 
   public static class Lift {
-    
+
     final static double gear_ratio = 16;
     final static double winchDiameter = 1;
-    public static final double liftConversionVelocityFactor = (winchDiameter * Math.PI)/gear_ratio/60;
+    public static final double liftConversionVelocityFactor = (winchDiameter * Math.PI) / gear_ratio / 60;
 
-    public static final double liftConversionPositionFactor = (winchDiameter * Math.PI)/gear_ratio;
+    public static final double liftConversionPositionFactor = (winchDiameter * Math.PI) / gear_ratio;
     public static final int motor_id = 1;
 
     public static final double default_setpoint = 0;
     public static final double intake_setpoint = 0;
     public static final double outake_setpoint = 0;
-
 
     public static final boolean toInvert = false;
 
@@ -240,12 +239,13 @@ public class Constants {
     public static final int slave_id = 0;
 
   }
+
   public static class Climber {
     final static double gear_ratio = 25;
     final static double winchDiameter = 1;
-    public static final double liftConversionVelocityFactor = (winchDiameter * Math.PI)/gear_ratio/60;
+    public static final double liftConversionVelocityFactor = (winchDiameter * Math.PI) / gear_ratio / 60;
 
-    public static final double liftConversionPositionFactor = (winchDiameter * Math.PI)/gear_ratio;
+    public static final double liftConversionPositionFactor = (winchDiameter * Math.PI) / gear_ratio;
     public static final double climbKP = 0;
     public static final double climbKD = 0;
     public static final double ClimberConversionVelocityFactor = 0;
@@ -257,14 +257,15 @@ public class Constants {
     public static final int motor_id = 0;
     public static final int slave_id = 0;
   }
-  public static class LEDs{
-    
+
+  public static class LEDs {
+
     public static final int LED_LENGTH = 0;
 
-    public static final int FL_LED_INDEX =0;
-    public static final int FR_LED_INDEX =0;
-    public static final int BL_LED_INDEX =0;
-    public static final int BR_LED_INDEX =0;
+    public static final int FL_LED_INDEX = 0;
+    public static final int FR_LED_INDEX = 0;
+    public static final int BL_LED_INDEX = 0;
+    public static final int BR_LED_INDEX = 0;
 
     public static final int FL_PORT = 0;
     public static final int FR_PORT = 0;

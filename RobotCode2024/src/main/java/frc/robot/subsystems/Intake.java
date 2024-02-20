@@ -9,10 +9,22 @@ import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.MutableMeasure;
+import edu.wpi.first.units.Velocity;
+import edu.wpi.first.units.Voltage;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.TrapezoidProfileCommand;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.MutableMeasure.mutable;
 
 public class Intake extends SubsystemBase {
 
@@ -20,6 +32,43 @@ public class Intake extends SubsystemBase {
     private RelativeEncoder _angle_endcoder;
     private SparkPIDController _angle_pid;
     private TrapezoidProfile _angle_profile;
+    private final MutableMeasure<Voltage> m_appliedVoltage = mutable(Volts.of(0));
+    // Mutable holder for unit-safe linear distance values, persisted to avoid
+    // reallocation.
+    private final MutableMeasure<Angle> m_distance = mutable(Degrees.of(0));
+    // Mutable holder for unit-safe linear velocity values, persisted to avoid
+    // reallocation.
+    private final MutableMeasure<Velocity<Angle>> m_velocity = mutable(DegreesPerSecond.of(0));
+
+    private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
+            // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
+            new SysIdRoutine.Config(),
+            new SysIdRoutine.Mechanism(
+                    // Tell SysId how to plumb the driving voltage to the motors.
+                    (Measure<Voltage> volts) -> {
+                        // set states for all 4 modules
+
+                    },
+                    // Tell SysId how to record a frame of data for each motor on the mechanism
+                    // being
+                    // characterized.
+                    log -> {
+                        // set states for all 4 modules
+
+                        log.motor("angle")
+                                .voltage(
+                                        m_appliedVoltage.mut_replace(
+                                                _angle_motor.getBusVoltage() * RobotController.getBatteryVoltage(),
+                                                Volts))
+                                .angularPosition(m_distance.mut_replace(_angle_endcoder.getPosition() / 100, Degrees))
+                                .angularVelocity(
+                                        m_velocity.mut_replace(_angle_endcoder.getVelocity() / 100, DegreesPerSecond));
+
+                    },
+                    // Tell SysId to make generated commands require this subsystem, suffix test
+                    // state in
+                    // WPILog with this subsystem's name ("drive")
+                    this));
 
     /** Creates a new Intake. */
     public Intake() {
@@ -65,5 +114,13 @@ public class Intake extends SubsystemBase {
 
     public Command defaultCommand() {
         return setPoseCommand(() -> new TrapezoidProfile.State(Constants.Intake.default_setpoint, 0));
+    }
+
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return m_sysIdRoutine.quasistatic(direction);
+    }
+
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return m_sysIdRoutine.dynamic(direction);
     }
 }

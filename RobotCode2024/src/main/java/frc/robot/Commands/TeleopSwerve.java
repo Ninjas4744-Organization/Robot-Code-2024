@@ -29,7 +29,6 @@ public class TeleopSwerve extends Command {
   private PIDController _controller;
   private ProfiledPIDController _theta_controller;
   private PIDController _controller_x;
-  
 
   BooleanSupplier _withTag;
 
@@ -58,7 +57,7 @@ public class TeleopSwerve extends Command {
 
   @Override
   public void execute() {
-    
+
     Pose2d targetPose = _vision.getTagPose();
     Pose2d current_pos = s_Swerve.getLastCalculatedPosition();
     SmartDashboard.putNumber("distance",
@@ -73,13 +72,11 @@ public class TeleopSwerve extends Command {
         new Translation2d(translationVal,
             _withTag.getAsBoolean() && inrange(targetPose, current_pos)
                 ? -_controller_x.calculate(targetPose.getX() - current_pos.getX() + 0.1)
-                  : 
-                  strafeVal)
+                : strafeVal)
             .times(Constants.Swerve.maxSpeed),
         _withTag.getAsBoolean()
             ? -_controller.calculate(
-                targetPose.rotateBy(Rotation2d.fromDegrees(180)).minus(current_pos).getRotation().getDegrees()
-                )
+                targetPose.rotateBy(Rotation2d.fromDegrees(180)).minus(current_pos).getRotation().getDegrees())
             : rotationVal * Constants.Swerve.maxAngularVelocity,
         !robotCentricSup.getAsBoolean(),
         true);
