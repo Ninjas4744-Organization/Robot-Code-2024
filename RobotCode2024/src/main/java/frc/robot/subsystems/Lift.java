@@ -50,7 +50,7 @@ public class Lift extends SubsystemBase {
                     // Tell SysId how to plumb the driving voltage to the motors.
                     (Measure<Voltage> volts) -> {
                         // set states for all 4 modules
-
+                        _lift_motor.setVoltage(volts.in(Volts));
                     },
                     // Tell SysId how to record a frame of data for each motor on the mechanism
                     // being
@@ -63,9 +63,9 @@ public class Lift extends SubsystemBase {
                                         m_appliedVoltage.mut_replace(
                                                 _lift_motor.getBusVoltage() * RobotController.getBatteryVoltage(),
                                                 Volts))
-                                .linearPosition(m_distance.mut_replace(_lift_endcoder.getPosition() / 100, Meters))
+                                .linearPosition(m_distance.mut_replace(_lift_endcoder.getPosition(), Meters))
                                 .linearVelocity(
-                                        m_velocity.mut_replace(_lift_endcoder.getVelocity() / 100, MetersPerSecond));
+                                        m_velocity.mut_replace(_lift_endcoder.getVelocity(), MetersPerSecond));
 
                     },
                     // Tell SysId to make generated commands require this subsystem, suffix test

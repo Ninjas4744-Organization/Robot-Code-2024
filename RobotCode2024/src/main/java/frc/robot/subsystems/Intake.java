@@ -47,6 +47,7 @@ public class Intake extends SubsystemBase {
                     // Tell SysId how to plumb the driving voltage to the motors.
                     (Measure<Voltage> volts) -> {
                         // set states for all 4 modules
+                        _angle_motor.setVoltage(volts.in(Volts));
 
                     },
                     // Tell SysId how to record a frame of data for each motor on the mechanism

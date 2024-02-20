@@ -50,6 +50,7 @@ public class Climber extends SubsystemBase {
           // Tell SysId how to plumb the driving voltage to the motors.
           (Measure<Voltage> volts) -> {
             // set states for all 4 modules
+          _climber_motor.setVoltage(volts.in(Volts));
 
           },
           // Tell SysId how to record a frame of data for each motor on the mechanism
@@ -62,9 +63,9 @@ public class Climber extends SubsystemBase {
                 .voltage(
                     m_appliedVoltage.mut_replace(
                         _climber_motor.getBusVoltage() * RobotController.getBatteryVoltage(), Volts))
-                .linearPosition(m_distance.mut_replace(_climber_endcoder.getPosition() / 100, Meters))
+                .linearPosition(m_distance.mut_replace(_climber_endcoder.getPosition(), Meters))
                 .linearVelocity(
-                    m_velocity.mut_replace(_climber_endcoder.getVelocity() / 100, MetersPerSecond));
+                    m_velocity.mut_replace(_climber_endcoder.getVelocity(), MetersPerSecond));
 
           },
           // Tell SysId to make generated commands require this subsystem, suffix test
@@ -119,4 +120,5 @@ public class Climber extends SubsystemBase {
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return m_sysIdRoutine.dynamic(direction);
   }
+  
 }
