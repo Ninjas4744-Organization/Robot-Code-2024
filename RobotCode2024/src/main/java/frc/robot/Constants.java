@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.path.PathConstraints;
+import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -9,6 +10,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.util.Color;
 import frc.lib.util.SwerveModuleConstants;
@@ -199,6 +201,24 @@ public class Constants {
     public static final double intake_setpoint = 0;
     public static final double outake_setpoint = 0;
 
+    public static final Constraints IntakeConstants = new TrapezoidProfile.Constraints(0, 0);
+
+    public static final boolean toInvert = false;
+
+    public static final IdleMode driveNeutralMode = IdleMode.kBrake;
+
+    public static final double driveConversionVelocityFactor = 0;
+
+    public static final double driveConversionPositionFactor = 0;
+
+    public static final double driveKP = 0;
+
+    public static final double driveKI = 0;
+
+    public static final double driveKD = 0;
+
+    public static final double driveKFF = 0;
+
   }
 
   public static class Lift {
@@ -208,7 +228,18 @@ public class Constants {
     public static final double intake_setpoint = 0;
     public static final double outake_setpoint = 0;
 
+    public static final Constraints IntakeConstants = null;
+
+    public static final boolean toInvert = false;
+
+    public static final IdleMode driveNeutralMode = null;
+
+    public static final double driveKP = 0;
+
+    public static final double driveKD = 0;
+
   }
+
   public static class LEDs{
     
     public static final int LED_LENGTH = 0;

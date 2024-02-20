@@ -60,45 +60,46 @@ public class Swerve extends SubsystemBase {
   public Field2d m_field = new Field2d();
   public Field2d m_field_tag = new Field2d();
   public Field2d m_field_odo = new Field2d();
-    // Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
+  // Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
   private final MutableMeasure<Voltage> m_appliedVoltage = mutable(Volts.of(0));
-  // Mutable holder for unit-safe linear distance values, persisted to avoid reallocation.
+  // Mutable holder for unit-safe linear distance values, persisted to avoid
+  // reallocation.
   private final MutableMeasure<Distance> m_distance = mutable(Meters.of(0));
-  // Mutable holder for unit-safe linear velocity values, persisted to avoid reallocation.
+  // Mutable holder for unit-safe linear velocity values, persisted to avoid
+  // reallocation.
   private final MutableMeasure<Velocity<Distance>> m_velocity = mutable(MetersPerSecond.of(0));
-  
 
-   private final SysIdRoutine m_sysIdRoutine =
-      new SysIdRoutine(
-          // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
-          new SysIdRoutine.Config(),
-          new SysIdRoutine.Mechanism(
-              // Tell SysId how to plumb the driving voltage to the motors.
-              (Measure<Voltage> volts) -> {
-                // set states for all 4 modules
-    for (SwerveModule mod : mSwerveMods) {
-      mod.sysIdVolt(volts.in(Volts));
-    }
-              },
-              // Tell SysId how to record a frame of data for each motor on the mechanism being
-              // characterized.
-              log -> {
-                // set states for all 4 modules
-    for (SwerveModule mod : mSwerveMods) {
-log.motor("drive-" + mod.moduleNumber)
-                    .voltage(
-                        m_appliedVoltage.mut_replace(
-                            mod.getVoltage() * RobotController.getBatteryVoltage(), Volts))
-                    .linearPosition(m_distance.mut_replace(mod.getPosition().distanceMeters, Meters))
-                    .linearVelocity(
-                        m_velocity.mut_replace(mod.getState().speedMetersPerSecond, MetersPerSecond));
-    }
-                
-              
-              },
-              // Tell SysId to make generated commands require this subsystem, suffix test state in
-              // WPILog with this subsystem's name ("drive")
-              this));
+  private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
+      // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
+      new SysIdRoutine.Config(),
+      new SysIdRoutine.Mechanism(
+          // Tell SysId how to plumb the driving voltage to the motors.
+          (Measure<Voltage> volts) -> {
+            // set states for all 4 modules
+            for (SwerveModule mod : mSwerveMods) {
+              mod.sysIdVolt(volts.in(Volts));
+            }
+          },
+          // Tell SysId how to record a frame of data for each motor on the mechanism
+          // being
+          // characterized.
+          log -> {
+            // set states for all 4 modules
+            for (SwerveModule mod : mSwerveMods) {
+              log.motor("drive-" + mod.moduleNumber)
+                  .voltage(
+                      m_appliedVoltage.mut_replace(
+                          mod.getVoltage() * RobotController.getBatteryVoltage(), Volts))
+                  .linearPosition(m_distance.mut_replace(mod.getPosition().distanceMeters, Meters))
+                  .linearVelocity(
+                      m_velocity.mut_replace(mod.getState().speedMetersPerSecond, MetersPerSecond));
+            }
+
+          },
+          // Tell SysId to make generated commands require this subsystem, suffix test
+          // state in
+          // WPILog with this subsystem's name ("drive")
+          this));
   StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault()
       .getStructTopic("MyPose", Pose2d.struct).publish();
 
@@ -297,14 +298,16 @@ log.motor("drive-" + mod.moduleNumber)
   public Pose2d getLastCalculatedPosition() {
     return _estimator.getEstimatedPosition();
   }
-  private void updatePV(){
-    for (Optional<EstimatedRobotPose> estimation: _estimationsSupplier.get()){
-      estimation.ifPresent( pose -> {
+
+  private void updatePV() {
+    for (Optional<EstimatedRobotPose> estimation : _estimationsSupplier.get()) {
+      estimation.ifPresent(pose -> {
         _estimator.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds);
 
       });
     }
   }
+
   @Override
   public void periodic() {
     _commandKey = "";
@@ -337,6 +340,7 @@ log.motor("drive-" + mod.moduleNumber)
     // TODO Auto-generated method stub
     super.periodic();
   }
+
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
     return m_sysIdRoutine.quasistatic(direction);
   }
@@ -384,7 +388,7 @@ log.motor("drive-" + mod.moduleNumber)
 
 // PathPlannerPath path = new PathPlannerPath(
 // bezierPoints,
-// Constants.AutoConstants.constraints, 
+// Constants.AutoConstants.constraints,
 // new GoalEndState(0.0,
 // current_tag_pose.getRotation().rotateBy(Rotation2d.fromDegrees(180))));
 // return new InstantCommand(() -> {
