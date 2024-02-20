@@ -15,8 +15,8 @@ public class FloorIntakeRollers extends SubsystemBase {
   private DigitalInput _beamBreakerNote;
   
   public FloorIntakeRollers() {
-    _collectionMotor = new TalonSRX(Constants.Ports.FloorIntakeConstants.kFloorIntakeMotor);
-    _beamBreakerNote = new DigitalInput(Constants.Ports.FloorIntakeConstants.kFloorIntakeBeamBreaker);
+    //_collectionMotor = new TalonSRX(Constants.Ports.FloorIntakeConstants.kFloorIntakeMotor);
+   // _beamBreakerNote = new DigitalInput(Constants.Ports.FloorIntakeConstants.kFloorIntakeBeamBreaker);
   }
 
   public boolean isNote(){
