@@ -14,9 +14,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Commands.TeleopSwerve;
@@ -44,7 +42,7 @@ public class RobotContainer {
   public RobotContainer() {
 
     _driveController = new CommandPS4Controller(Constants.DRIVE_CONTROLLER_PORT);
-        _vision = new Vision();
+    _vision = new Vision();
 
     _swerve = new Swerve(_vision::getEstimatedGlobalPose);
     _intakes = new Intake();
@@ -150,10 +148,8 @@ public class RobotContainer {
     PathPlannerPath _path = PathPlannerPath.fromPathFile("Init");
 
     return Commands.sequence(
-      Commands.run(() -> _swerve.resetOdometry(_path.getPreviewStartingHolonomicPose())
-, _swerve),
-      AutoBuilder.buildAuto("basic")
-    );
+        Commands.run(() -> _swerve.resetOdometry(_path.getPreviewStartingHolonomicPose()), _swerve),
+        AutoBuilder.buildAuto("basic"));
 
   }
 
