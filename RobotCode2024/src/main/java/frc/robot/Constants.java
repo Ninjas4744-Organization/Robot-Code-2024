@@ -195,6 +195,11 @@ public class Constants {
   }
 
   public static class Intake {
+    final static double gear_ratio = 0;
+    public static final double IntakeConversionVelocityFactor = 360/gear_ratio/60;
+
+    public static final double IntakeConversionPositionFactor = 360/gear_ratio;
+
     public static final int motor_id = 1;
 
     public static final double default_setpoint = 0;
@@ -204,24 +209,20 @@ public class Constants {
     public static final Constraints IntakeConstants = new TrapezoidProfile.Constraints(0, 0);
 
     public static final boolean toInvert = false;
-
     public static final IdleMode driveNeutralMode = IdleMode.kBrake;
 
-    public static final double driveConversionVelocityFactor = 0;
-
-    public static final double driveConversionPositionFactor = 0;
-
-    public static final double driveKP = 0;
-
-    public static final double driveKI = 0;
-
-    public static final double driveKD = 0;
-
-    public static final double driveKFF = 0;
+    public static final double intakeKP = 0;
+    public static final double intakeKD = 0;
+    public static final IdleMode intakeNeutralMode = null;
 
   }
 
   public static class Lift {
+    
+    final static double gear_ratio = 0;
+    public static final double driveConversionVelocityFactor = 360/gear_ratio/60;
+
+    public static final double driveConversionPositionFactor = 360/gear_ratio;
     public static final int motor_id = 1;
 
     public static final double default_setpoint = 0;
@@ -234,12 +235,29 @@ public class Constants {
 
     public static final IdleMode driveNeutralMode = null;
 
-    public static final double driveKP = 0;
 
-    public static final double driveKD = 0;
+    public static final double LiftConversionPositionFactor = 0;
+    public static final double LiftConversionVelocityFactor = 0;
+    public static final Constraints LiftConstants = new TrapezoidProfile.Constraints(0, 0);
+    public static final IdleMode liftNeutralMode = null;
+    public static final double liftKP = 0;
+    public static final double liftKD = 0;
 
   }
+  public static class Climber {
+    final static double gear_ratio = 0;
+    public static final double IntakeConversionVelocityFactor = 360/gear_ratio/60;
 
+    public static final double IntakeConversionPositionFactor = 360/gear_ratio;
+    public static final double climbKP = 0;
+    public static final double climbKD = 0;
+    public static final double ClimberConversionVelocityFactor = 0;
+    public static final double ClimberConversionPositionFactor = 0;
+    public static final IdleMode driveNeutralMode = null;
+    public static final boolean toInvert = false;
+    public static final Constraints ClimberConstants = null;
+    public static final int motor_id = 0;
+  }
   public static class LEDs{
     
     public static final int LED_LENGTH = 0;

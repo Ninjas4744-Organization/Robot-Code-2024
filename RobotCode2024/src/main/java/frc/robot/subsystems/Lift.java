@@ -25,41 +25,42 @@ import frc.robot.Constants;
 
 public class Lift extends SubsystemBase {
 
-    private CANSparkMax _angle_motor;
-    private RelativeEncoder _angle_endcoder;
-    private SparkPIDController _angle_pid;
-    private TrapezoidProfile _angle_profile;
+    private CANSparkMax _lift_motor;
+    private RelativeEncoder _lift_endcoder;
+    private SparkPIDController _lift_pid;
+    private TrapezoidProfile _lift_profile;
 
     /** Creates a new Lift. */
     public Lift() {
-        _angle_motor = new CANSparkMax(Constants.Lift.motor_id, MotorType.kBrushless);
-        _angle_endcoder = _angle_motor.getEncoder();
-        _angle_pid = _angle_motor.getPIDController();
-        _angle_profile = new TrapezoidProfile(Constants.Lift.IntakeConstants);
-        configDriveMotor();
+        _lift_motor = new CANSparkMax(Constants.Lift.motor_id, MotorType.kBrushless);
+        _lift_endcoder = _lift_motor.getEncoder();
+        _lift_pid = _lift_motor.getPIDController();
+        _lift_profile = new TrapezoidProfile(Constants.Lift.LiftConstants);
+        configliftMotor();
     }
 
-    private void configDriveMotor() {
-        _angle_motor.restoreFactoryDefaults();
-        _angle_motor.setInverted(Constants.Lift.toInvert);
-        _angle_endcoder.setInverted(Constants.Lift.toInvert);
-        _angle_motor.setIdleMode(Constants.Lift.driveNeutralMode);
-
-        _angle_pid.setP(Constants.Lift.driveKP);
-        _angle_pid.setD(Constants.Lift.driveKD);
+    private void configliftMotor() {
+        _lift_motor.restoreFactoryDefaults();
+        _lift_motor.setInverted(Constants.Lift.toInvert);
+        _lift_endcoder.setInverted(Constants.Lift.toInvert);
+        _lift_motor.setIdleMode(Constants.Lift.liftNeutralMode);
+        _lift_endcoder.setPositionConversionFactor(Constants.Lift.LiftConversionPositionFactor);
+        _lift_endcoder.setVelocityConversionFactor(Constants.Lift.LiftConversionVelocityFactor);
+        _lift_pid.setP(Constants.Lift.liftKP);
+        _lift_pid.setD(Constants.Lift.liftKD);
         // burns to spark max
-        _angle_motor.burnFlash();
+        _lift_motor.burnFlash();
         // resets encoder position to 0
-        _angle_endcoder.setPosition(0.0);
+        _lift_endcoder.setPosition(0.0);
     }
 
     public Command setPoseCommand(Supplier<TrapezoidProfile.State> goal) {
         return new TrapezoidProfileCommand(
-                _angle_profile,
+                _lift_profile,
                 pos -> {
-                    _angle_pid.setReference(pos.position, ControlType.kPosition);
+                    _lift_pid.setReference(pos.position, ControlType.kPosition);
                 }, goal, () -> {
-                    return new TrapezoidProfile.State(_angle_endcoder.getPosition(), _angle_endcoder.getVelocity());
+                    return new TrapezoidProfile.State(_lift_endcoder.getPosition(), _lift_endcoder.getVelocity());
                 }, this);
     }
 

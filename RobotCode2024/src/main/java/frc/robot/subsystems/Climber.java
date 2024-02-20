@@ -27,21 +27,22 @@ public class Climber extends SubsystemBase {
 
   /** Creates a new Climber. */
   public Climber() {
-    _climber_motor = new CANSparkMax(Constants.Intake.motor_id, MotorType.kBrushless);
+    _climber_motor = new CANSparkMax(Constants.Climber.motor_id, MotorType.kBrushless);
     _climber_endcoder = _climber_motor.getEncoder();
     _climber_pid = _climber_motor.getPIDController();
-    _climber_profile = new TrapezoidProfile(Constants.Intake.IntakeConstants);
+    _climber_profile = new TrapezoidProfile(Constants.Climber.ClimberConstants);
     configDriveMotor();
   }
 
   private void configDriveMotor() {
     _climber_motor.restoreFactoryDefaults();
-    _climber_motor.setInverted(Constants.Intake.toInvert);
-    _climber_endcoder.setInverted(Constants.Intake.toInvert);
-    _climber_motor.setIdleMode(Constants.Intake.driveNeutralMode);
-
-    _climber_pid.setP(Constants.Intake.driveKP);
-    _climber_pid.setD(Constants.Intake.driveKD);
+    _climber_motor.setInverted(Constants.Climber.toInvert);
+    _climber_endcoder.setInverted(Constants.Climber.toInvert);
+    _climber_motor.setIdleMode(Constants.Climber.driveNeutralMode);
+    _climber_endcoder.setPositionConversionFactor(Constants.Climber.ClimberConversionPositionFactor);
+    _climber_endcoder.setVelocityConversionFactor(Constants.Climber.ClimberConversionVelocityFactor);
+    _climber_pid.setP(Constants.Climber.climbKP);
+    _climber_pid.setD(Constants.Climber.climbKD);
     // burns to spark max
     _climber_motor.burnFlash();
     // resets encoder position to 0
@@ -58,15 +59,5 @@ public class Climber extends SubsystemBase {
         }, this);
   }
 
-  public Command intakeConfiguration() {
-    return setPoseCommand(() -> new TrapezoidProfile.State(Constants.Intake.intake_setpoint, 0));
-  }
-
-  public Command outakeConfiguration() {
-    return setPoseCommand(() -> new TrapezoidProfile.State(Constants.Intake.outake_setpoint, 0));
-  }
-
-  public Command defaultCommand() {
-    return setPoseCommand(() -> new TrapezoidProfile.State(Constants.Intake.default_setpoint, 0));
-  }
+  
 }
