@@ -6,8 +6,10 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -20,7 +22,8 @@ public class Constants {
   public static final int DRIVE_CONTROLLER_PORT = 0;
   public static final int OPERATOR_CONTROLLER_PORT = 0;
   public static final String kJoystickPort = null;
-
+  public static final double trackWidth = Units.inchesToMeters(30);
+    public static final double wheelBase = Units.inchesToMeters(30);
   public static final class Swerve {
     public static final double stickDeadband = 0.1;
 
@@ -28,8 +31,7 @@ public class Constants {
     public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
 
     /* Drivetrain Constants */
-    public static final double trackWidth = Units.inchesToMeters(30);
-    public static final double wheelBase = Units.inchesToMeters(30);
+    
     public static final double wheelDiameter = Units.inchesToMeters(4.0);
     public static final double wheelCircumference = wheelDiameter * Math.PI;
 
@@ -179,8 +181,11 @@ public class Constants {
 
   public static class VisionConstants {
 
-    public static final String highRefreshRate = "";
-    public static final Transform3d robotToCam = new Transform3d();
+    public static final String front_name = "front";
+    public static final String back_name = "back";
+    public static final Transform3d robotToCamfront = new Transform3d(new Translation3d(0,trackWidth,60),new Rotation3d(0,30,0));
+    public static final Transform3d robotToCamback = new Transform3d(new Translation3d(0,trackWidth,30),
+    new Rotation3d(0,30,180));
 
   }
 
@@ -200,7 +205,7 @@ public class Constants {
 
     public static final double IntakeConversionPositionFactor = 360 / gear_ratio;
 
-    public static final int motor_id = 1;
+    public static final int motor_id = 13;
 
     public static final double default_setpoint = 0;
     public static final double intake_setpoint = 0;
@@ -209,7 +214,6 @@ public class Constants {
     public static final Constraints IntakeConstants = new TrapezoidProfile.Constraints(0, 0);
 
     public static final boolean toInvert = false;
-    public static final IdleMode driveNeutralMode = IdleMode.kBrake;
 
     public static final double intakeKP = 0;
     public static final double intakeKD = 0;

@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.units.MutableMeasure.mutable;
 
@@ -42,7 +43,9 @@ public class Intake extends SubsystemBase {
 
     private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
             // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
-            new SysIdRoutine.Config(),
+            new SysIdRoutine.Config(Volts.of(1).per(Seconds.of(0.5)),
+            Volts.of(4),
+            Seconds.of(10)),
             new SysIdRoutine.Mechanism(
                     // Tell SysId how to plumb the driving voltage to the motors.
                     (Measure<Voltage> volts) -> {
@@ -61,9 +64,9 @@ public class Intake extends SubsystemBase {
                                         m_appliedVoltage.mut_replace(
                                                 _angle_motor.getBusVoltage() * RobotController.getBatteryVoltage(),
                                                 Volts))
-                                .angularPosition(m_distance.mut_replace(_angle_endcoder.getPosition() / 100, Degrees))
+                                .angularPosition(m_distance.mut_replace(_angle_endcoder.getPosition(), Degrees))
                                 .angularVelocity(
-                                        m_velocity.mut_replace(_angle_endcoder.getVelocity() / 100, DegreesPerSecond));
+                                        m_velocity.mut_replace(_angle_endcoder.getVelocity(), DegreesPerSecond));
 
                     },
                     // Tell SysId to make generated commands require this subsystem, suffix test
@@ -83,7 +86,7 @@ public class Intake extends SubsystemBase {
     private void configintakeMotor() {
         _angle_motor.restoreFactoryDefaults();
         _angle_motor.setInverted(Constants.Intake.toInvert);
-        _angle_endcoder.setInverted(Constants.Intake.toInvert);
+        // _angle_endcoder.setInverted(Constants.Intake.toInvert);
         _angle_motor.setIdleMode(Constants.Intake.intakeNeutralMode);
         _angle_endcoder.setPositionConversionFactor(Constants.Intake.IntakeConversionPositionFactor);
         _angle_endcoder.setVelocityConversionFactor(Constants.Intake.IntakeConversionVelocityFactor);
@@ -116,7 +119,9 @@ public class Intake extends SubsystemBase {
     public Command defaultCommand() {
         return setPoseCommand(() -> new TrapezoidProfile.State(Constants.Intake.default_setpoint, 0));
     }
-
+    public void setPercent(double percent){
+        _angle_motor.set(percent);
+    }
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
         return m_sysIdRoutine.quasistatic(direction);
     }

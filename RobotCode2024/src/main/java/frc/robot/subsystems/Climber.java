@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.TrapezoidProfileCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import static edu.wpi.first.units.Units.Centimeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -38,10 +39,10 @@ public class Climber extends SubsystemBase {
   private final MutableMeasure<Voltage> m_appliedVoltage = mutable(Volts.of(0));
   // Mutable holder for unit-safe linear distance values, persisted to avoid
   // reallocation.
-  private final MutableMeasure<Distance> m_distance = mutable(Meters.of(0));
+  private final MutableMeasure<Distance> m_distance = mutable(Centimeters.of(0));
   // Mutable holder for unit-safe linear velocity values, persisted to avoid
   // reallocation.
-  private final MutableMeasure<Velocity<Distance>> m_velocity = mutable(MetersPerSecond.of(0));
+  private final MutableMeasure<Velocity<Distance>> m_velocity = mutable(MetersPerSecond.of(0).times(100));
 
   private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
       // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
@@ -63,9 +64,9 @@ public class Climber extends SubsystemBase {
                 .voltage(
                     m_appliedVoltage.mut_replace(
                         _climber_motor.getBusVoltage() * RobotController.getBatteryVoltage(), Volts))
-                .linearPosition(m_distance.mut_replace(_climber_endcoder.getPosition(), Meters))
+                .linearPosition(m_distance.mut_replace(_climber_endcoder.getPosition() / 100, Centimeters))
                 .linearVelocity(
-                    m_velocity.mut_replace(_climber_endcoder.getVelocity(), MetersPerSecond));
+                    m_velocity.mut_replace(_climber_endcoder.getVelocity() / 100, MetersPerSecond));
 
           },
           // Tell SysId to make generated commands require this subsystem, suffix test

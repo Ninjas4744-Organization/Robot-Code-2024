@@ -19,28 +19,27 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     ctreConfigs = new CTREConfigs();
     m_robotContainer = new RobotContainer();
-    LimelightHelpers.setLEDMode_ForceOff(null);
 
   }
 
-  @Override
-  public void robotPeriodic() {
-    CommandScheduler.getInstance().run();
+  // @Override
+  // public void robotPeriodic() {
+  //   CommandScheduler.getInstance().run();
 
-    m_robotContainer.periodic();
+  //   m_robotContainer.periodic();
 
-  }
+  // }
 
-  @Override
-  public void autonomousInit() {
-    m_robotContainer.autoCommand().schedule();
-    super.autonomousInit();
-  }
+  // @Override
+  // public void autonomousInit() {
+  //   m_robotContainer.autoCommand().schedule();
+  //   super.autonomousInit();
+  // }
 
-  @Override
-  public void disabledInit() {
-    m_robotContainer.disabledActions();
-  }
+  // @Override
+  // public void disabledInit() {
+  //   m_robotContainer.disabledActions();
+  // }
 
   @Override
   public void teleopInit() {
