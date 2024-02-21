@@ -68,13 +68,15 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
-    _robotContainer.disableActions();
+    //_robotContainer.disableActions();
   }
   
   @Override
   public void teleopInit() {
     LimelightHelpers.setLEDMode_ForceOff(null);
     
+    _robotContainer.disableActions();
+
     if (_autonomousCommand != null) {
       _autonomousCommand.cancel();
     }

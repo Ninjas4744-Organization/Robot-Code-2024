@@ -1,12 +1,6 @@
 {
   "version": 1.0,
-  "startingPose": {
-    "position": {
-      "x": 0.6465019492093177,
-      "y": 7.0
-    },
-    "rotation": 0
-  },
+  "startingPose": null,
   "command": {
     "type": "sequential",
     "data": {
@@ -18,21 +12,15 @@
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "Outake"
+            "waitTime": 0
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "ExitAmp"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "test"
           }
         }
       ]

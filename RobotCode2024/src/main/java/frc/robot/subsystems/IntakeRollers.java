@@ -49,6 +49,8 @@ public class IntakeRollers extends SubsystemBase {
 
   public void Reset() {
     Override();
+    if(this.getCurrentCommand() != null)
+      this.getCurrentCommand().cancel();
   }
 
   @Override
