@@ -26,7 +26,9 @@ public class Climber extends SubsystemBase {
 
   public Climber() {
     _motor1 = new CANSparkMax(Ports.Climber.kMotor1, MotorType.kBrushless);
+    _motor1.restoreFactoryDefaults();
     _motor2 = new CANSparkMax(Ports.Climber.kMotor2, MotorType.kBrushless);
+    _motor2.restoreFactoryDefaults();
     _limitSwitch = new DigitalInput(Ports.Climber.kLimitSwitch);
 
     _controller = _motor1.getPIDController();
@@ -34,8 +36,9 @@ public class Climber extends SubsystemBase {
     _controller.setI(PIDConstants.Climber.kI);
     _controller.setD(PIDConstants.Climber.kD);
 
+    _motor1.setSoftLimit(SoftLimitDirection.kForward, 0.4f);
     _motor1.setSoftLimit(SoftLimitDirection.kReverse, 0);
-
+    
     _motor2.follow(_motor1, true);
     
     _motor1.burnFlash();

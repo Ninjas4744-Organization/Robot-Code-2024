@@ -56,7 +56,7 @@ public class RobotContainer {
     // _floorIntakeRollers = new FloorIntakeRollers();
     // _floorIntakeRotation = new FloorIntakeRotation();
 
-    NamedCommands.registerCommand("Outake", runAutoOutake(IntakeStates.kAmpOpenHeight, IntakeStates.kAmpOpenRotation));
+    NamedCommands.registerCommand("Outake", runAutonomyOutake(IntakeStates.kAmpOpenHeight, IntakeStates.kAmpOpenRotation));
 
     configureBindings();
   }
@@ -113,12 +113,50 @@ public class RobotContainer {
 
     _joystick.square().onTrue(Commands.parallel(
       _intakeElevator.runClose(),
-      _intakeRotation.runOpen(Constants.IntakeStates.kGameStartRotation)
+      _intakeRotation.runOpen(IntakeStates.kGameStartRotation)
     ));
 
     _joystick.triangle().onTrue(runInOutTake(
-      Constants.IntakeStates.kAmpOpenHeight, Constants.IntakeStates.kAmpOpenRotation)
+      IntakeStates.kAmpOpenHeight, IntakeStates.kAmpOpenRotation)
     );
+
+    _joystick.circle().onTrue(runAutoOutakeTrap(
+      IntakeStates.kTrapOpenHeight, IntakeStates.kTrapOpenRotation)
+    );
+
+    _joystick.povUp().whileTrue(Commands.startEnd(
+      () -> {_climber.setMotor(1);}, 
+      () -> {_climber.stopMotor();}, _climber)
+    );
+
+    _joystick.povDown().whileTrue(Commands.startEnd(
+      () -> {_climber.setMotor(-1);}, 
+      () -> {_climber.stopMotor();}, _climber)
+    );
+
+    // _joystick.povUp().onTrue(
+    //   _climber.runElevateUp()
+    // );
+
+    // _joystick.povDown().onTrue(Commands.sequence(
+    //   _climber.runElevateDown(),
+    //   runAutoOutake(Constants.IntakeStates.kTrapOpenHeight, Constants.IntakeStates.kTrapOpenRotation)
+    // ));
+
+    // _joystick.circle().onTrue(
+    //   Commands.either(
+    //    _climber.runElevateUp(), 
+    //    Commands.run(() -> {}), 
+    //    () -> { return _climber.getHeight() == 0; })
+    // );
+
+    // _joystick.circle().whileTrue(
+    //     Commands.startEnd(
+    //     () -> { _climber.setMotor(-0.7); },
+    //     () -> { _climber.setMotor(0); } ,
+    //     _climber
+    //   )
+    // );
 
     // Manual:
     _joystick2.povRight().whileTrue(Commands.startEnd(
@@ -224,6 +262,44 @@ public class RobotContainer {
       ),
       Commands.waitUntil(() -> {
         return _joystick.triangle().getAsBoolean();
+      }),
+      _intakeRollers.runOutake(),
+      Commands.waitSeconds(Constants.kTimeToOutake),       
+      Commands.parallel(
+        _intakeElevator.runClose(),
+        _intakeRotation.runClose()
+        //Commands.run(() -> {coefficientFactor = 1;})
+      )
+    );
+  }
+
+  private Command runAutonomyOutake(double height, double rotation) {
+    return Commands.sequence(
+      Commands.parallel(
+        _intakeElevator.runOpen(height),
+        _intakeRotation.runOpen(rotation)
+      ),
+      Commands.waitUntil(() -> {
+        return _intakeElevator.isMax(height) && _intakeRotation.isMax(rotation);
+      }),
+      _intakeRollers.runOutake(),
+      Commands.waitSeconds(Constants.kTimeToOutake),       
+      Commands.parallel(
+        _intakeElevator.runClose(),
+        _intakeRotation.runClose()
+      )
+    );
+  }
+
+  private Command runAutoOutakeTrap(double height, double rotation) {
+    return Commands.sequence(
+      Commands.parallel(
+        _intakeElevator.runOpen(height),
+        _intakeRotation.runOpen(rotation)
+        //Commands.run(() -> {coefficientFactor = 0.25;})
+      ),
+      Commands.waitUntil(() -> {
+        return _joystick.circle().getAsBoolean();
       }),
       _intakeRollers.runOutake(),
       Commands.waitSeconds(Constants.kTimeToOutake),       

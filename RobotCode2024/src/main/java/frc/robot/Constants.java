@@ -12,7 +12,7 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.util.SwerveModuleConstants;
 
 public final class Constants {
-  public static final double kMaxClimber = 50;
+  public static final double kMaxClimber = 0.4;
   public static final double kTimeToOutake = 0.5;
   public static final double kFloorUpPositon = 55;
 
@@ -22,8 +22,8 @@ public final class Constants {
     public static final double kSourceOpenRotation = 70;
     public static final double kAmpOpenHeight = 0.45;
     public static final double kAmpOpenRotation = 0;
-    public static final double kTrapOpenHeight = 0.65;
-    public static final double kTrapOpenRotation = 0;
+    public static final double kTrapOpenHeight = 0.675;
+    public static final double kTrapOpenRotation = 25;
   }
 
   public final static class Ports {
