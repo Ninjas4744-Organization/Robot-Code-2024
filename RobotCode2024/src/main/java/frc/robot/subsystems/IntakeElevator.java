@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -83,6 +84,9 @@ public class IntakeElevator extends SubsystemBase {
     _controller.setI(PIDConstants.IntakeElevator.kI);
     _controller.setD(PIDConstants.IntakeElevator.kD);
 
+    _motor.setSoftLimit(SoftLimitDirection.kForward, 0.65f);
+    _motor.setSoftLimit(SoftLimitDirection.kReverse, 0);
+
     _controller.setOutputRange(-0.6, 1);
 
     _motor.burnFlash();
@@ -106,32 +110,34 @@ public class IntakeElevator extends SubsystemBase {
   }
 
   public boolean isMax(double max) {
-    return Math.abs(max - getHeight()) < 0.2;
+    return Math.abs(max - getHeight()) < 0.02;
   }
 
   public void stopElevator() {
-    _motor.stopMotor();;
+    _motor.stopMotor();
   }
 
   public Command Override() {
-    return Commands.startEnd(
-      () -> {_motor.stopMotor();},
-      () -> {Reset();},
-      this
+    return Commands.sequence(
+      Commands.run(() -> {
+        if (this.getCurrentCommand() != null)
+          this.getCurrentCommand().cancel();
+      }),
+      Commands.run(() -> {_motor.stopMotor();})
     );
   }
 
-  public void Reset() {
-    if (this.getCurrentCommand() != null)
-      this.getCurrentCommand().cancel();
+  public Command Reset() {
+    return Override();
   }
 
   @Override
   public void periodic() {
-    if (!_limitSwitch.get())// Check ! later
+    if (!_limitSwitch.get() )// Check ! later
       _motor.getEncoder().setPosition(0);
 
     SmartDashboard.putNumber("Intake Elevator Height", getHeight());
+    SmartDashboard.putBoolean("Intake limit", !_limitSwitch.get());
   }
 
   public Command runOpen(double height) {

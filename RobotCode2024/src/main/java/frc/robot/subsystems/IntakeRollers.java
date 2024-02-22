@@ -25,15 +25,15 @@ public class IntakeRollers extends SubsystemBase {
     // _led.setData(_ledBuffer);
     // _led.start();
     //////////////
-    return _beamBreaker.get();
+    return !_beamBreaker.get();
   }
 
   public void intake(){
-    _motor.set(0.7);
+    _motor.set(-1);
   }
 
   public void outake(){
-    _motor.set(-0.7);
+    _motor.set(1);
   }
 
   public void stopTake(){

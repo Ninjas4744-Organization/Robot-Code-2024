@@ -13,14 +13,14 @@ import frc.lib.util.SwerveModuleConstants;
 
 public final class Constants {
   public static final double kMaxClimber = 50;
-  public static final double kTimeToOutake = 1;
+  public static final double kTimeToOutake = 0.5;
   public static final double kFloorUpPositon = 55;
 
   public final static class IntakeStates {
     public static final double kGameStartRotation = 180;
-    public static final double kSourceOpenHeight = 0;
-    public static final double kSourceOpenRotation = 80;
-    public static final double kAmpOpenHeight = 0.4;
+    public static final double kSourceOpenHeight = 0.1;
+    public static final double kSourceOpenRotation = 70;
+    public static final double kAmpOpenHeight = 0.45;
     public static final double kAmpOpenRotation = 0;
     public static final double kTrapOpenHeight = 0.65;
     public static final double kTrapOpenRotation = 0;
@@ -33,33 +33,33 @@ public final class Constants {
     }
 
     public static final class Climber {
-      public static final int kMotor1 = 2;
-      public static final int kMotor2 = 4;
-      public static final int kLimitSwitch = 0;
+      public static final int kMotor1 = 11;
+      public static final int kMotor2 = 15;
+      public static final int kLimitSwitch = 8;
     }
 
     public static final class Intake {
-      public static final int kRollersMotor = 5;
+      public static final int kRollersMotor = 12;
       public static final int kElevatorMotor = 14;
       public static final int kRotationMotor = 13;
-      public static final int kLimitSwitchElevator = 1;
-      public static final int kLimitSwitchRotation = 6;
-      public static final int kBeamBreaker = 9;
+      public static final int kLimitSwitchElevator = 7;
+      public static final int kLimitSwitchRotation = 9;
+      public static final int kBeamBreaker = 5;
     }
 
-    public static final class FloorIntake {
-      public static final int kRollersMotor = 5;
-      public static final int kRotationMotor = 5;
-      public static final int kLimitSwitch = 2;
-      public static final int kBeamBreaker = 9;
-    }
+    // public static final class FloorIntake {
+    //   public static final int kRollersMotor = 5;
+    //   public static final int kRotationMotor = 5;
+    //   public static final int kLimitSwitch = 2;
+    //   public static final int kBeamBreaker = 9;
+    // }
   }
 
   public static final class PIDConstants {
     public static final class Climber {
       public static final double kP = 4.8;
-      public static final double kI = 0.0;
-      public static final double kD = 0.01;
+      public static final double kI = 0;
+      public static final double kD = 0;
 
       public static final double kMaxVelocity = 5;
       public static final double kMaxAcceleration = 160;
@@ -71,8 +71,9 @@ public final class Constants {
       public static final double kConversionPosFactor = /*360 / kGearRatio*/7.2;
       public static final double kConversionVelFactor = kConversionPosFactor / 60;
 
-      public static final double kP = 0.018;
-      public static final double kI = 0.0002;//0.0003;
+      public static final double kP = 0.0185;
+      //public static final double kI = 0.000;//0.0003;
+       public static final double kI = 0.0002;//0.0003;
       public static final double kD = 0;
 
       public static final double kMaxVelocity = 60;
@@ -90,7 +91,7 @@ public final class Constants {
       public static final double kI = 0;
       public static final double kD = 0;
 
-      public static final double kMaxVelocity = 3;
+      public static final double kMaxVelocity = 6;
       public static final double kMaxAcceleration = kMaxVelocity * 2;
       public static final TrapezoidProfile.Constraints kConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
     }

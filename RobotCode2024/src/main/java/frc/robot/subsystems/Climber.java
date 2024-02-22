@@ -5,6 +5,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkBase.SoftLimitDirection;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -33,11 +34,20 @@ public class Climber extends SubsystemBase {
     _controller.setI(PIDConstants.Climber.kI);
     _controller.setD(PIDConstants.Climber.kD);
 
-    _motor2.follow(_motor1);
+    _motor1.setSoftLimit(SoftLimitDirection.kReverse, 0);
+
+    _motor2.follow(_motor1, true);
+    
+    _motor1.burnFlash();
+    _motor2.burnFlash();
   }
 
   public void setMotor(double percent) {
     _motor1.set(percent);
+  }
+
+  public void stopMotor() { 
+    _motor1.stopMotor();
   }
 
   public Command setHeight(double height) {
@@ -58,7 +68,10 @@ public class Climber extends SubsystemBase {
   }
 
   public Command Override() {
-    return setHeight(getHeight());
+    return Commands.sequence(
+      Commands.run(() -> {Reset();}) ,
+      Commands.run(() -> {_motor1.stopMotor();})
+    );
   }
 
   public void Reset() {
@@ -68,10 +81,11 @@ public class Climber extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if (_limitSwitch.get())
+    if (!_limitSwitch.get())
       _motor1.getEncoder().setPosition(0);
 
     SmartDashboard.putNumber("Climber Height", getHeight());
+    SmartDashboard.putBoolean("Climber Limit", !_limitSwitch.get());
   }
 
   public Command runElevateUp() {

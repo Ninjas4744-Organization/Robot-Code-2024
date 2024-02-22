@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -92,6 +93,9 @@ public class IntakeRotation extends SubsystemBase {
     _controller.setD(PIDConstants.IntakeRotation.kD);
     _controller.setIZone(3);
 
+    _motor.setSoftLimit(SoftLimitDirection.kForward, 210);
+    _motor.setSoftLimit(SoftLimitDirection.kReverse, 0);
+
     _controller.setOutputRange(-0.55, 0.55);
 
     _motor.burnFlash();
@@ -111,7 +115,7 @@ public class IntakeRotation extends SubsystemBase {
   }
 
   public boolean isMax(double max) {
-    return Math.abs(max - getRotation()) < 0.2;
+    return Math.abs(max - getRotation()) < 0.07;
   }
 
   public void setRotationMotor(double percent) {
@@ -123,12 +127,17 @@ public class IntakeRotation extends SubsystemBase {
   }
 
   public Command Override() {
-    return setRotation(getRotation());
+    return Commands.sequence(
+      Commands.run(() -> {
+        if (this.getCurrentCommand() != null)
+          this.getCurrentCommand().cancel();
+      }),
+      Commands.run(() -> {_motor.stopMotor();})
+    );
   }
 
-  public void Reset() {
-    if (this.getCurrentCommand() != null)
-      this.getCurrentCommand().cancel();
+  public Command Reset() {
+    return Override();
   }
 
   @Override
@@ -138,6 +147,7 @@ public class IntakeRotation extends SubsystemBase {
 
     SmartDashboard.putNumber("Intake Rotation", getRotation());
     SmartDashboard.putNumber("Intake Rotation Velocity", _motor.getEncoder().getVelocity());
+    SmartDashboard.putBoolean("Intake Rotation Limit", !_limitSwitch.get());
   }
 
   public Command runOpen(double rotation) {
