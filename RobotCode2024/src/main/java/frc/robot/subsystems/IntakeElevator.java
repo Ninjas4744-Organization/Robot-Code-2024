@@ -110,17 +110,20 @@ public class IntakeElevator extends SubsystemBase {
   }
 
   public void stopElevator() {
-    _motor.set(0);
+    _motor.stopMotor();;
   }
 
   public Command Override() {
-    return setHeight(getHeight());
+    return Commands.startEnd(
+      () -> {_motor.stopMotor();},
+      () -> {Reset();},
+      this
+    );
   }
 
   public void Reset() {
-    if (this.getCurrentCommand() != null) {
+    if (this.getCurrentCommand() != null)
       this.getCurrentCommand().cancel();
-    }
   }
 
   @Override

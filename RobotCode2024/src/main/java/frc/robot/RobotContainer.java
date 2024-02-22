@@ -87,12 +87,15 @@ public class RobotContainer {
       new TeleopSwerve(
         _swerve,
         _vision,
-        () -> {return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient -
-          _joystick2.getLeftY() * Constants.Swerve.kDriveCoefficient;},
-        () -> {return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient -
-          _joystick2.getLeftX() * Constants.Swerve.kDriveCoefficient;},
-        () -> {return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient -
-          _joystick2.getRightX() * Constants.Swerve.kDriveCoefficient;},
+        () -> {return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient 
+          // -_joystick2.getLeftY() * Constants.Swerve.kDriveCoefficient
+        ;},
+        () -> {return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient 
+          // -_joystick2.getLeftX() * Constants.Swerve.kDriveCoefficient
+        ;},
+        () -> {return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient 
+          // -_joystick2.getRightX() * Constants.Swerve.kDriveCoefficient
+        ;},
         () -> {return withTag; },
         () -> {return false;}
       )
@@ -103,7 +106,9 @@ public class RobotContainer {
     // return getAcceptId();
     // }));
 
-    _joystick.circle().onTrue(Commands.run(() -> {Override();}));
+    _joystick.circle().onTrue(Override());
+
+    _joystick.povRight().onTrue(Commands.run(() -> {_intakeElevator.Reset();}, _intakeElevator));
 
     // _joystick.R2().whileTrue(Commands.startEnd(() -> withTag = true, () ->
     // withTag = false));
@@ -119,31 +124,33 @@ public class RobotContainer {
       _intakeRotation.runOpen(Constants.IntakeStates.kGameStartRotation)
     ));
 
-    _joystick.triangle().onTrue(runInOutTake(
-      Constants.IntakeStates.kAmpOpenHeight, Constants.IntakeStates.kAmpOpenRotation)
-    );
+    // _joystick.triangle().onTrue(runInOutTake(
+    //   Constants.IntakeStates.kAmpOpenHeight, Constants.IntakeStates.kAmpOpenRotation)
+    // );
 
     // Manual:
-    // _joystick2.L2().whileTrue(Commands.startEnd(() -> {
-    // _intakeRollers.intake();
-    // }, () -> {
-    // _intakeRollers.stopTake();
-    // }, _intakeRollers));
-    // _joystick2.R2().whileTrue(Commands.startEnd(() -> {
-    // _intakeRollers.outake();
-    // }, () -> {
-    // _intakeRollers.stopTake();
-    // }, _intakeRollers));
-    // _joystick2.povUp().whileTrue(Commands.startEnd(() -> {
-    // _climber.setMotor(1);
-    // }, () -> {
-    // _climber.Reset();
-    // }, _climber));
-    // _joystick2.povDown().whileTrue(Commands.startEnd(() -> {
-    // _climber.setMotor(-1);
-    // }, () -> {
-    // _climber.Reset();
-    // }, _climber));
+    // _joystick2.L2().whileTrue(Commands.startEnd(
+    //   () -> { _intakeRollers.intake();}, 
+    //   () -> {_intakeRollers.stopTake();}, 
+    //   _intakeRollers)
+    // );
+
+    // _joystick2.R2().whileTrue(Commands.startEnd(
+    //   () -> {_intakeRollers.outake();}, 
+    //   () -> {_intakeRollers.stopTake();}, 
+    //   _intakeRollers)
+    // );
+
+    // _joystick2.povUp().whileTrue(Commands.startEnd(
+    //   () -> {_climber.setMotor(1);}, 
+    //   () -> {_climber.Reset();}, _climber)
+    // );
+
+    // _joystick2.povDown().whileTrue(Commands.startEnd(
+    //   () -> {_climber.setMotor(-1);}, 
+    //   () -> {_climber.Reset();}, 
+    //   _climber)
+    // );
 
     _joystick2.R2().whileTrue(Commands.startEnd(
       () -> {_intakeElevator.setElevatorMotor(0.2);}, 
@@ -169,21 +176,15 @@ public class RobotContainer {
       _intakeRotation)
     );
 
-      // PID Testing:
+    // PID Testing:
     // _joystick.R2().toggleOnTrue(_intakeElevator.setHeight(IntakeStates.kAmpOpenHeight));
     // _joystick.L2().toggleOnTrue(_intakeElevator.setHeight(0));
     // _joystick.R1().toggleOnTrue(_intakeRotation.setRotation(IntakeStates.kAmpOpenRotation));
     // _joystick.L1().toggleOnTrue(_intakeRotation.setRotation(0));
-
     // _joystick.povUp().toggleOnTrue(_climber.runElevate());
-     _joystick.povDown().onTrue(runAutoIntake());
     // _joystick.povRight()
     // .onTrue(runAutoOutake(Constants.IntakeStates.kAmpOpenHeight,
     // Constants.IntakeStates.kAmpOpenRotation));
-     _joystick.povLeft().onTrue(runAutoOutake(
-        Constants.IntakeStates.kTrapOpenHeight, Constants.IntakeStates.kTrapOpenRotation
-      )
-    );
   }
 
   public void periodic() {
@@ -233,21 +234,22 @@ public class RobotContainer {
         return _intakeElevator.isMax(height) && _intakeRotation.isMax(rotation);
       }),
       //_intakeRollers.runOutake(),
-      Commands.waitSeconds(Constants.kTimeToOutake),        Commands.parallel(
+      Commands.waitSeconds(Constants.kTimeToOutake),       
+      Commands.parallel(
         _intakeElevator.runClose(),
         _intakeRotation.runClose()
       )
     );
   }
 
-  public Command runInOutTake(double height, double rotation) {
-    return Commands.either(
-      runAutoIntake(),
-      runAutoOutake(height, rotation),
-      // () -> { return !(_intakeRollers.isNote();
-      }
-    );
-  }
+  // public Command runInOutTake(double height, double rotation) {
+  //   return Commands.either(
+  //     runAutoIntake(),
+  //     runAutoOutake(height, rotation),
+  //     () -> { return !(_intakeRollers.isNote();
+  //     }
+  //   );
+  // }
 
   // private Command runAutoFloorIntake(){
   // return Commands.sequence(
@@ -266,14 +268,16 @@ public class RobotContainer {
   // ).until(() -> { return override; }).andThen(() -> { override = false; });
   // }
 
-  private void Override() {
-    _swerve.Override();
-    // _climber.Override().schedule();
-    _intakeElevator.Override().schedule();
-    _intakeRotation.Override().schedule();
-    // _intakeRollers.Override();
-    // _floorIntakeRollers.Override();
-    // _floorIntakeRotation.Override();
+  private Command Override() {
+    return Commands.parallel(
+      Commands.run(() -> {_swerve.Override();}, _swerve),
+      // Commands.run(() -> {_climber.Reset();}, _climber));
+      Commands.run(() -> {_intakeElevator.Reset();}, _intakeElevator),
+      Commands.run(() -> {_intakeRotation.Reset();}, _intakeRotation)
+      // Commands.run(() -> {_intakeRollers.Reset();}, _intakeRollers));;
+      // _floorIntakeRollers.Override();
+      // _floorIntakeRotation.Override();
+    );
   }
 
   private int getTagID() {

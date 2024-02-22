@@ -17,7 +17,7 @@ public final class Constants {
   public static final double kFloorUpPositon = 55;
 
   public final static class IntakeStates {
-    public static final double kGameStartRotation = 210;
+    public static final double kGameStartRotation = 180;
     public static final double kSourceOpenHeight = 0;
     public static final double kSourceOpenRotation = 80;
     public static final double kAmpOpenHeight = 0.4;
@@ -76,7 +76,7 @@ public final class Constants {
       public static final double kD = 0;
 
       public static final double kMaxVelocity = 60;
-      public static final double kMaxAcceleration = kMaxVelocity * 3;
+      public static final double kMaxAcceleration = kMaxVelocity * 2;
       public static final TrapezoidProfile.Constraints kConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
     }
 

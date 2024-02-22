@@ -62,11 +62,8 @@ public class Climber extends SubsystemBase {
   }
 
   public void Reset() {
-    //_motor1.getEncoder().setPosition(0);
-    // if(this.getCurrentCommand() != null){
-    //   this.getCurrentCommand().cancel();
-    // }
-    setHeight(0).schedule();
+    if (this.getCurrentCommand() != null)
+      this.getCurrentCommand().cancel();
   }
 
   @Override
