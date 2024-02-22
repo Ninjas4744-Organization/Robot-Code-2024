@@ -22,6 +22,9 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.PIDConstants;
 import frc.robot.Constants.Ports;
+import edu.wpi.first.units.Angle;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
@@ -36,16 +39,16 @@ public class IntakeRotation extends SubsystemBase {
   private final MutableMeasure<Voltage> _appliedVoltage = mutable(Volts.of(0));
   // Mutable holder for unit-safe linear distance values, persisted to avoid
   // reallocation.
-  private final MutableMeasure<Distance> _distance = mutable(Meters.of(0));
+  private final MutableMeasure<Angle> _distance = mutable(Degrees.of(0));
   // Mutable holder for unit-safe linear velocity values, persisted to avoid
   // reallocation.
-  private final MutableMeasure<Velocity<Distance>> _velocity = mutable(MetersPerSecond.of(0));
+  private final MutableMeasure<Velocity<Angle>> _velocity = mutable(DegreesPerSecond.of(0));
 
   private final SysIdRoutine _sysIdRoutine = new SysIdRoutine(
             // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
-            new SysIdRoutine.Config(Volts.of(1).per(Seconds.of(0.5)),
-            Volts.of(4),
-            Seconds.of(4)),
+            new SysIdRoutine.Config(Volts.of(0.05).per(Seconds.of(0.25)),
+            Volts.of(1),
+            Seconds.of(7.5)),
             new SysIdRoutine.Mechanism(
                     // Tell SysId how to plumb the driving voltage to the motors.
                     (Measure<Voltage> volts) -> {
@@ -53,26 +56,31 @@ public class IntakeRotation extends SubsystemBase {
                         _motor.setVoltage(volts.in(Volts));
 
                     },
+                    // Tell SysId how to record a frame of data for each motor on the mechanism
+                    // being
+                    // characterized.
                     log -> {
                         // set states for all 4 modules
 
-                        log.motor("elevator")
+                        log.motor("angle")
                                 .voltage(
                                         _appliedVoltage.mut_replace(
-                                                _motor.getBusVoltage() * RobotController.getBatteryVoltage(),
+                                                _motor.getAppliedOutput() * RobotController.getBatteryVoltage(),
                                                 Volts))
-                                .linearPosition(_distance.mut_replace(_motor.getEncoder().getPosition(), Meters))
-                                .linearVelocity(
-                                        _velocity.mut_replace(_motor.getEncoder().getVelocity(), MetersPerSecond));
+                                .angularPosition(_distance.mut_replace(_motor.getEncoder().getPosition(), Degrees))
+                                .angularVelocity(_velocity.mut_replace(_motor.getEncoder().getVelocity(), DegreesPerSecond));
 
                     },
                     // Tell SysId to make generated commands require this subsystem, suffix test
                     // state in
                     // WPILog with this subsystem's name ("drive")
                     this));
+                    
+
 
   public IntakeRotation() {
     _motor = new CANSparkMax(Ports.Intake.kRotationMotor, MotorType.kBrushless);
+    _motor.restoreFactoryDefaults();
     _motor.getEncoder().setPositionConversionFactor(Constants.PIDConstants.IntakeRotation.kConversionPosFactor);
     _motor.getEncoder().setVelocityConversionFactor(Constants.PIDConstants.IntakeRotation.kConversionVelFactor);
     _limitSwitch = new DigitalInput(Ports.Intake.kLimitSwitchRotation);
@@ -81,8 +89,9 @@ public class IntakeRotation extends SubsystemBase {
     _controller.setP(PIDConstants.IntakeRotation.kP);
     _controller.setI(PIDConstants.IntakeRotation.kI);
     _controller.setD(PIDConstants.IntakeRotation.kD);
+    _controller.setIZone(3);
 
-    _controller.setOutputRange(-0.01, 0.01);
+    _controller.setOutputRange(-0.55, 0.55);
 
     _motor.burnFlash();
   }
@@ -117,20 +126,16 @@ public class IntakeRotation extends SubsystemBase {
   }
 
   public void Reset() {
-    //_motor.getEncoder().setPosition(0);
-    // if(this.getCurrentCommand() != null){
-    //   this.getCurrentCommand().cancel();
-    // }
-    setRotation(0).schedule();
+    
   }
 
   @Override
   public void periodic() {
-    // if (!_limitSwitch.get())// Check ! later
-    //   _motor.getEncoder().setPosition(0);
+    if (!_limitSwitch.get())// Check ! later
+      _motor.getEncoder().setPosition(0);
 
-    // SmartDashboard.putNumber("Intake Rotation", getRotation());
-    SmartDashboard.putBoolean("Limit", _limitSwitch.get());
+    SmartDashboard.putNumber("Intake Rotation", getRotation());
+    SmartDashboard.putNumber("Intake Rotation Velocity", _motor.getEncoder().getVelocity());
   }
 
   public Command runOpen(double rotation) {

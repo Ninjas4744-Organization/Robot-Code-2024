@@ -17,12 +17,13 @@ public final class Constants {
   public static final double kFloorUpPositon = 55;
 
   public final static class IntakeStates {
-    public static final double kSourceOpenHeight = 5;
-    public static final double kSourceOpenRotation = 5;
-    public static final double kAmpOpenHeight = 0.6;
-    public static final double kAmpOpenRotation = -45;
-    public static final double kTrapOpenHeight = 5;
-    public static final double kTrapOpenRotation = 5;
+    public static final double kGameStartRotation = 210;
+    public static final double kSourceOpenHeight = 0;
+    public static final double kSourceOpenRotation = 80;
+    public static final double kAmpOpenHeight = 0.4;
+    public static final double kAmpOpenRotation = 0;
+    public static final double kTrapOpenHeight = 0.65;
+    public static final double kTrapOpenRotation = 0;
   }
 
   public final static class Ports {
@@ -67,15 +68,15 @@ public final class Constants {
 
     public static final class IntakeRotation {
       public static final double kGearRatio = 27; 
-      public static final double kConversionPosFactor = 360 / kGearRatio;
-      public static final double kConversionVelFactor = 360 / kGearRatio / 60;
+      public static final double kConversionPosFactor = /*360 / kGearRatio*/7.2;
+      public static final double kConversionVelFactor = kConversionPosFactor / 60;
 
-      public static final double kP = 2.4;
-      public static final double kI = 0.0;
+      public static final double kP = 0.018;
+      public static final double kI = 0.0002;//0.0003;
       public static final double kD = 0;
 
-      public static final double kMaxVelocity = 0.1;
-      public static final double kMaxAcceleration = 0.2;
+      public static final double kMaxVelocity = 60;
+      public static final double kMaxAcceleration = kMaxVelocity * 3;
       public static final TrapezoidProfile.Constraints kConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
     }
 
@@ -86,11 +87,11 @@ public final class Constants {
       public static final double kConversionVelFactor = (kWinchDiameter * Math.PI) / kGearRatio / 60;
 
       public static final double kP = 3.596;
-      public static final double kI = 0.0;
+      public static final double kI = 0;
       public static final double kD = 0;
 
       public static final double kMaxVelocity = 3;
-      public static final double kMaxAcceleration = 6;
+      public static final double kMaxAcceleration = kMaxVelocity * 2;
       public static final TrapezoidProfile.Constraints kConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
     }
   }

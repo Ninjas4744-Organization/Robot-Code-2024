@@ -62,8 +62,7 @@ public class IntakeElevator extends SubsystemBase {
                                                 _motor.getBusVoltage() * RobotController.getBatteryVoltage(),
                                                 Volts))
                                 .linearPosition(_distance.mut_replace(_motor.getEncoder().getPosition(), Meters))
-                                .linearVelocity(
-                                        _velocity.mut_replace(_motor.getEncoder().getVelocity(), MetersPerSecond));
+                                .linearVelocity(_velocity.mut_replace(_motor.getEncoder().getVelocity(), MetersPerSecond));
 
                     },
                     // Tell SysId to make generated commands require this subsystem, suffix test
@@ -73,6 +72,7 @@ public class IntakeElevator extends SubsystemBase {
 
   public IntakeElevator() {
     _motor = new CANSparkMax(Ports.Intake.kElevatorMotor, MotorType.kBrushless);
+    _motor.restoreFactoryDefaults();
     _motor.setInverted(true);
     _motor.getEncoder().setPositionConversionFactor(Constants.PIDConstants.IntakeElevator.kConversionPosFactor);
     _motor.getEncoder().setVelocityConversionFactor(Constants.PIDConstants.IntakeElevator.kConversionVelFactor);

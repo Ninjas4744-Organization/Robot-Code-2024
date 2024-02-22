@@ -75,7 +75,7 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
     LimelightHelpers.setLEDMode_ForceOff(null);
     
-    _robotContainer.disableActions();
+    _robotContainer.Reset();
 
     if (_autonomousCommand != null) {
       _autonomousCommand.cancel();
