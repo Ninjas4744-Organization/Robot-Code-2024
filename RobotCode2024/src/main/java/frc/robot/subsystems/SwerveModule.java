@@ -76,7 +76,8 @@ public class SwerveModule {
     }
 
     public SwerveModulePosition getPosition(){
-        return new SwerveModulePosition(driveEncoder.getPosition(),  getAngle()); 
+        return new SwerveModulePosition(); 
+        // return new SwerveModulePosition(driveEncoder.getPosition(),  getAngle()); 
     }
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {

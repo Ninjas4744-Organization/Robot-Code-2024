@@ -57,15 +57,15 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
 
-    _robotContainer.periodic();
+    // _robotContainer.periodic();
   }
 
-  @Override
-  public void autonomousInit() {
-    _autoSelected = _chooser.getSelected();
-    _robotContainer.autoCommand(_autoSelected).schedule();
-    super.autonomousInit();
-  }
+  // @Override
+  // public void autonomousInit() {
+  //   _autoSelected = _chooser.getSelected();
+  //   _robotContainer.autoCommand(_autoSelected).schedule();
+  //   super.autonomousInit();
+  // }
 
   @Override
   public void disabledInit() {
@@ -73,10 +73,8 @@ public class Robot extends TimedRobot {
   }
   
   @Override
-  public void teleopInit() {
-    LimelightHelpers.setLEDMode_ForceOff(null);
-    
-    _robotContainer.Reset().schedule();
+  public void teleopInit() {    
+    // _robotContainer.Reset().schedule();
 
     if (_autonomousCommand != null) {
       _autonomousCommand.cancel();

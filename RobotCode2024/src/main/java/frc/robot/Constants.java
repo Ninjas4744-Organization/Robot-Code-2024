@@ -3,8 +3,10 @@ package frc.robot;
 import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -25,7 +27,14 @@ public final class Constants {
     public static final double kTrapOpenHeight = 0.675;
     public static final double kTrapOpenRotation = 25;
   }
+  public static final class Cameras{
+    public static final class Camera1  {
+      public static final String _name = "front";
+      public static final Transform3d _camera_to_robot = new Transform3d(new Translation3d(-324/10/100,0,0.6),new Rotation3d(0,25,0));
 
+    }
+    
+  }
   public final static class Ports {
     public static final class Joystick {
       public static final int kJoystickPort = 0;
@@ -76,7 +85,6 @@ public final class Constants {
       public static final double kConversionVelFactor = kConversionPosFactor / 60;
 
       public static final double kP = 0.0185;
-      //public static final double kI = 0.000;//0.0003;
        public static final double kI = 0.0002;//0.0003;
       public static final double kD = 0;
 
@@ -158,7 +166,7 @@ public final class Constants {
     public static final double angleConversionFactor = 360.0 / 12.8;
 
     /* Swerve Profiling Values */
-    public static final double maxSpeed = 3.6; // meters per second
+    public static final double maxSpeed = 4; // meters per second
     public static final double maxAngularVelocity = 11.5;
 
     /* Neutral Modes */
@@ -242,8 +250,5 @@ public final class Constants {
     // Constraint for the motion profilied robot angle controller
   }
 
-  public static class VisionConstants {
-    public static final String cameraName = "";
-    public static final Transform3d robotToCam = new Transform3d();
-  }
+
 }

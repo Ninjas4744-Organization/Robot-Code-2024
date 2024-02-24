@@ -1,19 +1,18 @@
-package frc.robot.subsystems;
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
 
-import java.util.List;
+package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
-import com.pathplanner.lib.path.GoalEndState;
-import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -24,55 +23,73 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.MutableMeasure;
+import edu.wpi.first.units.Velocity;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonPoseEstimator;
+
+import static edu.wpi.first.units.MutableMeasure.mutable;
 
 public class Swerve extends SubsystemBase {
+
   private SwerveDriveOdometry swerveOdometry;
   private SwerveModule[] mSwerveMods;
   private Pose2d _lastUnFilterred;
   private AHRS gyro;
-
+  private Supplier<List<Optional<EstimatedRobotPose>>> _estimationsSupplier;
+  public Field2d m_field = new Field2d();
+  public Field2d m_field_tag = new Field2d();
+  public Field2d m_field_odo = new Field2d();
+    
   StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault()
       .getStructTopic("MyPose", Pose2d.struct).publish();
 
+  private Field2d m_field_solution = new Field2d();
   public SwerveDrivePoseEstimator _estimator;
   private String _commandKey = "Outake";
 
-  public Swerve() {
+  /** Creates a new SwerveSubsystem. */
+  public Swerve(
+    Supplier<List<Optional<EstimatedRobotPose>>> estimationsSupplier
+    ) {
+
     gyro = new AHRS();
     gyro.getRotation2d();
     zeroGyro();
-
+    _estimationsSupplier = estimationsSupplier;
+    // Creates all four swerve modules into a swerve drive
     mSwerveMods = new SwerveModule[] {
         new SwerveModule(0, Constants.Swerve.Mod0.constants),
         new SwerveModule(1, Constants.Swerve.Mod1.constants),
         new SwerveModule(2, Constants.Swerve.Mod2.constants),
         new SwerveModule(3, Constants.Swerve.Mod3.constants)
     };
-
     Pose2d initPose = LimelightHelpers.getBotPose2d_wpiRed(null);
     _lastUnFilterred = initPose;
+    // creates new swerve odometry (odometry is where the robot is on the field)
     swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw(), getPositions());
     resetOdometry(initPose);
-    _estimator = new SwerveDrivePoseEstimator(Constants.Swerve.swerveKinematics, getYaw(), getPositions(), initPose);// ROBOT
-                                                                                                                     // MUST
-                                                                                                                     // BE
-                                                                                                                     // WITH
-                                                                                                                     // FACE
-                                                                                                                     // (LIMELIGHT)
-                                                                                                                     // TOWARDS
-                                                                                                                     // TAG
-                                                                                                                     // AND
-                                                                                                                     // CLOSE
-                                                                                                                     // (1
-                                                                                                                     // METER
-                                                                                                                     // MAX)
+    _estimator = new SwerveDrivePoseEstimator(Constants.Swerve.swerveKinematics, getYaw(), getPositions(), initPose);
 
     AutoBuilder.configureHolonomic(
         this::getPose, // Robot pose supplier
@@ -92,57 +109,55 @@ public class Swerve extends SubsystemBase {
           // This will flip the path being followed to the red side of the field.
           // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
-          var alliance = DriverStation.getAlliance();
-          if (alliance.isPresent()) {
-            return alliance.get() == DriverStation.Alliance.Red;
-          }
+          // var alliance = DriverStation.getAlliance();
+          // if (alliance.isPresent()) {
+          // return alliance.get() == DriverStation.Alliance.Red;
+          // }
           return true;
-        }, this);
+        },
+        this // Reference to this subsystem to set requirements
+    );
+
   }
 
-  public void Override() {
-    // Idk add later...
-  }
-
+  public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop)
   // takes the coordinate on field wants to go to, the rotation of it, whether or
   // not in field relative mode, and if in open loop control
-  public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
+  {
     SwerveModuleState[] swerveModuleStates = Constants.Swerve.swerveKinematics.toSwerveModuleStates(
-        // if field relative, use field relative stuff, otherwise use robot centric
-        fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
-            translation.getX(), translation.getY(), rotation, getYaw())
+        // fancy way to do an if else statement
+        // if field relative == true, use field relative stuff, otherwise use robot
+        // centric
+        fieldRelative
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                translation.getX(), translation.getY(), rotation, getYaw())
             : new ChassisSpeeds(translation.getX(), translation.getY(), rotation));
+    // sets to top speed if above top speed
+    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
 
-    setModuleStates(swerveModuleStates);
+    // set states for all 4 modules
+    for (SwerveModule mod : mSwerveMods) {
+      mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
+    }
   }
 
+  public void drive(ChassisSpeeds targetSpeed)
   // takes the coordinate on field wants to go to, the rotation of it, whether or
   // not in field relative mode, and if in open loop control
-  public void drive(ChassisSpeeds targetSpeed) {
+  {
     SwerveModuleState[] swerveModuleStates = Constants.Swerve.swerveKinematics.toSwerveModuleStates(targetSpeed,
         new Translation2d());
+    // sets to top speed if above top speed
+    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
 
-    setModuleStates(swerveModuleStates);
-  }
-
-  public Command followPath(List<Translation2d> path) {
-    return AutoBuilder.followPath(new PathPlannerPath(
-        path,
-        Constants.AutoConstants.constraints,
-        new GoalEndState(0, getHeading())));
-  }
-
-  public Command goToTag(Vision _vision) {
-    if (_vision.getTag() != null)
-      return null;
-
-    Pose2d targetPose = _vision.getTagPose();
-    Pose2d currentPos = getLastCalculatedPosition();
-
-    return followPath(PathPlannerPath.bezierFromPoses(currentPos, targetPose));
+    // set states for all 4 modules
+    for (SwerveModule mod : mSwerveMods) {
+      mod.setDesiredState(swerveModuleStates[mod.moduleNumber], false);// MIGHT NEED TO CHANGE
+    }
   }
 
   public ChassisSpeeds getChassisSpeeds() {
+
     return Constants.Swerve.swerveKinematics.toChassisSpeeds(getStates());
   }
 
@@ -192,13 +207,43 @@ public class Swerve extends SubsystemBase {
     return positions;
   }
 
+  public Command followPathCommand(String pathName) {
+    PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+
+    return new FollowPathHolonomic(
+        path,
+        this::getPose, // Robot pose supplier
+        this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+        this::drive, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
+        new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
+            new PIDConstants(1.0, 0.0, 0.0), // Translation PID constants
+            new PIDConstants(1.0, 0.0, 0.0), // Rotation PID constants
+            Constants.AutoConstants.maxVelocity, // Max module speed, in m/s
+            Constants.Swerve.wheelBase, // Drive base radius in meters. Distance from robot center to furthest module.
+            new ReplanningConfig() // Default path replanning config. See the API for the options here
+        ),
+        () -> {
+          // Boolean supplier that controls when the path will be mirrored for the red
+          // alliance
+          // This will flip the path being followed to the red side of the field.
+          // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+          var alliance = DriverStation.getAlliance();
+          if (alliance.isPresent()) {
+            System.out.println(alliance.get());
+            return alliance.get() == DriverStation.Alliance.Red;
+          }
+          return false;
+        },
+        this // Reference to this subsystem to set requirements
+    );
+  }
+
   public void zeroGyro() {
     gyro.zeroYaw();
   }
 
-  public Rotation2d getHeading() {
-    return Rotation2d.fromDegrees(360 - gyro.getFusedHeading());
-  }
+ 
 
   public Rotation2d getYaw() {
     // fancy if else loop again
@@ -214,21 +259,102 @@ public class Swerve extends SubsystemBase {
   public Pose2d getLastCalculatedPosition() {
     return _estimator.getEstimatedPosition();
   }
+  private void updatePV(){
+    // System.out.println(_estimationsSupplier.get());
+    for (Optional<EstimatedRobotPose> estimation: _estimationsSupplier.get()){
+      
+      estimation.ifPresent( pose -> {
+            // System.out.println(pose.estimatedPose.toPose2d());
 
+        _estimator.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds);
+
+      });
+    }
+  }
   @Override
   public void periodic() {
     _commandKey = "";
+          updatePV();
+          System.out.println(getLastCalculatedPosition());
 
-    if (LimelightHelpers.getTV(null)) {
-      if (LimelightHelpers.getBotPose2d_wpiRed(null).getX() != 0)
-        _lastUnFilterred = LimelightHelpers.getBotPose2d_wpiRed(null);
+    // if (LimelightHelpers.getTV(null)) {
+    //   if (LimelightHelpers.getBotPose2d_wpiRed(null).getX() != 0) {
+    //     _lastUnFilterred = LimelightHelpers.getBotPose2d_wpiRed(null);
+    //   }
+    //   _estimator.addVisionMeasurement(_lastUnFilterred, edu.wpi.first.wpilibj.Timer.getFPGATimestamp());
 
-      _estimator.addVisionMeasurement(_lastUnFilterred, edu.wpi.first.wpilibj.Timer.getFPGATimestamp());
-    } else
-      _lastUnFilterred = _estimator.getEstimatedPosition();
+    // } else {
+
+    //   _lastUnFilterred = _estimator.getEstimatedPosition();
+    // }
 
     publisher.set(getLastCalculatedPosition());
     _estimator.update(getYaw(), getPositions());
     swerveOdometry.update(getYaw(), getPositions());
+    m_field_solution.setRobotPose(getLastCalculatedPosition());
+    SmartDashboard.putData("Field_Estimation", m_field_solution);
+    for (SwerveModule mod : mSwerveMods) {
+      // SmartDashboard.putNumber(
+      // "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
+      // SmartDashboard.putNumber(
+      // "Mod " + mod.moduleNumber + " Integrated",
+      // mod.getState().angle.getDegrees());
+      // SmartDashboard.putNumber(
+      // "Mod " + mod.moduleNumber + " Velocity",
+      // mod.getState().speedMetersPerSecond);
+    }
+    // TODO Auto-generated method stub
+    super.periodic();
   }
+  
 }
+
+// commap.put("7",new DeferredCommand(() -> {
+// Pose2d current_pos = _swerve.getLastCalculatedPosition();
+
+// // Pose2d current_tag_pose = new Pose2d(new
+
+// Pose2d current_tag_pose = _vision._currentTag.pose.toPose2d();
+// Rotation2d target_rot =
+// current_tag_pose.getRotation().rotateBy(Rotation2d.fromDegrees(180));
+
+// List<Translation2d> bezierPoints;
+// if(current_tag_pose.minus(current_tag_pose).getRotation().getDegrees()>50){
+// bezierPoints = PathPlannerPath.bezierFromPoses(
+// current_pos,
+// new Pose2d(new Translation2d(
+// current_pos.getX()+0.2,// ID 1 aprilTag location
+// current_pos.getY() ),target_rot),
+// new Pose2d(new Translation2d(
+// current_pos.getX(),// ID 1 aprilTag location
+// current_tag_pose.getY()),target_rot),
+// new Pose2d(new Translation2d(
+// current_tag_pose.getX()+2,// ID 1 aprilTag location
+// current_tag_pose.getY()),target_rot)
+// );
+// }
+// else{
+// bezierPoints = PathPlannerPath.bezierFromPoses(
+// current_pos,
+
+// new Pose2d(new Translation2d(
+// current_tag_pose.getX()+0.5,// ID 1 aprilTag location
+// current_tag_pose.getY()),target_rot)
+// );
+// }
+
+// // Create the path using the bezier points created above
+
+// PathPlannerPath path = new PathPlannerPath(
+// bezierPoints,
+// Constants.AutoConstants.constraints, 
+// new GoalEndState(0.0,
+// current_tag_pose.getRotation().rotateBy(Rotation2d.fromDegrees(180))));
+// return new InstantCommand(() -> {
+
+// _swerve.resetOdometry(current_pos);
+
+// })
+// .andThen(AutoBuilder.followPath(path))
+// ;
+// }, Set.of(_swerve)));
