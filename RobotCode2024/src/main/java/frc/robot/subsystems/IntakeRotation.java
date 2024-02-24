@@ -127,17 +127,22 @@ public class IntakeRotation extends SubsystemBase {
   }
 
   public Command Override() {
-    return Commands.sequence(
-      Commands.run(() -> {
-        if (this.getCurrentCommand() != null)
-          this.getCurrentCommand().cancel();
-      }),
-      Commands.run(() -> {_motor.stopMotor();})
-    );
+    // return Commands.sequence(
+      // Commands.run(() -> {
+      //   if (this.getCurrentCommand() != null)
+      //     this.getCurrentCommand().cancel();
+      // }),
+    return Commands.run(() -> {_motor.stopMotor();}, this);
+    // );
   }
 
   public Command Reset() {
-    return Override();
+    return Commands.sequence(
+      Override().withTimeout(0.1),
+      Commands.run(() -> {this.setRotationMotor(-0.08);}, this).until(() -> {return !_limitSwitch.get();}),
+      // Commands.waitUntil(() -> {return !_limitSwitch.get();}),
+      Commands.run(() -> {this.setRotationMotor(0);}, this)
+    );
   }
 
   @Override
@@ -146,8 +151,8 @@ public class IntakeRotation extends SubsystemBase {
       _motor.getEncoder().setPosition(0);
 
     SmartDashboard.putNumber("Intake Rotation", getRotation());
-    SmartDashboard.putNumber("Intake Rotation Velocity", _motor.getEncoder().getVelocity());
-    SmartDashboard.putBoolean("Intake Rotation Limit", !_limitSwitch.get());
+    // SmartDashboard.putNumber("Intake Rotation Velocity", _motor.getEncoder().getVelocity());
+    SmartDashboard.putBoolean("In. Rot. Limit", !_limitSwitch.get());
   }
 
   public Command runOpen(double rotation) {

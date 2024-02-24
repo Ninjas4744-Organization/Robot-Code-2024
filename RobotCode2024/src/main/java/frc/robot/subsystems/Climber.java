@@ -27,6 +27,8 @@ public class Climber extends SubsystemBase {
   public Climber() {
     _motor1 = new CANSparkMax(Ports.Climber.kMotor1, MotorType.kBrushless);
     _motor1.restoreFactoryDefaults();
+    _motor1.getEncoder().setPositionConversionFactor(Constants.PIDConstants.Climber.kConversionPosFactor);
+    _motor1.getEncoder().setVelocityConversionFactor(Constants.PIDConstants.Climber.kConversionVelFactor);
     _motor2 = new CANSparkMax(Ports.Climber.kMotor2, MotorType.kBrushless);
     _motor2.restoreFactoryDefaults();
     _limitSwitch = new DigitalInput(Ports.Climber.kLimitSwitch);
@@ -78,8 +80,8 @@ public class Climber extends SubsystemBase {
   }
 
   public void Reset() {
-    if (this.getCurrentCommand() != null)
-      this.getCurrentCommand().cancel();
+    // if (this.getCurrentCommand() != null)
+    //   this.getCurrentCommand().cancel();
   }
 
   @Override

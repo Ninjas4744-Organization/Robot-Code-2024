@@ -57,6 +57,10 @@ public final class Constants {
 
   public static final class PIDConstants {
     public static final class Climber {
+      public static final double kGearRatio = 27; 
+      public static final double kConversionPosFactor = 0.0023295454545455;
+      public static final double kConversionVelFactor = kConversionPosFactor / 60;
+      
       public static final double kP = 4.8;
       public static final double kI = 0;
       public static final double kD = 0;
@@ -88,7 +92,7 @@ public final class Constants {
       public static final double kConversionVelFactor = (kWinchDiameter * Math.PI) / kGearRatio / 60;
 
       public static final double kP = 3.596;
-      public static final double kI = 0;
+      public static final double kI = 0.0005;
       public static final double kD = 0;
 
       public static final double kMaxVelocity = 6;
@@ -98,7 +102,7 @@ public final class Constants {
   }
 
   public static final class Swerve {
-    public static final double kDriveCoefficient = 0.7;
+    public static final double kDriveCoefficient = 1;
     public static final double stickDeadband = 0.1;
 
     // public static final int pigeonID = 6;

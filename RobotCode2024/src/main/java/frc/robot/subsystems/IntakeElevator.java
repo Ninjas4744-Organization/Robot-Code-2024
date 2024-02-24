@@ -83,6 +83,7 @@ public class IntakeElevator extends SubsystemBase {
     _controller.setP(PIDConstants.IntakeElevator.kP);
     _controller.setI(PIDConstants.IntakeElevator.kI);
     _controller.setD(PIDConstants.IntakeElevator.kD);
+    _controller.setIZone(0.1);
 
     _motor.setSoftLimit(SoftLimitDirection.kForward, 0.65f);
     _motor.setSoftLimit(SoftLimitDirection.kReverse, 0);
@@ -119,10 +120,10 @@ public class IntakeElevator extends SubsystemBase {
 
   public Command Override() {
     return Commands.sequence(
-      Commands.run(() -> {
-        if (this.getCurrentCommand() != null)
-          this.getCurrentCommand().cancel();
-      }),
+      // Commands.run(() -> {
+      //   if (this.getCurrentCommand() != null)
+      //     this.getCurrentCommand().cancel();
+      // }),
       Commands.run(() -> {_motor.stopMotor();})
     );
   }
@@ -136,8 +137,8 @@ public class IntakeElevator extends SubsystemBase {
     if (!_limitSwitch.get() )// Check ! later
       _motor.getEncoder().setPosition(0);
 
-    SmartDashboard.putNumber("Intake Elevator Height", getHeight());
-    SmartDashboard.putBoolean("Intake limit", !_limitSwitch.get());
+    SmartDashboard.putNumber("In. Ele. Height", getHeight());
+    SmartDashboard.putBoolean("In. Ele. Limit", !_limitSwitch.get());
   }
 
   public Command runOpen(double height) {
