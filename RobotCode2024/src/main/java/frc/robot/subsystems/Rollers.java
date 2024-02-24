@@ -8,19 +8,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.Ports;
 import frc.robot.Constants;
 
-public class IntakeRollers extends SubsystemBase {
+public class Rollers extends SubsystemBase {
   private CANSparkMax _motor;
   private DigitalInput _beamBreaker;
-  
-  public IntakeRollers() { 
-    _motor = new CANSparkMax(Ports.Intake.kRollersMotor, MotorType.kBrushless);
-    _beamBreaker = new DigitalInput(Ports.Intake.kBeamBreaker);
+
+  public Rollers() {
+    _motor = new CANSparkMax(Constants.Rollers.kRollersMotor, MotorType.kBrushless);
+    _beamBreaker = new DigitalInput(Constants.Rollers.kBeamBreaker);
   }
 
-  public boolean isNote(){
+  public boolean isNote() {
     //////////////
     // _led.setData(_ledBuffer);
     // _led.start();
@@ -28,28 +27,24 @@ public class IntakeRollers extends SubsystemBase {
     return !_beamBreaker.get();
   }
 
-  public void intake(){
-    _motor.set(-1);
+  public void setRollers(double speed) {
+    _motor.set(speed);
   }
 
-  public void outake(){
-    _motor.set(1);
-  }
-
-  public void stopTake(){
+  public void stopTake() {
     _motor.set(0);
     //////////////
     // _led.stop();
     //////////////
   }
 
-  public void Override(){
+  public void Override() {
     stopTake();
   }
 
   public void Reset() {
     Override();
-    if(this.getCurrentCommand() != null)
+    if (this.getCurrentCommand() != null)
       this.getCurrentCommand().cancel();
   }
 
@@ -58,17 +53,23 @@ public class IntakeRollers extends SubsystemBase {
     SmartDashboard.putBoolean("Intake Note", isNote());
   }
 
-  public Command runIntake(){
-    return Commands.startEnd(
-      () -> { intake(); },
-      () -> { stopTake(); }, 
-      this).until(() -> { return isNote(); });
+  public Command runIntake() {
+    return Commands.either(Commands.startEnd(
+        () -> {
+          setRollers(-1);
+        },
+        () -> {
+          stopTake();
+        },
+        this),
+        Commands.startEnd(
+            () -> {
+              setRollers(1);
+            },
+            () -> {
+              stopTake();
+            }),
+        this::isNote);
   }
 
-  public Command runOutake(){
-    return Commands.startEnd(
-      () -> { outake(); },
-      () -> { stopTake(); }, 
-      this).withTimeout(Constants.kTimeToOutake);
-  }
 }

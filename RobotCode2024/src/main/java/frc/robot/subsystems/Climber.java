@@ -14,9 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.TrapezoidProfileCommand;
-import frc.robot.Constants.Ports;
 import frc.robot.Constants;
-import frc.robot.Constants.PIDConstants;
 
 public class Climber extends SubsystemBase {
   private CANSparkMax _motor1;
@@ -25,24 +23,24 @@ public class Climber extends SubsystemBase {
   private SparkPIDController _controller;
 
   public Climber() {
-    _motor1 = new CANSparkMax(Ports.Climber.kMotor1, MotorType.kBrushless);
+    _motor1 = new CANSparkMax(Constants.Climber.kMotor1, MotorType.kBrushless);
     _motor1.restoreFactoryDefaults();
-    _motor1.getEncoder().setPositionConversionFactor(Constants.PIDConstants.Climber.kConversionPosFactor);
-    _motor1.getEncoder().setVelocityConversionFactor(Constants.PIDConstants.Climber.kConversionVelFactor);
-    _motor2 = new CANSparkMax(Ports.Climber.kMotor2, MotorType.kBrushless);
+    _motor1.getEncoder().setPositionConversionFactor(Constants.Climber.ControlConstants.kConversionPosFactor);
+    _motor1.getEncoder().setVelocityConversionFactor(Constants.Climber.ControlConstants.kConversionVelFactor);
+    _motor2 = new CANSparkMax(Constants.Climber.kMotor2, MotorType.kBrushless);
     _motor2.restoreFactoryDefaults();
-    _limitSwitch = new DigitalInput(Ports.Climber.kLimitSwitch);
+    _limitSwitch = new DigitalInput(Constants.Climber.kLimitSwitch);
 
     _controller = _motor1.getPIDController();
-    _controller.setP(PIDConstants.Climber.kP);
-    _controller.setI(PIDConstants.Climber.kI);
-    _controller.setD(PIDConstants.Climber.kD);
+    _controller.setP(Constants.Climber.ControlConstants.kP);
+    _controller.setI(Constants.Climber.ControlConstants.kI);
+    _controller.setD(Constants.Climber.ControlConstants.kD);
 
     _motor1.setSoftLimit(SoftLimitDirection.kForward, 0.4f);
     _motor1.setSoftLimit(SoftLimitDirection.kReverse, 0);
-    
+
     _motor2.follow(_motor1, true);
-    
+
     _motor1.burnFlash();
     _motor2.burnFlash();
   }
@@ -51,13 +49,13 @@ public class Climber extends SubsystemBase {
     _motor1.set(percent);
   }
 
-  public void stopMotor() { 
+  public void stopMotor() {
     _motor1.stopMotor();
   }
 
   public Command setHeight(double height) {
     return new TrapezoidProfileCommand(
-        new TrapezoidProfile(PIDConstants.Climber.kConstraints),
+        new TrapezoidProfile(Constants.Climber.ControlConstants.kConstraints),
         output -> _controller.setReference(output.position, ControlType.kPosition),
         () -> new TrapezoidProfile.State(height, 0),
         () -> new TrapezoidProfile.State(getHeight(), 0),
@@ -69,19 +67,14 @@ public class Climber extends SubsystemBase {
   }
 
   public boolean isMax() {
-    return Math.abs(Constants.kMaxClimber - getHeight()) < 0.2;
+    return Math.abs(Constants.Climber.kMaxClimber - getHeight()) < 0.2;
   }
 
   public Command Override() {
     return Commands.sequence(
-      Commands.run(() -> {Reset();}) ,
-      Commands.run(() -> {_motor1.stopMotor();})
-    );
-  }
-
-  public void Reset() {
-    // if (this.getCurrentCommand() != null)
-    //   this.getCurrentCommand().cancel();
+        Commands.run(() -> {
+          _motor1.stopMotor();
+        }));
   }
 
   @Override
@@ -94,7 +87,7 @@ public class Climber extends SubsystemBase {
   }
 
   public Command runElevateUp() {
-    return setHeight(Constants.kMaxClimber);
+    return setHeight(Constants.Climber.kMaxClimber);
   }
 
   public Command runElevateDown() {

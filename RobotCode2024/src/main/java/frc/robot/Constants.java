@@ -14,62 +14,25 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.util.SwerveModuleConstants;
 
 public final class Constants {
-  public static final double kMaxClimber = 0.4;
-  public static final double kTimeToOutake = 0.5;
-  public static final double kFloorUpPositon = 55;
+  public static final int kJoystickPort = 0;
+  public static final int kJoystick2Port = 1;
 
-  public final static class IntakeStates {
-    public static final double kGameStartRotation = 180;
-    public static final double kSourceOpenHeight = 0.1;
-    public static final double kSourceOpenRotation = 70;
-    public static final double kAmpOpenHeight = 0.45;
-    public static final double kAmpOpenRotation = 0;
-    public static final double kTrapOpenHeight = 0.675;
-    public static final double kTrapOpenRotation = 25;
-  }
-  public static final class Cameras{
-    public static final class Camera1  {
-      public static final String _name = "front";
-      public static final Transform3d _camera_to_robot = new Transform3d(new Translation3d(-324/10/100,0,0.6),new Rotation3d(0,25,0));
+  public static final class Climber {
+    public static final int kMotor1 = 11;
+    public static final int kMotor2 = 15;
+    public static final int kLimitSwitch = 8;
+
+    public static final double kMaxClimber = 0.4;
+
+    public static final class States {
 
     }
-    
-  }
-  public final static class Ports {
-    public static final class Joystick {
-      public static final int kJoystickPort = 0;
-      public static final int kJoystick2Port = 1;
-    }
 
-    public static final class Climber {
-      public static final int kMotor1 = 11;
-      public static final int kMotor2 = 15;
-      public static final int kLimitSwitch = 8;
-    }
-
-    public static final class Intake {
-      public static final int kRollersMotor = 12;
-      public static final int kElevatorMotor = 14;
-      public static final int kRotationMotor = 13;
-      public static final int kLimitSwitchElevator = 7;
-      public static final int kLimitSwitchRotation = 9;
-      public static final int kBeamBreaker = 5;
-    }
-
-    // public static final class FloorIntake {
-    //   public static final int kRollersMotor = 5;
-    //   public static final int kRotationMotor = 5;
-    //   public static final int kLimitSwitch = 2;
-    //   public static final int kBeamBreaker = 9;
-    // }
-  }
-
-  public static final class PIDConstants {
-    public static final class Climber {
-      public static final double kGearRatio = 27; 
+    public static final class ControlConstants {
+      public static final double kGearRatio = 27;
       public static final double kConversionPosFactor = 0.0023295454545455;
       public static final double kConversionVelFactor = kConversionPosFactor / 60;
-      
+
       public static final double kP = 4.8;
       public static final double kI = 0;
       public static final double kD = 0;
@@ -78,24 +41,58 @@ public final class Constants {
       public static final double kMaxAcceleration = 160;
       public static final TrapezoidProfile.Constraints kConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
     }
+  }
 
-    public static final class IntakeRotation {
-      public static final double kGearRatio = 27; 
-      public static final double kConversionPosFactor = /*360 / kGearRatio*/7.2;
+  public static final class Intake {
+    public static final int kRotationMotor = 13;
+    public static final int kLimitSwitchRotation = 9;
+
+    public final static class States {
+      public static final double kGameStartRotation = 180;
+      public static final double kSourceOpenRotation = 70;
+      public static final double kAmpOpenRotation = 0;
+      public static final double kTrapOpenRotation = 25;
+    }
+
+    public static final class ControlConstants {
+      public static final double kGearRatio = 27;
+      public static final double kConversionPosFactor = /* 360 / kGearRatio */7.2;
       public static final double kConversionVelFactor = kConversionPosFactor / 60;
 
       public static final double kP = 0.0185;
-       public static final double kI = 0.0002;//0.0003;
+      public static final double kI = 0.0002;// 0.0003;
       public static final double kD = 0;
 
       public static final double kMaxVelocity = 60;
       public static final double kMaxAcceleration = kMaxVelocity * 2;
       public static final TrapezoidProfile.Constraints kConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
     }
+  }
 
-    public static final class IntakeElevator {
-      public static final double kGearRatio = 16.0; 
-      public static final double kWinchDiameter = 50 / 10 / 100.0;//milimiters/centimeters/meter הבעיה הייתה שעבדתי עם סנטימטרים ולא מטרים 
+  public static final class Rollers {
+    public static final int kBeamBreaker = 5;
+    public static final int kRollersMotor = 12;
+    public static final double kTimeToOutake = 0.5;
+
+  }
+
+  public static final class Elevator {
+
+    public static final int kLimitSwitchElevator = 7;
+    public static final int kElevatorMotor = 14;
+
+    public static final class States {
+      public static final double kSourceOpenHeight = 0.1;
+      public static final double kAmpOpenHeight = 0.45;
+      public static final double kTrapOpenHeight = 0.675;
+
+    }
+
+    public static final class ControlConstants {
+
+      public static final double kGearRatio = 16.0;
+      public static final double kWinchDiameter = 50 / 10 / 100.0;// milimiters/centimeters/meter הבעיה הייתה שעבדתי עם
+                                                                  // סנטימטרים ולא מטרים
       public static final double kConversionPosFactor = (kWinchDiameter * Math.PI) / kGearRatio;
       public static final double kConversionVelFactor = (kWinchDiameter * Math.PI) / kGearRatio / 60;
 
@@ -186,7 +183,8 @@ public final class Constants {
       public static final int driveMotorID = 1;
       public static final int angleMotorID = 2;
       public static final int canCoderID = 21;
-      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(180);//Rotation2d.fromRadians(Math.PI / 18 + 0.614258);
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(180);// Rotation2d.fromRadians(Math.PI / 18 +
+                                                                               // 0.614258);
       public static final boolean isDriverEncoderInverted = false;
       public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
           canCoderID, angleOffset);
@@ -197,7 +195,8 @@ public final class Constants {
       public static final int driveMotorID = 3;
       public static final int angleMotorID = 4;
       public static final int canCoderID = 22;
-      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(180);//Rotation2d.fromRadians(-Math.PI / 18 + Math.PI / 2 + 0.261475);
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(180);// Rotation2d.fromRadians(-Math.PI / 18 +
+                                                                               // Math.PI / 2 + 0.261475);
       public static final boolean isDriverEncoderInverted = false;
       public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
           canCoderID, angleOffset);
@@ -208,7 +207,8 @@ public final class Constants {
       public static final int driveMotorID = 5;
       public static final int angleMotorID = 6;
       public static final int canCoderID = 24;
-      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(180);//Rotation2d.fromRadians(-Math.PI / 18 + Math.PI / 4 + 0.776855);
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(180);// Rotation2d.fromRadians(-Math.PI / 18 +
+                                                                               // Math.PI / 4 + 0.776855);
       // public static final double / =0;
       public static final boolean isDriverEncoderInverted = true;
 
@@ -221,7 +221,8 @@ public final class Constants {
       public static final int driveMotorID = 7;
       public static final int angleMotorID = 8;
       public static final int canCoderID = 23;
-      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(180);//Rotation2d.fromRadians(-Math.PI / 18 + 0.634766);
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(180);// Rotation2d.fromRadians(-Math.PI / 18 +
+                                                                               // 0.634766);
       public static final boolean isDriverEncoderInverted = false;
 
       public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
@@ -250,5 +251,20 @@ public final class Constants {
     // Constraint for the motion profilied robot angle controller
   }
 
+  public static final class Cameras {
+    public static final class Front {
+      public static final String _name = "front";
+      public static final Transform3d _camera_to_robot = new Transform3d(new Translation3d(-324 / 10 / 100, 0, 0.6),
+          new Rotation3d(0, 25, 0));
 
+    }
+
+    public static final class Back {
+      public static final String _name = "back";
+      public static final Transform3d _camera_to_robot = new Transform3d(new Translation3d(-324 / 10 / 100, 0, 0.3),
+          new Rotation3d(0, 25, 180));
+
+    }
+
+  }
 }
