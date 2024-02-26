@@ -33,7 +33,9 @@ public class Intake extends SubsystemBase {
     _controller.setD(Constants.Intake.ControlConstants.kD);
     _controller.setIZone(3);
 
-    _motor.setSoftLimit(SoftLimitDirection.kForward, 210);
+    _motor.enableSoftLimit(SoftLimitDirection.kForward, true);
+
+    _motor.setSoftLimit(SoftLimitDirection.kForward, 130);
     _motor.setSoftLimit(SoftLimitDirection.kReverse, 0);
 
     _controller.setOutputRange(-0.55, 0.55);

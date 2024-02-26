@@ -20,7 +20,7 @@ public class SequentialStandByCommandGroup extends SequentialCommandGroup {
   public SequentialStandByCommandGroup(BooleanSupplier _to_continue,Command... commands) {
     for (Command command : commands) {
       
-      addCommands(Commands.sequence(command,Commands.waitUntil(_to_continue)));
+      addCommands(Commands.race(command,Commands.waitUntil(_to_continue)));
       
     }
   }

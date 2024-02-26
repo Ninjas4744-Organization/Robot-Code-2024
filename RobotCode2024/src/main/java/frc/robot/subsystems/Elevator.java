@@ -34,10 +34,12 @@ public class Elevator extends SubsystemBase {
     _controller.setD(Constants.Elevator.ControlConstants.kD);
     _controller.setIZone(0.1);
 
+    _motor.enableSoftLimit(SoftLimitDirection.kForward, true);
+
     _motor.setSoftLimit(SoftLimitDirection.kForward, 0.65f);
     _motor.setSoftLimit(SoftLimitDirection.kReverse, 0);
 
-    _controller.setOutputRange(-0.6, 1);
+    _controller.setOutputRange(-0.8, 1);
 
     _motor.burnFlash();
   }

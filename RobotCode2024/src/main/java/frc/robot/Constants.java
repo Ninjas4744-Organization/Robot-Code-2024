@@ -48,7 +48,7 @@ public final class Constants {
     public static final int kLimitSwitchRotation = 9;
 
     public final static class States {
-      public static final double kGameStartRotation = 180;
+      public static final double kGameStartRotation = 120;
       public static final double kSourceOpenRotation = 70;
       public static final double kAmpOpenRotation = 0;
       public static final double kTrapOpenRotation = 25;
@@ -96,7 +96,7 @@ public final class Constants {
       public static final double kConversionPosFactor = (kWinchDiameter * Math.PI) / kGearRatio;
       public static final double kConversionVelFactor = (kWinchDiameter * Math.PI) / kGearRatio / 60;
 
-      public static final double kP = 3.596;
+      public static final double kP = 5;
       public static final double kI = 0.0005;
       public static final double kD = 0;
 

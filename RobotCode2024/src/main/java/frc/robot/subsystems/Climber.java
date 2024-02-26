@@ -36,8 +36,10 @@ public class Climber extends SubsystemBase {
     _controller.setI(Constants.Climber.ControlConstants.kI);
     _controller.setD(Constants.Climber.ControlConstants.kD);
 
-    _motor1.setSoftLimit(SoftLimitDirection.kForward, 0.4f);
-    _motor1.setSoftLimit(SoftLimitDirection.kReverse, 0);
+    _motor1.enableSoftLimit(SoftLimitDirection.kForward, true);
+
+    _motor1.setSoftLimit(SoftLimitDirection.kForward, 0.6f);
+    _motor2.setSoftLimit(SoftLimitDirection.kReverse, 0);
 
     _motor2.follow(_motor1, true);
 

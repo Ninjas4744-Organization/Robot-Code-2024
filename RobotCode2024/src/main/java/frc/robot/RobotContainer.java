@@ -41,7 +41,7 @@ public class RobotContainer {
   private final CommandPS5Controller _joystick;
   private final CommandPS5Controller _joystick2;
   private boolean withTag = false;
-  // private double coefficientFactor = 1;
+  private double coefficientFactor = 1;
 
   public RobotContainer() {
     _joystick = new CommandPS5Controller(Constants.kJoystickPort);
@@ -70,11 +70,11 @@ public class RobotContainer {
     new TeleopSwerve(
     _swerve,
     _vision,
-    () -> {return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient - _joystick2.getLeftY() *
+    () -> {return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient * coefficientFactor - _joystick2.getLeftY() *
     Constants.Swerve.kDriveCoefficient;},
-    () -> {return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient - _joystick2.getLeftX() *
+    () -> {return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient * coefficientFactor - _joystick2.getLeftX() *
     Constants.Swerve.kDriveCoefficient;},
-    () -> {return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient  - _joystick2.getRightX() *
+    () -> {return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient * coefficientFactor  - _joystick2.getRightX() *
     Constants.Swerve.kDriveCoefficient;},
     () -> {return false;},
     () -> {return false;}
@@ -238,6 +238,7 @@ public class RobotContainer {
   // }
 
   private Command runAutoIntake() {
+
     return Commands.sequence(
       Commands.parallel(
         _elevator.runOpen(Constants.Elevator.States.kSourceOpenHeight),
@@ -268,26 +269,46 @@ public class RobotContainer {
   }
 
   private Command runAutoOutakeAmp(double height, double rotation) {
-    return Commands.sequence(
+    return new SequentialStandByCommandGroup(
+      _joystick.getHID()::getTriangleButtonPressed,
       Commands.parallel(
         _elevator.runOpen(height),
         _intake.runOpen(rotation)
       ),
-      // Commands.waitUntil(() -> {return _joystick.getHID().getTriangleButton();}),
-      // new SequentialStandByCommandGroup(
-      //   () -> {return _joystick.getHID().getTriangleButtonPressed();},
-      //   Commands.parallel(
-      //     _elevator.runOpen(height),
-      //     _intake.runOpen(rotation)
-      //   )
-      // ),
-      _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
-      
       Commands.parallel(
-        _elevator.runClose(),
-        _intake.runClose()
+        Commands.run(() -> {coefficientFactor = 0.25;}),
+        _elevator.runOpen(height),
+        _intake.runOpen(rotation)
+      ),
+      Commands.sequence(
+        _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
+        Commands.parallel(
+          Commands.run(() -> {coefficientFactor = 1;}),
+          _elevator.runClose(),
+          _intake.runClose()
+        )
       )
     );
+    // return Commands.sequence(
+    //   Commands.parallel(
+    //     _elevator.runOpen(height),
+    //     _intake.runOpen(rotation)
+    //   ),
+    //   // Commands.waitUntil(() -> {return _joystick.getHID().getTriangleButton();}),
+    //   // new SequentialStandByCommandGroup(
+    //   //   () -> {return _joystick.getHID().getTriangleButtonPressed();},
+    //   //   Commands.parallel(
+    //   //     _elevator.runOpen(height),
+    //   //     _intake.runOpen(rotation)
+    //   //   )
+    //   // ),
+    //   _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
+      
+    //   Commands.parallel(
+    //     _elevator.runClose(),
+    //     _intake.runClose()
+    //   )
+    // );
   }
 
   private Command runAutoOutakeTrap(double height, double rotation) {
