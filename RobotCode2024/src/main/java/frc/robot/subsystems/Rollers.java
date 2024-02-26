@@ -38,9 +38,7 @@ public class Rollers extends SubsystemBase {
     //////////////
   }
 
-  public void Override() {
-    stopTake();
-  }
+  public void Override() {stopTake();}
 
   public void Reset() {
     Override();
@@ -51,25 +49,21 @@ public class Rollers extends SubsystemBase {
   @Override
   public void periodic() {
     SmartDashboard.putBoolean("Intake Note", isNote());
+    super.periodic();
   }
 
   public Command runIntake() {
-    return Commands.either(Commands.startEnd(
-        () -> {
-          setRollers(-1);
-        },
-        () -> {
-          stopTake();
-        },
-        this),
-        Commands.startEnd(
-            () -> {
-              setRollers(1);
-            },
-            () -> {
-              stopTake();
-            }),
-        this::isNote);
+    return Commands.either(
+      Commands.startEnd(
+        () -> {setRollers(1);},
+        () -> {stopTake();},
+        this
+      ),
+      Commands.startEnd(
+        () -> {setRollers(-1);},
+        () -> {stopTake();}
+      ),
+      this::isNote
+    );
   }
-
 }

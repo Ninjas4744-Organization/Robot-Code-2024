@@ -24,6 +24,7 @@ public class TeleopSwerve extends Command {
   private BooleanSupplier robotCentricSup;
   private ProfiledPIDController _theta_controller;
   private PIDController _controller_x;
+  private PIDController _controller_theta_pid;
 
   BooleanSupplier _withTag;
 
@@ -37,10 +38,10 @@ public class TeleopSwerve extends Command {
       BooleanSupplier robotCentricSup) {
     this.s_Swerve = s_Swerve;
     this._vision = vision;
-    _theta_controller = new ProfiledPIDController(0.01111111 * 4, 0, 0,
+    _controller_theta_pid = new PIDController(0.01111111 * 3.5, 0, 0);
+    _theta_controller = new ProfiledPIDController(0.01111111 *0.5, 0, 0,
         Constants.AutoConstants.kThetaControllerConstraints);
-    _controller_x = new PIDController(0.6666666666666667 * 2, 0, 0.1);
-    _theta_controller = new ProfiledPIDController(0, 0, 0, null);
+    _controller_x = new PIDController(0.6666666666666667 * 2.5, 0, 0.1);
     this._withTag = withTag;
     this.translationSup = translationSup;
     this.strafeSup = strafeSup;
@@ -55,26 +56,32 @@ public class TeleopSwerve extends Command {
 
     Pose2d targetPose = _vision.getTagPose();
     Pose2d current_pos = s_Swerve.getLastCalculatedPosition();
-    SmartDashboard.putNumber("distance",
-        Math.hypot(targetPose.getX() - current_pos.getX(), targetPose.getY() - current_pos.getY()));
-
+    SmartDashboard.putNumber("X error",
+        _controller_x.calculate(targetPose.getX() - current_pos.getX()));
+    SmartDashboard.putNumber("X distance",
+        targetPose.getX() - current_pos.getX());
+    
     /* Get Values, Deadband */
     double translationVal = MathUtil.applyDeadband(translationSup.getAsDouble(), Constants.Swerve.stickDeadband);
     double strafeVal = MathUtil.applyDeadband(strafeSup.getAsDouble(), Constants.Swerve.stickDeadband);
     double rotationVal = MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.Swerve.stickDeadband);
 
     s_Swerve.drive(
-        new Translation2d(translationVal,
+        new Translation2d(
+          _withTag.getAsBoolean() && inrange(targetPose, current_pos)?MathUtil.clamp(translationVal, -0.3, 0.3):
+          translationVal,
             _withTag.getAsBoolean() && inrange(targetPose, current_pos)
-                ? -_controller_x.calculate(targetPose.getX() - current_pos.getX() + 0.1)
-                : strafeVal)
+                ? _controller_x.calculate(targetPose.getX() - current_pos.getX()-0.025)
+                : 
+                strafeVal)
             .times(Constants.Swerve.maxSpeed),
         _withTag.getAsBoolean()
-            ? -_theta_controller.calculate(current_pos.getRotation().getDegrees(),
-                targetPose.rotateBy(Rotation2d.fromDegrees(180)).minus(current_pos).getRotation().getDegrees())
+            ? -_controller_theta_pid.calculate(
+                targetPose.rotateBy(Rotation2d.fromDegrees(180)).getRotation().minus(current_pos.getRotation()).getDegrees())
             : rotationVal * Constants.Swerve.maxAngularVelocity,
         !robotCentricSup.getAsBoolean(),
         true);
+    
   }
 
   private boolean inrange(Pose2d targetPose, Pose2d current_pos) {

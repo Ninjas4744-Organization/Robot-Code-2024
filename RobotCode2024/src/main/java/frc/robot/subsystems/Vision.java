@@ -16,6 +16,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.util.VisionCamera;
@@ -23,7 +24,6 @@ import frc.lib.util.FieldTagsFilter;
 
 public class Vision extends SubsystemBase {
   private AprilTagFieldLayout CURRENT_FIELD_LAYOUT;
-  private AprilTagFieldLayout RED_FIELD_LAYOUT;
   private AprilTag _currentTag;
 
   private List<VisionCamera> _cameras = new ArrayList<VisionCamera>();
@@ -75,7 +75,7 @@ public class Vision extends SubsystemBase {
   }
 
   public Pose2d getTagPose() {
-    return RED_FIELD_LAYOUT.getTagPose(_currentTag.ID).get().toPose2d();
+    return CURRENT_FIELD_LAYOUT.getTagPose(_currentTag.ID-1).get().toPose2d();
   }
 
   public List<Optional<EstimatedRobotPose>> getEstimatedGlobalPose() {
@@ -101,7 +101,7 @@ public class Vision extends SubsystemBase {
 
   @Override
   public void periodic() {
-
+    SmartDashboard.putNumber("current tag", _currentTag.ID);
     _currentEstimations = getEstimatedGlobalPose();
 
   }

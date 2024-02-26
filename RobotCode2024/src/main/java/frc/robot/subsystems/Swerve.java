@@ -210,6 +210,7 @@ public class Swerve extends SubsystemBase {
   }
 
   public void log_modules() {
+    SmartDashboard.putNumber("gyro", getYaw().getDegrees());
     for (SwerveModule mod : mSwerveMods) {
       SmartDashboard.putNumber(
           "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
@@ -222,10 +223,10 @@ public class Swerve extends SubsystemBase {
     }
   }
 
+
   @Override
   public void periodic() {
     updatePV();
-    System.out.println(getLastCalculatedPosition());
 
     publisher.set(getLastCalculatedPosition());
     _estimator.update(getYaw(), getPositions());
