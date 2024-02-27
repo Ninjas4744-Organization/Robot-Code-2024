@@ -72,7 +72,8 @@ public class Elevator extends SubsystemBase {
 
   public Command Reset() {
     return Commands.startEnd(
-      () -> {setMotor(-0.2);},
+      () -> {setMotor(-0.3);
+      System.out.println("RESETING");},
       () -> {Stop();},
       this
     ).until(() -> {return !_limitSwitch.get();});

@@ -42,6 +42,7 @@ public class RobotContainer {
   private Rotation _rotation;
   private Rollers _rollers;
   private Leds _leds;
+  private Trigger _start_game_trigger;
 
   // Misc
   private CommandPS5Controller _joystick;
@@ -75,6 +76,7 @@ public class RobotContainer {
     tIntake.whileTrue(_leds.setColorBeep(0, 255, 0, 0.1));
     // tIntake.onFalse(Commands.none());
 
+    _start_game_trigger = new Trigger(() -> {return DriverStation.getMatchTime() < 1;});
     // Driving:
     _swerve.setDefaultCommand(
       new TeleopSwerve(
@@ -88,7 +90,7 @@ public class RobotContainer {
       )
     );
 
-    // Auto:
+    // Driver:
     // _joystick.cross().onTrue(Commands.select(getAcceptCommands(), () -> {return getAcceptId();}));
 
     _joystick.R2().whileTrue(
@@ -123,10 +125,36 @@ public class RobotContainer {
 
     _joystick.povUp().onTrue(_climber.runClimb());
 
-    _joystick.L1().onTrue(Commands.run(() -> {_swerve.zeroGyro();}));
-    _joystick.R1().onTrue(Commands.run(() -> {_climber.Reset();}, _climber));
+    _joystick.L1().onTrue(Commands.runOnce(() -> {_swerve.zeroGyro();
+    
+    System.out.println("ZEROING");}, _swerve));
 
-    // Manual:
+    // Operator:
+
+    _joystick2.cross().onTrue(
+      Commands.parallel(
+      _elevator.runClose(),
+      _rotation.runClose()
+      )
+    );
+
+    _joystick2.square().onTrue(
+      Commands.parallel(
+        _elevator.runClose(),
+        _rotation.runOpen(Constants.Rotation.States.kUpRotation)
+      )
+    );
+
+    _joystick2.triangle().onTrue(runInOutTake(
+      Constants.Elevator.States.kAmpOpenHeight, Constants.Rotation.States.kAmpOpenRotation, _joystick.getHID()::getTriangleButtonPressed)
+    );
+
+    _joystick2.circle().onTrue(runOutake(
+      Constants.Elevator.States.kTrapOpenHeight, Constants.Rotation.States.kTrapOpenRotation, _joystick.getHID()::getCircleButtonPressed)
+    );
+
+    _joystick2.R3().onTrue(runTrap());
+
     _joystick2.povRight().whileTrue(
       Commands.startEnd(
         () -> { _rollers.setMotor(1);},
@@ -233,7 +261,7 @@ public class RobotContainer {
 
         Commands.parallel(
           _elevator.runClose(),
-          _rotation.runClose()
+          _rotation.runOpen(Constants.Rotation.States.kUpRotation)
         )
       )
     );
@@ -390,12 +418,15 @@ public class RobotContainer {
         AutoBuilder.buildAuto(auto));
   }
 
-  public void Reset() {
-    // _elevator.Reset().schedule();
-    // _rotation.Reset().schedule();
-    // _climber.Reset().schedule();
+  public Command Reset() {
+    return Commands.parallel(
+      _elevator.Reset(),
+      _rotation.Reset(),
+      _climber.Reset()
+    );
 
-    _swerve.zeroGyro();
+
+    
     // _swerve.resetOdometry(new Pose2d());
   }
 }

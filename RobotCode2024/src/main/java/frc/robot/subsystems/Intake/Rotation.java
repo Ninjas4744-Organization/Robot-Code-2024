@@ -69,16 +69,11 @@ public class Rotation extends SubsystemBase {
   }
 
   public Command Reset() {
-    return Commands.sequence(
-      // Commands.run(() -> {this.setMotor(-0.08);}, this).until(() -> {return !_limitSwitch.get();}),
-      // Commands.run(() -> {this.setMotor(0);}, this)
-       
-      Commands.startEnd(
+    return Commands.startEnd(
         () -> {setMotor(-0.08);},
         () -> {Stop();},
         this
-      ).until(() -> {return !_limitSwitch.get();})
-    );
+      ).until(() -> {return !_limitSwitch.get();});
   }
 
   @Override

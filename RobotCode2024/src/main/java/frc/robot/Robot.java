@@ -71,7 +71,7 @@ public class Robot extends TimedRobot {
       _autonomousCommand.cancel();
     }
     
-    _robotContainer.Reset();
+    _robotContainer.Reset().schedule();
   }
 
   @Override
