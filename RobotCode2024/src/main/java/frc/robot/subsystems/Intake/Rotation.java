@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.Intake;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
@@ -15,22 +15,22 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.TrapezoidProfileCommand;
 import frc.robot.Constants;
 
-public class Intake extends SubsystemBase {
+public class Rotation extends SubsystemBase {
   private CANSparkMax _motor;
   private DigitalInput _limitSwitch;
   private SparkPIDController _controller;
 
-  public Intake() {
-    _motor = new CANSparkMax(Constants.Intake.kRotationMotor, MotorType.kBrushless);
+  public Rotation() {
+    _motor = new CANSparkMax(Constants.Rotation.kRotationMotor, MotorType.kBrushless);
     _motor.restoreFactoryDefaults();
-    _motor.getEncoder().setPositionConversionFactor(Constants.Intake.ControlConstants.kConversionPosFactor);
-    _motor.getEncoder().setVelocityConversionFactor(Constants.Intake.ControlConstants.kConversionVelFactor);
-    _limitSwitch = new DigitalInput(Constants.Intake.kLimitSwitchRotation);
+    _motor.getEncoder().setPositionConversionFactor(Constants.Rotation.ControlConstants.kConversionPosFactor);
+    _motor.getEncoder().setVelocityConversionFactor(Constants.Rotation.ControlConstants.kConversionVelFactor);
+    _limitSwitch = new DigitalInput(Constants.Rotation.kLimitSwitch);
 
     _controller = _motor.getPIDController();
-    _controller.setP(Constants.Intake.ControlConstants.kP);
-    _controller.setI(Constants.Intake.ControlConstants.kI);
-    _controller.setD(Constants.Intake.ControlConstants.kD);
+    _controller.setP(Constants.Rotation.ControlConstants.kP);
+    _controller.setI(Constants.Rotation.ControlConstants.kI);
+    _controller.setD(Constants.Rotation.ControlConstants.kD);
     _controller.setIZone(3);
 
     _motor.enableSoftLimit(SoftLimitDirection.kForward, true);
@@ -45,7 +45,7 @@ public class Intake extends SubsystemBase {
 
   public Command setRotation(double rotation) {
     return new TrapezoidProfileCommand(
-        new TrapezoidProfile(Constants.Intake.ControlConstants.kConstraints),
+        new TrapezoidProfile(Constants.Rotation.ControlConstants.kConstraints),
         output -> _controller.setReference(output.position, ControlType.kPosition),
         () -> new TrapezoidProfile.State(rotation, 0),
         () -> new TrapezoidProfile.State(getRotation(), 0),
@@ -56,53 +56,38 @@ public class Intake extends SubsystemBase {
     return _motor.getEncoder().getPosition();
   }
 
-  public boolean isMax(double max) {
-    return Math.abs(max - getRotation()) < 0.07;
+  public boolean isRotation(double rotation) {
+    return Math.abs(rotation - getRotation()) < 0.07;
   }
 
-  public void setRotationMotor(double percent) {
+  public void setMotor(double percent) {
     _motor.set(percent);
   }
 
-  public void stopRotation() {
+  public void Stop() {
     _motor.set(0);
-  }
-
-  public Command Override() {
-    // return Commands.sequence(
-    // Commands.run(() -> {
-    // if (this.getCurrentCommand() != null)
-    // this.getCurrentCommand().cancel();
-    // }),
-    return Commands.run(() -> {
-      _motor.stopMotor();
-    }, this);
-    // );
   }
 
   public Command Reset() {
     return Commands.sequence(
-        Override().withTimeout(0.1),
-        Commands.run(() -> {
-          this.setRotationMotor(-0.08);
-        }, this).until(() -> {
-          return !_limitSwitch.get();
-        }),
-        // Commands.waitUntil(() -> {return !_limitSwitch.get();}),
-        Commands.run(() -> {
-          this.setRotationMotor(0);
-        }, this));
+      // Commands.run(() -> {this.setMotor(-0.08);}, this).until(() -> {return !_limitSwitch.get();}),
+      // Commands.run(() -> {this.setMotor(0);}, this)
+       
+      Commands.startEnd(
+        () -> {setMotor(-0.08);},
+        () -> {Stop();},
+        this
+      ).until(() -> {return !_limitSwitch.get();})
+    );
   }
 
   @Override
   public void periodic() {
-    if (!_limitSwitch.get())// Check ! later
+    if (!_limitSwitch.get())
       _motor.getEncoder().setPosition(0);
 
-    SmartDashboard.putNumber("Intake Rotation", getRotation());
-    // SmartDashboard.putNumber("Intake Rotation Velocity",
-    // _motor.getEncoder().getVelocity());
-    SmartDashboard.putBoolean("In. Rot. Limit", !_limitSwitch.get());
+    SmartDashboard.putNumber("Rotation", getRotation());
+    SmartDashboard.putBoolean("Rotation Limit", !_limitSwitch.get());
   }
 
   public Command runOpen(double rotation) {
@@ -115,10 +100,9 @@ public class Intake extends SubsystemBase {
 
   public Command runOpenClose(double rotation) {
     return Commands.either(
-        runOpen(rotation),
-        runClose(),
-        () -> {
-          return this.getRotation() == 0;
-        });
+      runOpen(rotation),
+      runClose(),
+      () -> {return this.getRotation() == 0;}
+    );
   }
 }

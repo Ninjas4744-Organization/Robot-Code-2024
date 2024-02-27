@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.Intake;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -20,25 +20,22 @@ public class Rollers extends SubsystemBase {
   }
 
   public boolean isNote() {
-    //////////////
-    // _led.setData(_ledBuffer);
-    // _led.start();
-    //////////////
     return !_beamBreaker.get();
   }
 
-  public void setRollers(double speed) {
+  public void setMotor(double speed) {
     _motor.set(speed);
   }
 
-  public void stopTake() {
-    _motor.set(0);
-    //////////////
-    // _led.stop();
-    //////////////
+  public double getRollers() {
+    return _motor.get();
   }
 
-  public void Override() {stopTake();}
+  public void Stop() {
+    _motor.set(0);
+  }
+
+  public void Override() {Stop();}
 
   public void Reset() {
     Override();
@@ -49,19 +46,18 @@ public class Rollers extends SubsystemBase {
   @Override
   public void periodic() {
     SmartDashboard.putBoolean("Intake Note", isNote());
-    super.periodic();
   }
 
   public Command runIntake() {
     return Commands.either(
       Commands.startEnd(
-        () -> {setRollers(1);},
-        () -> {stopTake();},
+        () -> {setMotor(1);},
+        () -> {Stop();},
         this
       ),
       Commands.startEnd(
-        () -> {setRollers(-1);},
-        () -> {stopTake();}
+        () -> {setMotor(-1);},
+        () -> {Stop();}
       ),
       this::isNote
     );

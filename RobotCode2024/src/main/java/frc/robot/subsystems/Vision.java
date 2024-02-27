@@ -70,9 +70,9 @@ public class Vision extends SubsystemBase {
     return _currentTag;
   }
 
-  public boolean isAmp() {
-    return _currentTag.ID == 5 || _currentTag.ID == 6;
-  }
+  // public boolean isAmp() {
+  //   return _currentTag.ID == 5 || _currentTag.ID == 6;
+  // }
 
   public Pose2d getTagPose() {
     return CURRENT_FIELD_LAYOUT.getTagPose(_currentTag.ID-1).get().toPose2d();

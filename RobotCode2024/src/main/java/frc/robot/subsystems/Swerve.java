@@ -68,7 +68,7 @@ public class Swerve extends SubsystemBase {
         new Pose2d());
 
     AutoBuilder.configureHolonomic(
-        this::getPose, // Robot pose supplier
+        this::getLastCalculatedPosition, // Robot pose supplier
         this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
         this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
         this::drive, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
@@ -232,10 +232,8 @@ public class Swerve extends SubsystemBase {
     _estimator.update(getYaw(), getPositions());
     swerveOdometry.update(getYaw(), getPositions());
     m_field_solution.setRobotPose(getLastCalculatedPosition());
-    SmartDashboard.putData("Field_Estimation", m_field_solution);
+    // SmartDashboard.putData("Field_Estimation", m_field_solution);
     log_modules();
-    // TODO Auto-generated method stub
-    super.periodic();
   }
 
 }

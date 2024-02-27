@@ -51,35 +51,31 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-
-    // _robotContainer.periodic();
   }
 
-  // @Override
-  // public void autonomousInit() {
-  // _autoSelected = _chooser.getSelected();
-  // _robotContainer.autoCommand(_autoSelected).schedule();
-  // super.autonomousInit();
-  // }
+  @Override
+  public void autonomousInit() {
+  _autoSelected = _chooser.getSelected();
+  _robotContainer.autoCommand(_autoSelected).schedule();
+  super.autonomousInit();
+  }
 
   @Override
   public void disabledInit() {
-    _robotContainer.disableActions();
+    
   }
 
   @Override
   public void teleopInit() {
-    // _robotContainer.Reset().schedule();
-
     if (_autonomousCommand != null) {
       _autonomousCommand.cancel();
     }
+    
+    _robotContainer.Reset();
   }
 
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
   }
-
-
 }

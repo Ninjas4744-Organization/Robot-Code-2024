@@ -3,6 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -25,6 +26,9 @@ public class TeleopSwerve extends Command {
   private ProfiledPIDController _theta_controller;
   private PIDController _controller_x;
   private PIDController _controller_theta_pid;
+  private SlewRateLimiter _translationRateLimiter;
+  private SlewRateLimiter _strafeRateLimiter;
+  private SlewRateLimiter _rotationRateLimiter;
 
   BooleanSupplier _withTag;
 
@@ -47,13 +51,16 @@ public class TeleopSwerve extends Command {
     this.strafeSup = strafeSup;
     this.rotationSup = rotationSup;
     this.robotCentricSup = robotCentricSup;
-    addRequirements(s_Swerve, _vision);
+    
+    _translationRateLimiter = new SlewRateLimiter(1);
+    _strafeRateLimiter = new SlewRateLimiter(1);
+    _rotationRateLimiter = new SlewRateLimiter(1);
 
+    addRequirements(s_Swerve, _vision);
   }
 
   @Override
   public void execute() {
-
     Pose2d targetPose = _vision.getTagPose();
     Pose2d current_pos = s_Swerve.getLastCalculatedPosition();
     SmartDashboard.putNumber("X error",
@@ -65,6 +72,10 @@ public class TeleopSwerve extends Command {
     double translationVal = MathUtil.applyDeadband(translationSup.getAsDouble(), Constants.Swerve.stickDeadband);
     double strafeVal = MathUtil.applyDeadband(strafeSup.getAsDouble(), Constants.Swerve.stickDeadband);
     double rotationVal = MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.Swerve.stickDeadband);
+
+    translationVal = _translationRateLimiter.calculate(translationVal * (_withTag.getAsBoolean() ? Constants.Swerve.kActionCoefficient : 1));
+    strafeVal = _strafeRateLimiter.calculate(strafeVal * (_withTag.getAsBoolean() ? Constants.Swerve.kActionCoefficient : 1));
+    rotationVal = _rotationRateLimiter.calculate(rotationVal);
 
     s_Swerve.drive(
         new Translation2d(

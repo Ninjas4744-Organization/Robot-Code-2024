@@ -1,14 +1,18 @@
 package frc.robot;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
@@ -17,31 +21,32 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.SequentialStandByCommandGroup;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.Climber;
-import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Rollers;
+import frc.robot.subsystems.Leds;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Vision;
+import frc.robot.subsystems.Intake.Elevator;
+import frc.robot.subsystems.Intake.Rotation;
+import frc.robot.subsystems.Intake.Rollers;
+import frc.robot.Constants;
 
 public class RobotContainer {
   // Subsystems
-  private final Swerve _swerve;
-  private final Vision _vision;
-  private final Climber _climber;
-  private final Elevator _elevator;
-  private final Intake _intake;
-  private final Rollers _rollers;
-  // private final FloorIntakeRollers _floorIntakeRollers;
-  // private final FloorIntakeRotation _floorIntakeRotation;
+  private Swerve _swerve;
+  private Vision _vision;
+  private Climber _climber;
+  private Elevator _elevator;
+  private Rotation _rotation;
+  private Rollers _rollers;
+  private Leds _leds;
 
-  // Other
-  private final CommandPS5Controller _joystick;
-  private final CommandPS5Controller _joystick2;
-  private boolean withTag = false;
-  private double coefficientFactor = 1;
+  // Misc
+  private CommandPS5Controller _joystick;
+  private CommandPS5Controller _joystick2;
+  private Boolean withTag = false;
 
   public RobotContainer() {
     _joystick = new CommandPS5Controller(Constants.kJoystickPort);
@@ -51,128 +56,89 @@ public class RobotContainer {
 
     _climber = new Climber();
     _elevator = new Elevator();
-    _intake = new Intake();
+    _rotation = new Rotation();
     _rollers = new Rollers();
-    // _floorIntakeRollers = new FloorIntakeRollers();
-    // _floorIntakeRotation = new FloorIntakeRotation();
+    _leds = new Leds();
 
-    // NamedCommands.registerCommand("Outake",
-    // runAutonomyOutake(IntakeStates.kAmpOpenHeight,
-    // IntakeStates.kAmpOpenRotation));
+    NamedCommands.registerCommand("Outake", runAutoOutake());
 
     configureBindings();
   }
 
-  private void configureBindings() {
-    _joystick.getHID().getCircleButtonPressed();
+  public void configureBindings() {
+    // Misc:
+    Trigger tNote = new Trigger(() -> {return _rollers.isNote();});
+    Trigger tIntake = new Trigger(() -> {return _rollers.getRollers() == -1;});
+    
+    tNote.whileFalse(_leds.setColor(255, 0, 0));
+    tNote.whileTrue(_leds.setColor(0, 255, 0));
+    tIntake.whileTrue(_leds.setColorBeep(0, 255, 0, 0.1));
+    // tIntake.onFalse(Commands.none());
+
     // Driving:
     _swerve.setDefaultCommand(
-    new TeleopSwerve(
-    _swerve,
-    _vision,
-    () -> {return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient * coefficientFactor - _joystick2.getLeftY() *
-    Constants.Swerve.kDriveCoefficient;},
-    () -> {return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient * coefficientFactor - _joystick2.getLeftX() *
-    Constants.Swerve.kDriveCoefficient;},
-    () -> {return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient * coefficientFactor  - _joystick2.getRightX() *
-    Constants.Swerve.kDriveCoefficient;},
-    () -> {return false;},
-    () -> {return false;}
-    )
+      new TeleopSwerve(
+        _swerve,
+        _vision,
+        () -> {return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient;},
+        () -> {return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient;},
+        () -> {return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient * Constants.Swerve.kDriveRotationCoefficient;},
+        () -> {return withTag;},
+        () -> {return false;}
+      )
     );
-    _joystick.R2().whileTrue(new TeleopSwerve(
-    _swerve,
-    _vision,
-    () -> {return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient - _joystick2.getLeftY() *
-    Constants.Swerve.kDriveCoefficient;},
-    () -> {return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient - _joystick2.getLeftX() *
-    Constants.Swerve.kDriveCoefficient;},
-    () -> {return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient  - _joystick2.getRightX() *
-    Constants.Swerve.kDriveCoefficient;},
-    () -> {return true;},
-    () -> {return false;}
-    ));
+
     // Auto:
-    // _joystick.cross().onTrue(Commands.select(getAcceptCommands(), () -> {
-    // return getAcceptId();
-    // }));
+    // _joystick.cross().onTrue(Commands.select(getAcceptCommands(), () -> {return getAcceptId();}));
 
-    // _joystick.circle().onTrue(Override());
+    _joystick.R2().whileTrue(
+      Commands.startEnd(
+        () -> withTag = true,
+        () -> withTag = false
+      )
+    );
 
-    // _joystick.R2().whileTrue(Commands.startEnd(() -> withTag = true, () ->
-    // withTag = false));
-
-    // //Semi-Auto:
+    // Semi-Auto:
     _joystick.cross().onTrue(
       Commands.parallel(
       _elevator.runClose(),
-      _intake.runClose()
+      _rotation.runClose()
       )
     );
 
     _joystick.square().onTrue(
       Commands.parallel(
         _elevator.runClose(),
-        _intake.runOpen(Constants.Intake.States.kGameStartRotation)
+        _rotation.runOpen(Constants.Rotation.States.kUpRotation)
       )
     );
 
     _joystick.triangle().onTrue(runInOutTake(
-      Constants.Elevator.States.kAmpOpenHeight, Constants.Intake.States.kAmpOpenRotation)
+      Constants.Elevator.States.kAmpOpenHeight, Constants.Rotation.States.kAmpOpenRotation, _joystick.getHID()::getTriangleButtonPressed)
     );
 
-    _joystick.circle().onTrue(runAutoOutakeTrap(
-      Constants.Elevator.States.kTrapOpenHeight, Constants.Intake.States.kTrapOpenRotation)
+    _joystick.circle().onTrue(runOutake(
+      Constants.Elevator.States.kTrapOpenHeight, Constants.Rotation.States.kTrapOpenRotation, _joystick.getHID()::getCircleButtonPressed)
     );
 
-    // _joystick.povUp().whileTrue(Commands.startEnd(
-    // () -> {_climber.setMotor(1);},
-    // () -> {_climber.stopMotor();}, _climber)
-    // );
+    _joystick.povUp().onTrue(_climber.runClimb());
 
-    // _joystick.povDown().whileTrue(Commands.startEnd(
-    // () -> {_climber.setMotor(-1);},
-    // () -> {_climber.stopMotor();}, _climber)
-    // );
-
-    // _joystick.povUp().onTrue(
-    // _climber.runElevateUp()
-    // );
-
-    // _joystick.povDown().onTrue(Commands.sequence(
-    // _climber.runElevateDown(),
-    // runAutoOutake(Constants.IntakeStates.kTrapOpenHeight,
-    // Constants.IntakeStates.kTrapOpenRotation)
-    // ));
-
-    // _joystick.circle().onTrue(
-    // Commands.either(
-    // _climber.runElevateUp(),
-    // Commands.run(() -> {}),
-    // () -> { return _climber.getHeight() == 0; })
-    // );
-
-    // _joystick.circle().whileTrue(
-    // Commands.startEnd(
-    // () -> { _climber.setMotor(-0.7); },
-    // () -> { _climber.setMotor(0); } ,
-    // _climber
-    // )
-    // );
+    _joystick.L1().onTrue(Commands.run(() -> {_swerve.zeroGyro();}));
+    _joystick.R1().onTrue(Commands.run(() -> {_climber.Reset();}, _climber));
 
     // Manual:
     _joystick2.povRight().whileTrue(
       Commands.startEnd(
-        () -> { _rollers.setRollers(1);},
-        () -> {_rollers.stopTake();},
+        () -> { _rollers.setMotor(1);},
+        () -> {_rollers.Stop();},
         _rollers
       )
     );
 
     _joystick2.povLeft().whileTrue(
       Commands.startEnd(
-        () -> {_rollers.setRollers(-1);},
-        () -> {_rollers.stopTake();},
+        () -> {_rollers.setMotor(-1);},
+        () -> {_rollers.Stop();},
         _rollers
       )
     );
@@ -180,7 +146,7 @@ public class RobotContainer {
     _joystick2.povUp().whileTrue(
       Commands.startEnd(
         () -> {_climber.setMotor(1);},
-        () -> {_climber.stopMotor();}, 
+        () -> {_climber.Stop();}, 
         _climber
       )
     );
@@ -188,247 +154,248 @@ public class RobotContainer {
     _joystick2.povDown().whileTrue(
       Commands.startEnd(
         () -> {_climber.setMotor(-1);},
-        () -> {_climber.stopMotor();},
+        () -> {_climber.Stop();},
         _climber
       )
     );
 
     _joystick2.R2().whileTrue(
       Commands.startEnd(
-        () -> {_elevator.setElevatorMotor(0.4);},
-        () -> {_elevator.stopElevator();},
+        () -> {_elevator.setMotor(0.4);},
+        () -> {_elevator.Stop();},
         _elevator
       )
     );
 
     _joystick2.L2().whileTrue(
       Commands.startEnd(
-        () -> {_elevator.setElevatorMotor(-0.3);},
-        () -> {_elevator.stopElevator();},
+        () -> {_elevator.setMotor(-0.3);},
+        () -> {_elevator.Stop();},
         _elevator
       )
     );
 
     _joystick2.R1().whileTrue(
       Commands.startEnd(
-        () -> {_intake.setRotationMotor(0.1);},
-        () -> {_intake.stopRotation();},
-        _intake
+        () -> {_rotation.setMotor(0.1);},
+        () -> {_rotation.Stop();},
+        _rotation
       )
     );
 
     _joystick2.L1().whileTrue(
       Commands.startEnd(
-        () -> {_intake.setRotationMotor(-0.07);},
-        () -> {_intake.stopRotation();},
-        _intake
+        () -> {_rotation.setMotor(-0.07);},
+        () -> {_rotation.Stop();},
+        _rotation
       )
     );
   }
+  
+  public Command runInOutTake(double elevatorHeight, double rotation, BooleanSupplier condition) {
+    return Commands.either(
+      runIntake(),
+      runOutake(elevatorHeight, rotation, condition),
+      () -> { return !(_rollers.isNote());}
+    );
+  }
 
-  // private Command runAutoClimb() {
-  // return Commands.sequence(
-  // _climber.runElevateUp(),
-  // _intakeElevator.runOpen(Constants.IntakeStates.kTrapOpenHeight),
-  // _intakeRotation.runOpen(Constants.IntakeStates.kTrapOpenRotation),
-  // Commands.waitUntil(() -> {
-  // return _climber.isMax();
-  // }),
-  // _intakeRollers.runOutake());
-  // }
-
-  private Command runAutoIntake() {
-
+  public Command runIntake() {
     return Commands.sequence(
       Commands.parallel(
         _elevator.runOpen(Constants.Elevator.States.kSourceOpenHeight),
-        _intake.runOpen(Constants.Intake.States.kSourceOpenRotation)
+        _rotation.runOpen(Constants.Rotation.States.kSourceOpenRotation)
       ),
-      // new SequentialStandByCommandGroup(
-      //   () -> {return _intake.isMax(Constants.Intake.States.kSourceOpenRotation);}, 
-      //   Commands.parallel(
-      //     _elevator.runOpen(Constants.Elevator.States.kSourceOpenHeight),
-      //     _intake.runOpen(Constants.Intake.States.kSourceOpenRotation)
-      //   )
-      // ),
-      // Commands.waitUntil(() -> {
-      // return //_intakeElevator.isMax(Constants.IntakeStates.kSourceOpenHeight)
-      // _intake.isMax(Constants.Intake.States.kSourceOpenRotation);
-      // }),
-      // new SequentialStandByCommandGroup(
-      //   () -> {return _rollers.isNote();}, 
-      //   _rollers.runIntake()
-      // ),
-      _rollers.runIntake().until(_rollers::isNote).andThen(_rollers::stopTake),
-      // Commands.waitUntil(() -> {return _rollers.isNote();}),
+
+      _rollers.runIntake().until(_rollers::isNote),
+
       Commands.parallel(
         _elevator.runClose(),
-        _intake.runClose()
+        _rotation.runClose()
       )
     );
   }
 
-  private Command runAutoOutakeAmp(double height, double rotation) {
+  public Command runOutake(double height, double rotation, BooleanSupplier condition) {
     return new SequentialStandByCommandGroup(
-      _joystick.getHID()::getTriangleButtonPressed,
+      condition,
+
+      Commands.run(() -> {}),
+
       Commands.parallel(
         _elevator.runOpen(height),
-        _intake.runOpen(rotation)
+        _rotation.runOpen(rotation),
+        Commands.run(() -> {})
       ),
-      Commands.parallel(
-        Commands.run(() -> {coefficientFactor = 0.25;}),
-        _elevator.runOpen(height),
-        _intake.runOpen(rotation)
-      ),
+
       Commands.sequence(
         _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
+
         Commands.parallel(
-          Commands.run(() -> {coefficientFactor = 1;}),
           _elevator.runClose(),
-          _intake.runClose()
+          _rotation.runClose()
         )
       )
     );
+
     // return Commands.sequence(
     //   Commands.parallel(
     //     _elevator.runOpen(height),
-    //     _intake.runOpen(rotation)
+    //     _rotation.runOpen(rotation)
     //   ),
     //   // Commands.waitUntil(() -> {return _joystick.getHID().getTriangleButton();}),
     //   // new SequentialStandByCommandGroup(
     //   //   () -> {return _joystick.getHID().getTriangleButtonPressed();},
     //   //   Commands.parallel(
     //   //     _elevator.runOpen(height),
-    //   //     _intake.runOpen(rotation)
+    //   //     _rotation.runOpen(rotation)
     //   //   )
     //   // ),
     //   _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
       
     //   Commands.parallel(
     //     _elevator.runClose(),
-    //     _intake.runClose()
+    //     _rotation.runClose()
     //   )
     // );
   }
 
-  private Command runAutoOutakeTrap(double height, double rotation) {
+  public Command runAutoOutake() {
     return Commands.sequence(
-      // Commands.parallel(
-      //   _elevator.runOpen(height),
-      //   _intake.runOpen(rotation)
-      // ),
-      // Commands.waitUntil(() -> {return _joystick.getHID().getTriangleButton();}),
-      new SequentialStandByCommandGroup(
-        () -> {return _joystick.getHID().getCircleButtonPressed();},
-        Commands.parallel(
-          _elevator.runOpen(height),
-          _intake.runOpen(rotation)
-        )
+      Commands.parallel(
+        _elevator.runOpen(Constants.Elevator.States.kAmpOpenHeight),
+        _rotation.runOpen(Constants.Rotation.States.kAmpOpenRotation)
       ),
-      _rollers.runIntake(),
-      Commands.waitSeconds(Constants.Rollers.kTimeToOutake),
+
+      Commands.waitUntil(
+        () -> {return _elevator.isHeight(Constants.Elevator.States.kAmpOpenHeight)
+        && _rotation.isRotation(Constants.Rotation.States.kAmpOpenRotation);}
+      ),
+
+      _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
+
       Commands.parallel(
         _elevator.runClose(),
-        _intake.runClose()
+        _rotation.runClose()
       )
     );
   }
 
-  private Command runAutoTrap(double elevatorHeight, double rotation) {
-    //return Commands.sequence(
-      // Commands.parallel(
-      // _elevator.runOpen(height),
-      // _intake.runOpen(rotation)
-      // ),
-      // Commands.waitUntil(() -> {
-      // return _elevator.isMax(height) && _intake.isMax(rotation);
-      // }),
+  private Command runTrap() {
     return new SequentialStandByCommandGroup(
-      () -> {return _joystick.getHID().getCircleButtonPressed();},
-      _climber.runElevate(),
-      _climber.runElevate(),
+      _joystick.getHID()::getCircleButtonPressed,
+
+      Commands.run(() -> {}),
+
+      _climber.runClimb(),
+
+      _climber.setHeight(Constants.Climber.kTrapChainHeight),
+
       Commands.sequence(
         Commands.parallel(
-          _elevator.runOpen(elevatorHeight),
-          _intake.runOpen(rotation)
+          _elevator.runOpen(0),
+          _rotation.runOpen(Constants.Rotation.States.kUpRotation),
+          Commands.run(() -> {})
         ),
-        Commands.waitUntil(() -> {return _elevator.isMax(elevatorHeight) && _intake.isMax(rotation);}
-        ),
-        _rollers.runIntake(),
         Commands.parallel(
           _elevator.runOpen(Constants.Elevator.States.kTrapOpenHeight),
-          _intake.runOpen(Constants.Intake.States.kTrapOpenRotation)
+          _rotation.runOpen(Constants.Rotation.States.kTrapOpenRotation),
+          Commands.run(() -> {})
         )
       ),
-      _climber.runElevate(),
-      _climber.runElevate()
+      
+      _climber.runClimb(),
+
+      _rollers.runIntake()
     );
   }
 
-  // private Command runAutoOutakeTrap(double height, double rotation) {
-  // return Commands.sequence(
-  // Commands.parallel(
-  // // _intakeElevator.runOpen(height),
-  // _intakeRotation.runOpen(rotation)
-  // //Commands.run(() -> {coefficientFactor = 0.25;})
-  // ),
-  // Commands.waitUntil(() -> {
-  // return _joystick.circle().getAsBoolean();
-  // }),
-  // _intakeRollers.runOutake(),
-  // Commands.waitSeconds(Constants.kTimeToOutake),
-  // Commands.parallel(
-  // // _intakeElevator.runClose(),
-  // _intakeRotation.runClose()
-  // //Commands.run(() -> {coefficientFactor = 1;})
-  // )
-  // );
-  // }
+  public HashMap<Integer, Command> getAcceptCommands() {
+    HashMap<Integer, Command> _acceptCommands = new HashMap<Integer, Command>();
 
-  public Command runInOutTake(double elevatorHeight, double rotation) {
-    return Commands.either(
-      runAutoIntake(),
-      runAutoOutakeAmp(elevatorHeight, Constants.Intake.States.kAmpOpenRotation),
-      () -> { return !(_rollers.isNote());}
+    //Source
+    _acceptCommands.put(1, runIntake());
+    _acceptCommands.put(2, runIntake());
+    _acceptCommands.put(9, runIntake());
+    _acceptCommands.put(10, runIntake());
+
+    //Amp
+    _acceptCommands.put(5, 
+      runOutake(
+        Constants.Elevator.States.kAmpOpenHeight, 
+        Constants.Rotation.States.kAmpOpenRotation, 
+        _joystick.getHID()::getTriangleButtonPressed
+      )
     );
-  }
-  public void disableActions(){
-    _swerve.zeroGyro();
+
+    _acceptCommands.put(6, 
+      runOutake(
+        Constants.Elevator.States.kAmpOpenHeight, 
+        Constants.Rotation.States.kAmpOpenRotation, 
+        _joystick.getHID()::getTriangleButtonPressed
+      )
+    );
+
+    //Stage
+    _acceptCommands.put(11, runTrap());
+    _acceptCommands.put(12, runTrap());
+    _acceptCommands.put(13, runTrap());
+    _acceptCommands.put(14, runTrap());
+    _acceptCommands.put(15, runTrap());
+    _acceptCommands.put(16, runTrap());
     
-  // _swerve.resetOdometry(new Pose2d());
+    return _acceptCommands;
   }
 
-  // private Command runAutoFloorIntake(){
-  // return Commands.sequence(
-  // _floorIntakeRotation.runClose(),
-  // Commands.waitUntil(() -> { return _floorIntakeRotation.getRotation() == 0;
-  // }),
-  // _floorIntakeRollers.runIntake()
-  // ).until(() -> { return override; }).andThen(() -> { override = false; });
-  // }
-
-  // private Command runAutoFloorOutake(){
-  // return Commands.sequence(
-  // _floorIntakeRotation.runOpen(),
-  // Commands.waitUntil(() -> { return _floorIntakeRotation.isMax(); }),
-  // _floorIntakeRollers.runOutake()
-  // ).until(() -> { return override; }).andThen(() -> { override = false; });
-  // }
-
-  // private Command Override() {
-  // return Commands.parallel(
-  // Commands.run(() -> {_swerve.Override();}, _swerve),
-  // // Commands.run(() -> {_climber.Reset();}, _climber));
-  // // Commands.run(() -> {_intakeElevator.Override();}, _intakeElevator),
-  // Commands.run(() -> {_intakeRotation.Override();}, _intakeRotation)
-  // // Commands.run(() -> {_intakeRollers.Reset();}, _intakeRollers));
-  // // _floorIntakeRollers.Override();
-  // // _floorIntakeRotation.Override();
-  // );
-  // }
-
-  // public Command Reset() {
+  private int getAcceptId() {
+    // try{
+    //   Optional<Alliance> ally = DriverStation.getAlliance();
+    //   int tag = _vision.getTag().ID;
   
-  // );
-  // }
+    //   AprilTagFieldLayout blue = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
+    //   blue.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
+  
+    //   AprilTagFieldLayout red = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
+    //   red.setOrigin(AprilTagFieldLayout.OriginPosition.kRedAllianceWallRightSide);
+      
+    //   if(ally.get() == DriverStation.Alliance.Red)
+    // }
+    // catch (Exception e) {
+    //   e.printStackTrace();
+    // }
+
+    Optional<Alliance> ally = DriverStation.getAlliance();
+    int tag = _vision.getTag().ID;
+    List<Integer> blueIDs = Arrays.asList(6, 14, 15, 16, 1, 2);
+    List<Integer> redIDs = Arrays.asList(5, 11, 12, 13, 9, 10);
+
+    if (ally.get() == Alliance.Blue) {
+      if (blueIDs.contains(tag))
+        return tag;
+    } else {
+      if (redIDs.contains(tag))
+        return tag;
+    }
+
+    return -1;
+  }
+
+  public Command autoCommand(String auto) {
+    PathPlannerPath _path = PathPlannerPath.fromPathFile("LeftToAmp");
+
+    return Commands.sequence(
+        Commands.run(() -> {
+          _swerve.resetOdometry(_path.getPreviewStartingHolonomicPose());
+        }, _swerve).withTimeout(0.5),
+        AutoBuilder.buildAuto(auto));
+  }
+
+  public void Reset() {
+    // _elevator.Reset().schedule();
+    // _rotation.Reset().schedule();
+    // _climber.Reset().schedule();
+
+    _swerve.zeroGyro();
+    // _swerve.resetOdometry(new Pose2d());
+  }
 }

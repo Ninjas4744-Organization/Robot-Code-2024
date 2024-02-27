@@ -20,35 +20,33 @@ public final class Constants {
   public static final class Climber {
     public static final int kMotor1 = 11;
     public static final int kMotor2 = 15;
-    public static final int kLimitSwitch = 8;
+    public static final int kLimitSwitch = 2;
 
     public static final double kMaxClimber = 0.4;
+    public static final double kTrapChainHeight = 0.35;
 
-    public static final class States {
-
-    }
 
     public static final class ControlConstants {
       public static final double kGearRatio = 27;
       public static final double kConversionPosFactor = 0.0023295454545455;
       public static final double kConversionVelFactor = kConversionPosFactor / 60;
 
-      public static final double kP = 4.8;
+      public static final double kP = 12;
       public static final double kI = 0;
       public static final double kD = 0;
 
-      public static final double kMaxVelocity = 5;
-      public static final double kMaxAcceleration = 160;
+      public static final double kMaxVelocity = 30;
+      public static final double kMaxAcceleration = 60;
       public static final TrapezoidProfile.Constraints kConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
     }
   }
 
-  public static final class Intake {
+  public static final class Rotation {
     public static final int kRotationMotor = 13;
-    public static final int kLimitSwitchRotation = 9;
+    public static final int kLimitSwitch = 9;
 
     public final static class States {
-      public static final double kGameStartRotation = 120;
+      public static final double kUpRotation = 120;
       public static final double kSourceOpenRotation = 70;
       public static final double kAmpOpenRotation = 0;
       public static final double kTrapOpenRotation = 25;
@@ -60,7 +58,7 @@ public final class Constants {
       public static final double kConversionVelFactor = kConversionPosFactor / 60;
 
       public static final double kP = 0.0185;
-      public static final double kI = 0.0002;// 0.0003;
+      public static final double kI = 0.0002;
       public static final double kD = 0;
 
       public static final double kMaxVelocity = 60;
@@ -70,34 +68,31 @@ public final class Constants {
   }
 
   public static final class Rollers {
-    public static final int kBeamBreaker = 5;
     public static final int kRollersMotor = 12;
+    public static final int kBeamBreaker = 5;
     public static final double kTimeToOutake = 0.5;
-
+    // public static final double kTimeToIntake = 1;
   }
 
   public static final class Elevator {
-
-    public static final int kLimitSwitchElevator = 7;
     public static final int kElevatorMotor = 14;
+    public static final int kLowerLimitElevator = 7;
 
     public static final class States {
+      // public static final double kRealZero = -0.015;
       public static final double kSourceOpenHeight = 0.1;
-      public static final double kAmpOpenHeight = 0.45;
-      public static final double kTrapOpenHeight = 0.675;
-
+      public static final double kAmpOpenHeight = 0.4;
+      public static final double kTrapOpenHeight = 0.59;
     }
 
     public static final class ControlConstants {
-
       public static final double kGearRatio = 16.0;
-      public static final double kWinchDiameter = 50 / 10 / 100.0;// milimiters/centimeters/meter הבעיה הייתה שעבדתי עם
-                                                                  // סנטימטרים ולא מטרים
+      public static final double kWinchDiameter = 50 / 10 / 100.0;// milimiters/centimeters/meter
       public static final double kConversionPosFactor = (kWinchDiameter * Math.PI) / kGearRatio;
       public static final double kConversionVelFactor = (kWinchDiameter * Math.PI) / kGearRatio / 60;
 
-      public static final double kP = 5;
-      public static final double kI = 0.0005;
+      public static final double kP = 4.5;
+      public static final double kI = 0.0017;
       public static final double kD = 0;
 
       public static final double kMaxVelocity = 6;
@@ -108,6 +103,8 @@ public final class Constants {
 
   public static final class Swerve {
     public static final double kDriveCoefficient = 1;
+    public static final double kDriveRotationCoefficient = 0.5;
+    public static final double kActionCoefficient = 0.25;
     public static final double stickDeadband = 0.1;
 
     // public static final int pigeonID = 6;
