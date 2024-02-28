@@ -82,7 +82,7 @@ public final class Constants {
       // public static final double kRealZero = -0.015;
       public static final double kSourceOpenHeight = 0.1;
       public static final double kAmpOpenHeight = 0.4;
-      public static final double kTrapOpenHeight = 0.59;
+      public static final double kTrapOpenHeight = 0.59-0.27;
     }
 
     public static final class ControlConstants {
@@ -105,7 +105,7 @@ public final class Constants {
     public static final double kDriveCoefficient = 1;
     public static final double kDriveRotationCoefficient = 0.5;
     public static final double kActionCoefficient = 0.25;
-    public static final double stickDeadband = 0.1;
+    public static final double stickDeadband = 0.05;
 
     // public static final int pigeonID = 6;
     public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-

@@ -48,7 +48,7 @@ public class RobotContainer {
   private CommandPS5Controller _joystick;
   private CommandPS5Controller _joystick2;
   private Boolean withTag = false;
-  private String Mode = "";
+  private String Mode = "Nothing";
 
   public RobotContainer() {
     _joystick = new CommandPS5Controller(Constants.kJoystickPort);
@@ -63,6 +63,7 @@ public class RobotContainer {
     _leds = new Leds();
 
     NamedCommands.registerCommand("Outake", runAutoOutake());
+    NamedCommands.registerCommand("Reset", Reset());
 
     configureBindings();
   }
@@ -83,7 +84,6 @@ public class RobotContainer {
     tIntake.whileTrue(_leds.setColorBeep(0, 255, 0, 0.2));
     tClimb.whileTrue(_leds.setColor(255, 255, 0));
     tTrap.whileTrue(_leds.setColorBeep(255, 255, 0, 0.2));
-    // tIntake.onFalse(Commands.none());
 
     tAmp.onTrue(Commands.runOnce(() -> {Mode = "Amp";}));
     tSrc.onTrue(Commands.runOnce(() -> {Mode = "Source";}));
@@ -147,9 +147,9 @@ public class RobotContainer {
         Constants.Elevator.States.kAmpOpenHeight, Constants.Rotation.States.kAmpOpenRotation,
         _joystick2.getHID()::getTriangleButton));
 
-    _joystick2.circle().onTrue(runOutake(Constants.Elevator.States.kTrapOpenHeight-0.27,
-        Constants.Rotation.States.kSourceOpenRotation+30, _joystick2.getHID()::getCircleButtonReleased));
-
+    _joystick2.circle().onTrue(runOutake(Constants.Elevator.States.kTrapOpenHeight+0.06,
+        Constants.Rotation.States.kSourceOpenRotation+17, _joystick2.getHID()::getCircleButtonReleased));
+    
     // _joystick2.L2().onTrue(_climber.runClimb());
 
     _joystick2.povRight().whileTrue(
@@ -205,7 +205,7 @@ public class RobotContainer {
     _joystick2.L2().whileTrue(
         Commands.startEnd(
             () -> {
-              _elevator.setMotor(-0.3);
+              _elevator.setMotor(-0.4);
             },
             () -> {
               _elevator.Stop();
@@ -235,7 +235,16 @@ public class RobotContainer {
   }
 
   public void periodic(){
-    SmartDashboard.putString("Intake Mode", Mode);
+    SmartDashboard.putString("Mode", Mode);
+    // System.out.println(Mode);
+    // System.out.println(Mode);
+    // System.out.println(Mode);
+    // System.out.println(Mode);
+    // System.out.println(Mode);
+    // System.out.println(Mode);
+    // System.out.println(Mode);
+    // System.out.println(Mode);
+    // System.out.println(Mode);
   }
 
   public Command runInOutTake(double elevatorHeight, double rotation, BooleanSupplier condition) {
@@ -290,7 +299,12 @@ public class RobotContainer {
       Commands.waitUntil(condition),
       Commands.waitUntil(condition),
 
-      _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake*3)),
+      Commands.either(
+        _rollers.runIntake(0.9).raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake*3)),
+        _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake*3)),
+        () -> {return height == Constants.Elevator.States.kTrapOpenHeight;}
+      ),
+      
       Commands.waitUntil(condition),
 
       Commands.parallel(
@@ -454,6 +468,6 @@ public class RobotContainer {
     return Commands.parallel(
         _elevator.Reset(),
         _rotation.Reset(),
-        _climber.Reset());
+        _climber.Reset()).until(() -> {return _elevator.isHeight(0) && _rotation.isRotation(0) && _climber.isLimitSwitch();});
   }
 }

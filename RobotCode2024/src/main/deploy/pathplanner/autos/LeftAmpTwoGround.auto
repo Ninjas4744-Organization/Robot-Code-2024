@@ -12,6 +12,12 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "Reset"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "LeftToAmp"

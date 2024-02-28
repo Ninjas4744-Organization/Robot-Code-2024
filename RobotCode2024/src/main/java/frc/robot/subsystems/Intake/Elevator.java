@@ -35,7 +35,7 @@ public class Elevator extends SubsystemBase {
     _controller.setIZone(0.6);
 
     _motor.enableSoftLimit(SoftLimitDirection.kForward, true);
-    _motor.enableSoftLimit(SoftLimitDirection.kReverse, true);
+    // _motor.enableSoftLimit(SoftLimitDirection.kReverse, true);
 
     _motor.setSoftLimit(SoftLimitDirection.kForward, 0.61f);
     _motor.setSoftLimit(SoftLimitDirection.kReverse, 0);

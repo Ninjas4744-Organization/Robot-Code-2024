@@ -70,7 +70,7 @@ public class Rotation extends SubsystemBase {
 
   public Command Reset() {
     return Commands.startEnd(
-        () -> {setMotor(-0.08);},
+        () -> {setMotor(-0.1);},
         () -> {Stop();},
         this
       ).until(() -> {return !_limitSwitch.get();});

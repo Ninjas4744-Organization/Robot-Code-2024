@@ -52,9 +52,9 @@ public class TeleopSwerve extends Command {
     this.rotationSup = rotationSup;
     this.robotCentricSup = robotCentricSup;
     
-    _translationRateLimiter = new SlewRateLimiter(1);
-    _strafeRateLimiter = new SlewRateLimiter(1);
-    _rotationRateLimiter = new SlewRateLimiter(1);
+    _translationRateLimiter = new SlewRateLimiter(3);
+    _strafeRateLimiter = new SlewRateLimiter(3);
+    _rotationRateLimiter = new SlewRateLimiter(3);
 
     addRequirements(s_Swerve, _vision);
   }

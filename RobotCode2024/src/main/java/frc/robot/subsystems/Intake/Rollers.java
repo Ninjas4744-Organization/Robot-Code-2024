@@ -62,4 +62,19 @@ public class Rollers extends SubsystemBase {
       this::isNote
     );
   }
+
+  public Command runIntake(double speed) {
+    return Commands.either(
+      Commands.startEnd(
+        () -> {setMotor(speed);},
+        () -> {Stop();},
+        this
+      ),
+      Commands.startEnd(
+        () -> {setMotor(-speed);},
+        () -> {Stop();}
+      ),
+      this::isNote
+    );
+  }
 }

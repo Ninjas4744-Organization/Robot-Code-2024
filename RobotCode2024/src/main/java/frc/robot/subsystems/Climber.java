@@ -93,13 +93,19 @@ public class Climber extends SubsystemBase {
       () -> {return !_limitSwitch.get();}
     );
   }
+  public boolean isLimitSwitch() {
+    return !_limitSwitch.get();
+  }
   
   @Override
   public void periodic() {
     if(!_limitSwitch.get())
       _motor1.getEncoder().setPosition(0);
 
-    SmartDashboard.putBoolean("Climber Limit", !_limitSwitch.get());
+    if(isLimitSwitch() && getMotor() == -1)
+      Stop();
+
+    SmartDashboard.putBoolean("Climber Limit",isLimitSwitch() );
     SmartDashboard.putNumber("Climber Height", getHeight());
   }  
 }

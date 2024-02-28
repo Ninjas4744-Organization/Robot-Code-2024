@@ -5,12 +5,18 @@
       "x": 0.7,
       "y": 7.2
     },
-    "rotation": 0
+    "rotation": 90.0
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Reset"
+          }
+        },
         {
           "type": "path",
           "data": {
@@ -21,12 +27,6 @@
           "type": "named",
           "data": {
             "name": "Outake"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "ExitAmp"
           }
         }
       ]

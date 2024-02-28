@@ -16,6 +16,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.util.VisionCamera;
@@ -123,6 +124,49 @@ public class Vision extends SubsystemBase {
       _currentTag = _ids.isRelavent(proccesed_id)?CURRENT_FIELD_LAYOUT.getTags().get(proccesed_id):_currentTag;
     }
 
+    SmartDashboard.putString("current tag", String.valueOf(_currentTag.ID));
+  }
+
+  public String tagToString(AprilTag tag) {
+    switch(tag.ID){
+      case 1:
+        return "Blue Source";
+      
+      case 2:
+        return "Blue Source";
+
+      case 5:
+        return "Red Amp";
+
+      case 6:
+        return "Blue Amp";
+
+      case 9:
+        return "Red Source";
+
+      case 10:
+        return "Red Source";
+
+      case 11:
+        return "Red Stage";
+
+      case 12:
+        return "Red Stage";
+
+      case 13:
+        return "Red Stage";
+
+      case 14:
+        return "Blue Stage";
+
+      case 15:
+        return "Blue Stage";
+
+      case 16:
+        return "Blue Stage";
+    }
+    
+    return "No Tag In Sight";
   }
 
   // private boolean isBlueID(int id) {
