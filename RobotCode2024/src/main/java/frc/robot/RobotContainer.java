@@ -29,9 +29,9 @@ import frc.robot.subsystems.Leds;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Vision;
 import frc.robot.subsystems.Intake.Elevator;
+import frc.robot.subsystems.Intake.Rollers;
 import frc.robot.subsystems.Intake.Rotation;
 import frc.robot.Constants;
-import frc.robot.Constants.Rollers;
 
 public class RobotContainer {
   // Subsystems
@@ -70,9 +70,9 @@ public class RobotContainer {
     // Misc:
     
 
-    tNote.whileFalse(_leds.setColor(255, 0, 0));
-    tNote.whileTrue(_leds.setColor(0, 255, 0));
-    tIntake.whileTrue(_leds.setColorBeep(0, 255, 0, 0.1));
+    // tNote.whileFalse(_leds.setColor(255, 0, 0));
+    // tNote.whileTrue(_leds.setColor(0, 255, 0));
+    // tIntake.whileTrue(_leds.setColorBeep(0, 255, 0, 0.1));
     // tIntake.onFalse(Commands.none());
 
     _start_game_trigger = new Trigger(() -> {
@@ -156,25 +156,25 @@ public class RobotContainer {
 
     _joystick2.L2().onTrue(_climber.runClimb());
 
-    _joystick2.povRight().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _rollers.setMotor(1);
-            },
-            () -> {
-              _rollers.Stop();
-            },
-            _rollers));
+    // _joystick2.povRight().whileTrue(
+    //     Commands.startEnd(
+    //         () -> {
+    //           _rollers.setMotor(1);
+    //         },
+    //         () -> {
+    //           _rollers.Stop();
+    //         },
+    //         _rollers));
 
-    _joystick2.povLeft().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _rollers.setMotor(-1);
-            },
-            () -> {
-              _rollers.Stop();
-            },
-            _rollers));
+    // _joystick2.povLeft().whileTrue(
+    //     Commands.startEnd(
+    //         () -> {
+    //           _rollers.setMotor(-1);
+    //         },
+    //         () -> {
+    //           _rollers.Stop();
+    //         },
+    //         _rollers));
 
     _joystick2.povUp().whileTrue(
         Commands.startEnd(
