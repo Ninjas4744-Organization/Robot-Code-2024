@@ -79,11 +79,11 @@ public class TeleopSwerve extends Command {
 
     s_Swerve.drive(
         new Translation2d(
-          _withTag.getAsBoolean() && inrange(targetPose, current_pos)?MathUtil.clamp(translationVal, -0.3, 0.3):
+          _withTag.getAsBoolean() && inrange(targetPose, current_pos)?-_controller_x.calculate(targetPose.getX() - current_pos.getX()):
           translationVal,
-            // _withTag.getAsBoolean() && inrange(targetPose, current_pos)
-            //     ? _controller_x.calculate(targetPose.getX() - current_pos.getX()-0.025)
-            //     : 
+            _withTag.getAsBoolean() && inrange(targetPose, current_pos)
+                ?MathUtil.clamp(strafeVal, -0.3, 0.3) 
+                : 
                 strafeVal)
             .times(Constants.Swerve.maxSpeed),
         _withTag.getAsBoolean()

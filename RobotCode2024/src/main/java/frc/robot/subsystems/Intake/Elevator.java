@@ -55,7 +55,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public void setMotor(double percent) {
-    _motor.set(percent);
+    _motor.set(!_limitSwitch.get() && percent == -1 ? 0 : percent);
   }
 
   public double getHeight() {
