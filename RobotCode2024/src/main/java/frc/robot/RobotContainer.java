@@ -48,6 +48,7 @@ public class RobotContainer {
   private CommandPS5Controller _joystick;
   private CommandPS5Controller _joystick2;
   private Boolean withTag = false;
+  private String Mode = "";
 
   public RobotContainer() {
     _joystick = new CommandPS5Controller(Constants.kJoystickPort);
@@ -68,17 +69,32 @@ public class RobotContainer {
 
   public void configureBindings() {
     // Misc:
-    
+    Trigger tNote = new Trigger(() -> {return _rollers.isNote();});
+    Trigger tIntake = new Trigger(() -> {return _rollers.getRollers() == -1;});
+    Trigger tClimb = new Trigger(() -> {return _climber.getHeight() > 0.02;});
 
-    // tNote.whileFalse(_leds.setColor(255, 0, 0));
-    // tNote.whileTrue(_leds.setColor(0, 255, 0));
-    // tIntake.whileTrue(_leds.setColorBeep(0, 255, 0, 0.1));
+    Trigger tAmp = new Trigger(() -> {return _rotation.isRotation(Constants.Rotation.States.kAmpOpenRotation);});
+    Trigger tSrc = new Trigger(() -> {return _rotation.isRotation(Constants.Rotation.States.kSourceOpenRotation);});
+    Trigger tUp = new Trigger(() -> {return _rotation.isRotation(Constants.Rotation.States.kUpRotation);});
+    Trigger tTrap = new Trigger(() -> {return _rotation.isRotation(Constants.Rotation.States.kTrapOpenRotation);});
+
+    tNote.whileFalse(_leds.setColor(255, 0, 0));
+    tNote.whileTrue(_leds.setColor(0, 255, 0));
+    tIntake.whileTrue(_leds.setColorBeep(0, 255, 0, 0.2));
+    tClimb.whileTrue(_leds.setColor(255, 255, 0));
+    tTrap.whileTrue(_leds.setColorBeep(255, 255, 0, 0.2));
     // tIntake.onFalse(Commands.none());
+
+    tAmp.onTrue(Commands.runOnce(() -> {Mode = "Amp";}));
+    tSrc.onTrue(Commands.runOnce(() -> {Mode = "Source";}));
+    tUp.onTrue(Commands.runOnce(() -> {Mode = "Idle";}));
+    tTrap.onTrue(Commands.runOnce(() -> {Mode = "Trap";}));
 
     _start_game_trigger = new Trigger(() -> {
       return DriverStation.getMatchTime() < 1;
     });
-    // Driving:
+
+    // Driver:
     _swerve.setDefaultCommand(
         new TeleopSwerve(
             _swerve,
@@ -100,47 +116,27 @@ public class RobotContainer {
               return false;
             }));
 
-    // Driver:
-    // _joystick.cross().onTrue(Commands.select(getAcceptCommands(), () -> {return
+            
+            _joystick.R2().whileTrue(
+              Commands.startEnd(
+                () -> withTag = true,
+                () -> withTag = false));
+                
+                _joystick.L1().onTrue(Commands.runOnce(() -> {
+                  _swerve.zeroGyro();
+                  
+                  System.out.println("ZEROING");
+                }, _swerve)
+      );
+                
+    // Operator:
+    // _joystick2.cross().onTrue(Commands.select(getAcceptCommands(), () -> {return
     // getAcceptId();}));
 
-    _joystick.R2().whileTrue(
-        Commands.startEnd(
-            () -> withTag = true,
-            () -> withTag = false));
-
-    // Semi-Auto:
-    // _joystick.cross().onTrue(
-    //     Commands.parallel(
-    //         _elevator.runClose(),
-    //         _rotation.runClose()));
-
-    // _joystick.square().onTrue(
-    //     Commands.parallel(
-    //         _elevator.runClose(),
-    //         _rotation.runOpen(Constants.Rotation.States.kUpRotation)));
-
-    // _joystick.triangle().onTrue(runInOutTake(
-    //     Constants.Elevator.States.kAmpOpenHeight, Constants.Rotation.States.kAmpOpenRotation,
-    //     _joystick2.getHID()::getTriangleButtonReleased));
-
-    // _joystick.circle().onTrue(runOutake(
-    //     Constants.Elevator.States.kTrapOpenHeight, Constants.Rotation.States.kSourceOpenRotation+10,
-    //     _joystick.getHID()::getCircleButtonReleased));
-
-    _joystick.L1().onTrue(Commands.runOnce(() -> {
-      _swerve.zeroGyro();
-
-      System.out.println("ZEROING");
-    }, _swerve));
-
-    // Operator:
-
-
     _joystick2.cross().onTrue(
-        Commands.parallel(
-            _elevator.runClose(),
-            _rotation.runClose()));
+    Commands.parallel(
+        _elevator.runClose(),
+        _rotation.runClose()));
 
     _joystick2.square().onTrue(
         Commands.parallel(
@@ -154,27 +150,27 @@ public class RobotContainer {
     _joystick2.circle().onTrue(runOutake(Constants.Elevator.States.kTrapOpenHeight-0.27,
         Constants.Rotation.States.kSourceOpenRotation+30, _joystick2.getHID()::getCircleButtonReleased));
 
-    _joystick2.L2().onTrue(_climber.runClimb());
+    // _joystick2.L2().onTrue(_climber.runClimb());
 
-    // _joystick2.povRight().whileTrue(
-    //     Commands.startEnd(
-    //         () -> {
-    //           _rollers.setMotor(1);
-    //         },
-    //         () -> {
-    //           _rollers.Stop();
-    //         },
-    //         _rollers));
+    _joystick2.povRight().whileTrue(
+        Commands.startEnd(
+            () -> {
+              _rollers.setMotor(1);
+            },
+            () -> {
+              _rollers.Stop();
+            },
+            _rollers));
 
-    // _joystick2.povLeft().whileTrue(
-    //     Commands.startEnd(
-    //         () -> {
-    //           _rollers.setMotor(-1);
-    //         },
-    //         () -> {
-    //           _rollers.Stop();
-    //         },
-    //         _rollers));
+    _joystick2.povLeft().whileTrue(
+        Commands.startEnd(
+            () -> {
+              _rollers.setMotor(-1);
+            },
+            () -> {
+              _rollers.Stop();
+            },
+            _rollers));
 
     _joystick2.povUp().whileTrue(
         Commands.startEnd(
@@ -236,6 +232,10 @@ public class RobotContainer {
               _rotation.Stop();
             },
             _rotation));
+  }
+
+  public void periodic(){
+    SmartDashboard.putString("Intake Mode", Mode);
   }
 
   public Command runInOutTake(double elevatorHeight, double rotation, BooleanSupplier condition) {
@@ -303,7 +303,8 @@ public class RobotContainer {
     return Commands.sequence(
         Commands.parallel(
             _elevator.runOpen(Constants.Elevator.States.kAmpOpenHeight),
-            _rotation.runOpen(Constants.Rotation.States.kAmpOpenRotation)),
+            _rotation.runOpen(Constants.Rotation.States.kAmpOpenRotation)
+        ),
 
         Commands.waitUntil(
             () -> {
@@ -391,12 +392,12 @@ public class RobotContainer {
             _joystick.getHID()::getTriangleButtonReleased));
 
     // Stage
-    _acceptCommands.put(11, runTrap(_joystick.getHID()::getTriangleButtonReleased));
-    _acceptCommands.put(12, runTrap(_joystick.getHID()::getTriangleButtonReleased));
-    _acceptCommands.put(13, runTrap(_joystick.getHID()::getTriangleButtonReleased));
-    _acceptCommands.put(14, runTrap(_joystick.getHID()::getTriangleButtonReleased));
-    _acceptCommands.put(15, runTrap(_joystick.getHID()::getTriangleButtonReleased));
-    _acceptCommands.put(16, runTrap(_joystick.getHID()::getTriangleButtonReleased));
+    // _acceptCommands.put(11, runTrap(_joystick.getHID()::getTriangleButtonReleased));
+    // _acceptCommands.put(12, runTrap(_joystick.getHID()::getTriangleButtonReleased));
+    // _acceptCommands.put(13, runTrap(_joystick.getHID()::getTriangleButtonReleased));
+    // _acceptCommands.put(14, runTrap(_joystick.getHID()::getTriangleButtonReleased));
+    // _acceptCommands.put(15, runTrap(_joystick.getHID()::getTriangleButtonReleased));
+    // _acceptCommands.put(16, runTrap(_joystick.getHID()::getTriangleButtonReleased));
 
     return _acceptCommands;
   }
@@ -446,13 +447,13 @@ public class RobotContainer {
         AutoBuilder.buildAuto(auto));
   }
 
-  // public Command Reset() {
-  //   _swerve.zeroGyro();
-  //   // _swerve.resetOdometry(new Pose2d());
+  public Command Reset() {
+    _swerve.zeroGyro();
+    // _swerve.resetOdometry(new Pose2d());
 
-  //   return Commands.parallel(
-  //       _elevator.Reset(),
-  //       _rotation.Reset(),
-  //       _climber.Reset());
-  // }
+    return Commands.parallel(
+        _elevator.Reset(),
+        _rotation.Reset(),
+        _climber.Reset());
+  }
 }

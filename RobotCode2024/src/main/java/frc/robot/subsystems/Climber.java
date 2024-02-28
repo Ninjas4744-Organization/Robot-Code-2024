@@ -57,6 +57,10 @@ public class Climber extends SubsystemBase {
     _motor1.set(percent);
   }
 
+  public double getMotor() {
+    return _motor1.get();
+  }
+
   public Command setHeight(double height){
     return new TrapezoidProfileCommand(
         new TrapezoidProfile(Constants.Climber.ControlConstants.kConstraints),

@@ -63,8 +63,8 @@ public class TeleopSwerve extends Command {
   public void execute() {
     Pose2d targetPose = _vision.getTagPose();
     Pose2d current_pos = s_Swerve.getLastCalculatedPosition();
-    SmartDashboard.putNumber("X error",
-        _controller_x.calculate(targetPose.getX() - current_pos.getX()));
+    // SmartDashboard.putNumber("X error",
+    //     _controller_x.calculate(targetPose.getX() - current_pos.getX()));
     SmartDashboard.putNumber("X distance",
         targetPose.getX() - current_pos.getX());
     

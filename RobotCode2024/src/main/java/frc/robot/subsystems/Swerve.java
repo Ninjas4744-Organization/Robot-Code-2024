@@ -212,17 +212,17 @@ public class Swerve extends SubsystemBase {
   // }
 
   public void log_modules() {
-    SmartDashboard.putNumber("gyro", getYaw().getDegrees());
-    for (SwerveModule mod : mSwerveMods) {
-      SmartDashboard.putNumber(
-          "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
-      SmartDashboard.putNumber(
-          "Mod " + mod.moduleNumber + " Integrated",
-          mod.getState().angle.getDegrees());
-      SmartDashboard.putNumber(
-          "Mod " + mod.moduleNumber + " Velocity",
-          mod.getState().speedMetersPerSecond);
-    }
+    // SmartDashboard.putNumber("gyro", getYaw().getDegrees());
+    // for (SwerveModule mod : mSwerveMods) {
+    //   SmartDashboard.putNumber(
+    //       "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
+    //   SmartDashboard.putNumber(
+    //       "Mod " + mod.moduleNumber + " Integrated",
+    //       mod.getState().angle.getDegrees());
+    //   SmartDashboard.putNumber(
+    //       "Mod " + mod.moduleNumber + " Velocity",
+    //       mod.getState().speedMetersPerSecond);
+    // }
   }
 
 
