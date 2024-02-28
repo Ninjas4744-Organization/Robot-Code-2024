@@ -26,6 +26,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.util.LimelightHelpers;
+import frc.lib.util.PointWithTime;
 import frc.robot.Constants;
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +40,7 @@ public class Swerve extends SubsystemBase {
   private SwerveDriveOdometry swerveOdometry;
   private SwerveModule[] mSwerveMods;
   private AHRS gyro;
-  private Supplier<List<Optional<EstimatedRobotPose>>> _estimationsSupplier;
+  private Supplier<PointWithTime> _estimationSupplier;
 
   StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault()
       .getStructTopic("MyPose", Pose2d.struct).publish();
@@ -48,12 +50,12 @@ public class Swerve extends SubsystemBase {
 
   /** Creates a new SwerveSubsystem. */
   public Swerve(
-      Supplier<List<Optional<EstimatedRobotPose>>> estimationsSupplier) {
+      Supplier<PointWithTime> estimationsSupplier) {
 
     gyro = new AHRS();
     gyro.getRotation2d();
     zeroGyro();
-    _estimationsSupplier = estimationsSupplier;
+    _estimationSupplier = estimationsSupplier;
     // Creates all four swerve modules into a swerve drive
     mSwerveMods = new SwerveModule[] {
         new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -198,16 +200,16 @@ public class Swerve extends SubsystemBase {
     return _estimator.getEstimatedPosition();
   }
 
-  private void updatePV() {
-    for (Optional<EstimatedRobotPose> estimation : _estimationsSupplier.get()) {
+  // private void updatePV() {
+  //   for (Optional<EstimatedRobotPose> estimation : _estimationsSupplier.get()) {
 
-      estimation.ifPresent(pose -> {
+  //     estimation.ifPresent(pose -> {
 
-        _estimator.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds);
+  //       _estimator.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds);
 
-      });
-    }
-  }
+  //     });
+  //   }
+  // }
 
   public void log_modules() {
     SmartDashboard.putNumber("gyro", getYaw().getDegrees());
@@ -226,10 +228,13 @@ public class Swerve extends SubsystemBase {
 
   @Override
   public void periodic() {
-    updatePV();
+    // updatePV();
 
     publisher.set(getLastCalculatedPosition());
     _estimator.update(getYaw(), getPositions());
+    if(LimelightHelpers.getTV(null) && _estimationSupplier.get() != null){
+      _estimator.addVisionMeasurement(_estimationSupplier.get().getPoint(),_estimationSupplier.get().getTime());
+    }
     swerveOdometry.update(getYaw(), getPositions());
     m_field_solution.setRobotPose(getLastCalculatedPosition());
     // SmartDashboard.putData("Field_Estimation", m_field_solution);

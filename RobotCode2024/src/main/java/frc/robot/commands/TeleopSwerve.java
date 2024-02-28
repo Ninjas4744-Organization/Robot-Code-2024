@@ -43,7 +43,7 @@ public class TeleopSwerve extends Command {
     this.s_Swerve = s_Swerve;
     this._vision = vision;
     _controller_theta_pid = new PIDController(0.01111111 * 3.5, 0, 0);
-    _theta_controller = new ProfiledPIDController(0.01111111 *0.5, 0, 0,
+    _theta_controller = new ProfiledPIDController(0.01111111 *3, 0, 0,
         Constants.AutoConstants.kThetaControllerConstraints);
     _controller_x = new PIDController(0.6666666666666667 * 2.5, 0, 0.1);
     this._withTag = withTag;
@@ -81,9 +81,9 @@ public class TeleopSwerve extends Command {
         new Translation2d(
           _withTag.getAsBoolean() && inrange(targetPose, current_pos)?MathUtil.clamp(translationVal, -0.3, 0.3):
           translationVal,
-            _withTag.getAsBoolean() && inrange(targetPose, current_pos)
-                ? _controller_x.calculate(targetPose.getX() - current_pos.getX()-0.025)
-                : 
+            // _withTag.getAsBoolean() && inrange(targetPose, current_pos)
+            //     ? _controller_x.calculate(targetPose.getX() - current_pos.getX()-0.025)
+            //     : 
                 strafeVal)
             .times(Constants.Swerve.maxSpeed),
         _withTag.getAsBoolean()
