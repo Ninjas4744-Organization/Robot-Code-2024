@@ -22,8 +22,8 @@ public class Robot extends TimedRobot {
     _chooser = new SendableChooser<String>();
     ctreConfigs = new CTREConfigs();
     _robotContainer = new RobotContainer();
-    CameraServer.startAutomaticCapture();
-    CameraServer.startAutomaticCapture();
+   
+   
 
     _chooser.setDefaultOption("LeftAmp", "LeftAmp");
     _chooser.addOption("LeftAmp Alternate End", "LeftAmpAltEnd");
@@ -51,7 +51,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    System.out.println(LimelightHelpers.getBotPose2d_wpiBlue(null));
+    // System.out.println(LimelightHelpers.getBotPose2d_wpiBlue(null));
     _robotContainer.periodic();
     CommandScheduler.getInstance().run();
   }

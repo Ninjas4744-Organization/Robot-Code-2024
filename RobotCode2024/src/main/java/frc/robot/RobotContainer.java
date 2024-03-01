@@ -1,6 +1,5 @@
 package frc.robot;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -11,19 +10,13 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.SequentialStandByCommandGroup;
-import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Leds;
 import frc.robot.subsystems.Swerve;
@@ -31,7 +24,6 @@ import frc.robot.subsystems.Vision;
 import frc.robot.subsystems.Intake.Elevator;
 import frc.robot.subsystems.Intake.Rollers;
 import frc.robot.subsystems.Intake.Rotation;
-import frc.robot.Constants;
 
 public class RobotContainer {
   // Subsystems
@@ -95,26 +87,12 @@ public class RobotContainer {
     });
 
     // Driver:
-    _swerve.setDefaultCommand(
-        new TeleopSwerve(
-            _swerve,
-            _vision,
-            () -> {
-              return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient;
-            },
-            () -> {
-              return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient;
-            },
-            () -> {
-              return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient
-                  * Constants.Swerve.kDriveRotationCoefficient;
-            },
-            () -> {
-              return withTag;
-            },
-            () -> {
-              return false;
-            }));
+    _swerve.setDefaultCommand(new TeleopSwerve(
+      _swerve, _vision,
+       () -> {return -_joystick.getLeftX();},
+       () -> {return -_joystick.getLeftY();},
+       () -> {return -_joystick.getRightX();}, () ->false,() -> false)
+    );
 
             
             _joystick.R2().whileTrue(
