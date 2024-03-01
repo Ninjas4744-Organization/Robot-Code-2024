@@ -19,8 +19,8 @@ public class Robot extends TimedRobot {
     _chooser = new SendableChooser<String>();
     ctreConfigs = new CTREConfigs();
     _robotContainer = new RobotContainer();
-    // CameraServer.startAutomaticCapture();
-    // CameraServer.startAutomaticCapture();
+   
+   
 
     _chooser.setDefaultOption("LeftAmp", "LeftAmp");
     _chooser.addOption("LeftAmp Alternate End", "LeftAmpAltEnd");
