@@ -3,12 +3,10 @@ package frc.robot.subsystems.Intake;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
-import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -68,8 +66,7 @@ public class Elevator extends SubsystemBase {
 
   public Command Reset() {
     return Commands.startEnd(
-      () -> {setMotor(-0.3);
-      System.out.println("RESETING");},
+      () -> {setMotor(-0.3);},
       () -> {Stop();},
       this
     ).until(() -> {return !_limitSwitch.get();});

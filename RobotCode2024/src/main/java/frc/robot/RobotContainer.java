@@ -4,13 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
-
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.path.PathPlannerPath;
-
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -20,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.Climber;
-import frc.robot.subsystems.Leds;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Vision;
 import frc.robot.subsystems.Intake.Elevator;
@@ -38,6 +31,7 @@ public class RobotContainer {
   // private Leds _leds;
 
   // Misc
+  private CommandBuilder _commandBuilder;
   private CommandPS5Controller _joystick;
   private CommandPS5Controller _joystick2;
   private Boolean withTag = false;
@@ -55,17 +49,25 @@ public class RobotContainer {
     _rollers = new Rollers();
     // _leds = new Leds();
 
-    NamedCommands.registerCommand("Outake", runAutoOutake());
-    NamedCommands.registerCommand("Reset", Reset());
+    _commandBuilder = new CommandBuilder(_swerve, _climber, _elevator, _rotation, _rollers);
+
+    NamedCommands.registerCommand("Outake", _commandBuilder.runAutoOutake());
+    NamedCommands.registerCommand("Reset", _commandBuilder.Reset());
 
     configureBindings();
   }
 
-  public void configureBindings() {
-    // Misc:
-    Trigger tNote = new Trigger(() -> {return _rollers.isNote();});
-    Trigger tIntake = new Trigger(() -> {return _rollers.getMotor() == -1;});
-    Trigger tClimb = new Trigger(() -> {return _climber.getHeight() > 0.02;});
+  private void configureBindings() {
+    configureMiscBindings();
+    configureDriverBindings();
+    configureOperatorBindings();
+    configureManualBindings();
+  }
+
+  private void configureMiscBindings(){
+    // Trigger tNote = new Trigger(() -> {return _rollers.isNote();});
+    // Trigger tIntake = new Trigger(() -> {return _rollers.getMotor() == -1;});
+    // Trigger tClimb = new Trigger(() -> {return _climber.getHeight() > 0.02;});
 
     Trigger tAmp = new Trigger(() -> {return _rotation.isRotation(Constants.Rotation.States.kAmpOpenRotation);});
     Trigger tSrc = new Trigger(() -> {return _rotation.isRotation(Constants.Rotation.States.kSourceOpenRotation);});
@@ -82,8 +84,9 @@ public class RobotContainer {
     tSrc.onTrue(Commands.runOnce(() -> {Mode = "Source";}));
     tUp.onTrue(Commands.runOnce(() -> {Mode = "Idle";}));
     tTrap.onTrue(Commands.runOnce(() -> {Mode = "Trap";}));
+  }
 
-    // Driver:
+  private void configureDriverBindings(){
     _swerve.setDefaultCommand(
       new TeleopSwerve(
         _swerve,
@@ -104,16 +107,17 @@ public class RobotContainer {
     // );
 
     _joystick.L1().onTrue(Commands.runOnce(() -> { _swerve.zeroGyro(); }, _swerve));
-                
-    // Operator:
+  }
+
+  private void configureOperatorBindings(){
     _joystick2.cross().onTrue(Commands.select(getAcceptCommands(), () -> {return getAcceptId();}));
 
-    // _joystick2.cross().onTrue(
-    //   Commands.parallel(
-    //     _elevator.Reset(),
-    //     _rotation.Reset()
-    //   )
-    // );
+    _joystick2.circle().onTrue(
+      Commands.parallel(
+        _elevator.Reset(),
+        _rotation.Reset()
+      )
+    );
 
     _joystick2.square().onTrue(
       Commands.parallel(
@@ -122,13 +126,15 @@ public class RobotContainer {
       )
     );
 
-    _joystick2.triangle().onTrue(runInOutTake(
-        Constants.Elevator.States.kAmpOpenHeight, Constants.Rotation.States.kAmpOpenRotation,
-        _joystick2.getHID()::getTriangleButton));
+    // _joystick2.triangle().onTrue(_commandBuilder.runInOutTake(
+    //     Constants.Elevator.States.kAmpOpenHeight, Constants.Rotation.States.kAmpOpenRotation,
+    //     _joystick2.getHID()::getTriangleButton));
 
-    _joystick2.circle().onTrue(runOutake(Constants.Elevator.States.kTrapOpenHeight,
-        Constants.Rotation.States.kTrapOpenRotation, _joystick2.getHID()::getCircleButton));
+    // _joystick2.circle().onTrue(_commandBuilder.runOutake(Constants.Elevator.States.kTrapOpenHeight,
+    //     Constants.Rotation.States.kTrapOpenRotation, _joystick2.getHID()::getCircleButton));
+  }
 
+  private void configureManualBindings(){
     _joystick2.povRight().whileTrue(
         Commands.startEnd(
             () -> {
@@ -213,146 +219,34 @@ public class RobotContainer {
 
   public void periodic(){
     SmartDashboard.putString("Mode", Mode);
-    System.out.println(_vision.getTag().ID);
   }
 
-  public Command runInOutTake(double elevatorHeight, double rotation, BooleanSupplier condition) {
-    return Commands.either(
-      runIntake(),
-      runOutake(elevatorHeight, rotation, condition),
-      () -> { return !_rollers.isNote(); }
-    );
-  }
-
-  public Command runIntake() {
-    return Commands.sequence(
-      Commands.parallel(
-        _elevator.runOpen(Constants.Elevator.States.kSourceOpenHeight),
-        _rotation.runOpen(Constants.Rotation.States.kSourceOpenRotation)
-      ),
-
-      _rollers.runIntake().until(_rollers::isNote),
-
-      Commands.parallel(
-        _elevator.runClose(),
-        _rotation.runOpen(Constants.Rotation.States.kUpRotation)
-      )
-    );
-  }
-
-  public Command runOutake(double height, double rotation, BooleanSupplier condition) {
-    // return new SequentialStandByCommandGroup(
-    // condition,
-
-    // Commands.run(() -> {}),
-
-    // Commands.parallel(
-    // _elevator.runOpen(height),
-    // _rotation.runOpen(rotation)
-    // // Commands.run(() -> {})
-    // ),
-
-    // Commands.sequence(
-    // _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
-
-    // Commands.parallel(
-    // _elevator.runClose(),
-    // _rotation.runOpen(Constants.Rotation.States.kUpRotation)
-    // )
-    // )
-    // );
-
-    return Commands.sequence(
-      Commands.parallel(
-        _elevator.runOpen(height),
-        _rotation.runOpen(rotation)
-      ),
-      Commands.waitUntil(condition),
-
-      Commands.either(
-        _rollers.runIntake(0.7).raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
-        _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
-        () -> {return height == Constants.Elevator.States.kTrapOpenHeight;}
-      ),
-
-      Commands.parallel(
-        _elevator.runClose(),
-        _rotation.runOpen(Constants.Rotation.States.kUpRotation))
-    );
-  }
-
-  public Command runAutoOutake() {
-    return Commands.sequence(
-      Commands.parallel(
-        _elevator.runOpen(Constants.Elevator.States.kAmpOpenHeight),
-        _rotation.runOpen(Constants.Rotation.States.kAmpOpenRotation)
-      ),
-
-      Commands.waitUntil(
-        () -> {
-          return _elevator.isHeight(Constants.Elevator.States.kAmpOpenHeight)
-              && _rotation.isRotation(Constants.Rotation.States.kAmpOpenRotation);
-        }
-      ),
-
-      _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
-
-      Commands.parallel(
-        _elevator.runClose(),
-        _rotation.runOpen(Constants.Rotation.States.kUpRotation)
-      )
-    );
-  }
-
-  public HashMap<Integer, Command> getAcceptCommands() {
+  private HashMap<Integer, Command> getAcceptCommands() {
     HashMap<Integer, Command> _acceptCommands = new HashMap<Integer, Command>();
 
     // Source
-    _acceptCommands.put(1, runIntake());
-    _acceptCommands.put(2, runIntake());
-    _acceptCommands.put(9, runIntake());
-    _acceptCommands.put(10, runIntake());
+    _acceptCommands.put(1, _commandBuilder.runIntake());
+    _acceptCommands.put(2, _commandBuilder.runIntake());
+    _acceptCommands.put(9, _commandBuilder.runIntake());
+    _acceptCommands.put(10, _commandBuilder.runIntake());
 
     // Amp
-    _acceptCommands.put(5,
-        runOutake(
-            Constants.Elevator.States.kAmpOpenHeight,
-            Constants.Rotation.States.kAmpOpenRotation,
-            _joystick.getHID()::getTriangleButton));
-
-    _acceptCommands.put(6,
-        runOutake(
-            Constants.Elevator.States.kAmpOpenHeight,
-            Constants.Rotation.States.kAmpOpenRotation,
-            _joystick.getHID()::getTriangleButton));
+    for(int i = 5; i <= 6; i++)
+      _acceptCommands.put(i, _commandBuilder.runOutake(
+        Constants.Elevator.States.kAmpOpenHeight,
+        Constants.Rotation.States.kAmpOpenRotation,
+        _joystick2.getHID()::getCrossButton)
+      );
 
     // Stage
     for(int i = 11; i <= 16; i++)
-      _acceptCommands.put(i, runOutake(Constants.Elevator.States.kTrapOpenHeight,
-          Constants.Rotation.States.kTrapOpenRotation, _joystick2.getHID()::getCircleButton));
+      _acceptCommands.put(i, _commandBuilder.runOutake(Constants.Elevator.States.kTrapOpenHeight,
+          Constants.Rotation.States.kTrapOpenRotation, _joystick2.getHID()::getCrossButton));
 
     return _acceptCommands;
   }
 
   private int getAcceptId() {
-    // try{
-    // Optional<Alliance> ally = DriverStation.getAlliance();
-    // int tag = _vision.getTag().ID;
-
-    // AprilTagFieldLayout blue =
-    // AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
-    // blue.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
-
-    // AprilTagFieldLayout red =
-    // AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
-    // red.setOrigin(AprilTagFieldLayout.OriginPosition.kRedAllianceWallRightSide);
-
-    // if(ally.get() == DriverStation.Alliance.Red)
-    // }
-    // catch (Exception e) {
-    // e.printStackTrace();
-    // }
-
     int tag = _vision.getTag().ID;
     Optional<Alliance> ally = DriverStation.getAlliance();
     List<Integer> blueIDs = Arrays.asList(6, 14, 15, 16, 1, 2);
@@ -369,24 +263,7 @@ public class RobotContainer {
     return -1;
   }
 
-  public Command autoCommand(String auto) {
-    PathPlannerPath _path = PathPlannerPath.fromPathFile("LeftToAmp");
-
-    return Commands.sequence(
-        Commands.run(() -> {
-          _swerve.resetOdometry(_path.getPreviewStartingHolonomicPose());
-        }, _swerve).withTimeout(0.5),
-        AutoBuilder.buildAuto(auto));
-  }
-
-  public Command Reset() {
-    _swerve.zeroGyro();
-    _swerve.resetOdometry(new Pose2d());
-
-    return Commands.parallel(
-        _elevator.Reset(),
-        _rotation.Reset(),
-        _climber.Reset()
-    ).until(() -> {return _elevator.isHeight(0) && _rotation.isRotation(0) && _climber.isLimitSwitch();});
+  public void Reset(){
+    _commandBuilder.Reset().schedule();
   }
 }

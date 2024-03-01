@@ -56,7 +56,7 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     _autoSelected = _chooser.getSelected();
     // _robotContainer.autoCommand(_autoSelected).schedule();
-    _robotContainer.Reset().schedule();
+    _robotContainer.Reset();
   }
 
   @Override
@@ -65,7 +65,7 @@ public class Robot extends TimedRobot {
       _autonomousCommand.cancel();
     }
     
-    _robotContainer.Reset().schedule();
+    _robotContainer.Reset();
   }
 
   @Override
