@@ -40,7 +40,7 @@ public class Swerve extends SubsystemBase {
   private SwerveDriveOdometry swerveOdometry;
   private SwerveModule[] mSwerveMods;
   private AHRS gyro;
-  private Supplier<PointWithTime> _estimationSupplier;
+  // private Supplier<PointWithTime> _estimationSupplier;
 
   StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault()
       .getStructTopic("MyPose", Pose2d.struct).publish();
@@ -50,12 +50,13 @@ public class Swerve extends SubsystemBase {
 
   /** Creates a new SwerveSubsystem. */
   public Swerve(
-      Supplier<PointWithTime> estimationsSupplier) {
+      // Supplier<PointWithTime> estimationsSupplier
+      ) {
 
     gyro = new AHRS();
     gyro.getRotation2d();
     zeroGyro();
-    _estimationSupplier = estimationsSupplier;
+    // _estimationSupplier = estimationsSupplier;
     // Creates all four swerve modules into a swerve drive
     mSwerveMods = new SwerveModule[] {
         new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -106,7 +107,7 @@ public class Swerve extends SubsystemBase {
         // fancy way to do an if else statement
         // if field relative == true, use field relative stuff, otherwise use robot
         // centric
-        fieldRelative
+        true
             ? ChassisSpeeds.fromFieldRelativeSpeeds(
                 translation.getX(), translation.getY(), rotation, getYaw())
             : new ChassisSpeeds(translation.getX(), translation.getY(), rotation));
@@ -212,17 +213,17 @@ public class Swerve extends SubsystemBase {
   // }
 
   public void log_modules() {
-    // SmartDashboard.putNumber("gyro", getYaw().getDegrees());
-    // for (SwerveModule mod : mSwerveMods) {
-    //   SmartDashboard.putNumber(
-    //       "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
-    //   SmartDashboard.putNumber(
-    //       "Mod " + mod.moduleNumber + " Integrated",
-    //       mod.getState().angle.getDegrees());
-    //   SmartDashboard.putNumber(
-    //       "Mod " + mod.moduleNumber + " Velocity",
-    //       mod.getState().speedMetersPerSecond);
-    // }
+    SmartDashboard.putNumber("gyro", getYaw().getDegrees());
+    for (SwerveModule mod : mSwerveMods) {
+      SmartDashboard.putNumber(
+          "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
+      SmartDashboard.putNumber(
+          "Mod " + mod.moduleNumber + " Integrated",
+          mod.getState().angle.getDegrees());
+      SmartDashboard.putNumber(
+          "Mod " + mod.moduleNumber + " Velocity",
+          mod.getState().speedMetersPerSecond);
+    }
   }
 
 
@@ -232,13 +233,13 @@ public class Swerve extends SubsystemBase {
 
     publisher.set(getLastCalculatedPosition());
     _estimator.update(getYaw(), getPositions());
-    if(LimelightHelpers.getTV(null) && _estimationSupplier.get() != null){
-      _estimator.addVisionMeasurement(_estimationSupplier.get().getPoint(),_estimationSupplier.get().getTime());
-    }
+    // if(LimelightHelpers.getTV(null) && _estimationSupplier.get() != null){
+    //   _estimator.addVisionMeasurement(_estimationSupplier.get().getPoint(),_estimationSupplier.get().getTime());
+    // }
     swerveOdometry.update(getYaw(), getPositions());
     m_field_solution.setRobotPose(getLastCalculatedPosition());
     // SmartDashboard.putData("Field_Estimation", m_field_solution);
-    log_modules();
+    // log_modules();
   }
 
 }

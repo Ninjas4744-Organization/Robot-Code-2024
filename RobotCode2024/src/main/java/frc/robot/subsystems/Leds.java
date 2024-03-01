@@ -34,19 +34,15 @@ public class Leds extends SubsystemBase {
     return Commands.repeatingSequence(
       Commands.run(() -> {
         for (int i = 0; i < _ledBuffer.getLength(); i++)
-          _ledBuffer.setRGB(i, r, g, b);   
+          _ledBuffer.setRGB(i, r, g, b); 
         _led.setData(_ledBuffer);
       }, this).withTimeout(t),
 
-      // Commands.waitSeconds(t),
-
       Commands.run(() -> {
         for (int i = 0; i < _ledBuffer.getLength(); i++)
-        _ledBuffer.setRGB(i, 0, 0, 0);   
+            _ledBuffer.setRGB(i, 0, 0, 0);
         _led.setData(_ledBuffer);
       }, this).withTimeout(t)
-
-      // Commands.waitSeconds(t)
     ).repeatedly();
   }
 }

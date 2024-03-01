@@ -49,7 +49,7 @@ public final class Constants {
       public static final double kUpRotation = 120;
       public static final double kSourceOpenRotation = 70;
       public static final double kAmpOpenRotation = 0;
-      public static final double kTrapOpenRotation = 25;
+      public static final double kTrapOpenRotation = 87;
     }
 
     public static final class ControlConstants {
@@ -70,8 +70,8 @@ public final class Constants {
   public static final class Rollers {
     public static final int kRollersMotor = 12;
     public static final int kBeamBreaker = 5;
-    public static final double kTimeToOutake = 0.5;
-    // public static final double kTimeToIntake = 1;
+    public static final double kTimeToOutake = 1;
+    public static final double kTimeToIntake = 0.25;
   }
 
   public static final class Elevator {
@@ -82,7 +82,7 @@ public final class Constants {
       // public static final double kRealZero = -0.015;
       public static final double kSourceOpenHeight = 0.1;
       public static final double kAmpOpenHeight = 0.4;
-      public static final double kTrapOpenHeight = 0.59-0.27;
+      public static final double kTrapOpenHeight = 0.38;
     }
 
     public static final class ControlConstants {
@@ -102,7 +102,7 @@ public final class Constants {
   }
 
   public static final class Swerve {
-    public static final double kDriveCoefficient = 1;
+    public static final double kDriveCoefficient = 0;
     public static final double kDriveRotationCoefficient = 0.5;
     public static final double kActionCoefficient = 0.25;
     public static final double stickDeadband = 0.05;
@@ -133,7 +133,7 @@ public final class Constants {
 
     /* Swerve Current Limiting */
     public static final int angleContinuousCurrentLimit = 20;
-    public static final int driveContinuousCurrentLimit = 60;
+    public static final int driveContinuousCurrentLimit = 35;
 
     /* Angle Motor PID Values */
     public static final double angleKP = 0.01;
@@ -181,7 +181,7 @@ public final class Constants {
       public static final int angleMotorID = 2;
       public static final int canCoderID = 21;
       public static final Rotation2d angleOffset = 
-      Rotation2d.fromDegrees(269.472);// Rotation2d.fromRadians(Math.PI / 18 +
+      Rotation2d.fromDegrees(0);// Rotation2d.fromRadians(Math.PI / 18 +
                                                                                // 0.614258);
       public static final boolean isDriverEncoderInverted = false;
       public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
@@ -194,7 +194,7 @@ public final class Constants {
       public static final int angleMotorID = 4;
       public static final int canCoderID = 22;
       public static final Rotation2d angleOffset = 
-      Rotation2d.fromDegrees(270.175);// Rotation2d.fromRadians(-Math.PI / 18 +
+      Rotation2d.fromDegrees(0);// Rotation2d.fromRadians(-Math.PI / 18 +
                                                                                // Math.PI / 2 + 0.261475);
       public static final boolean isDriverEncoderInverted = false;
       public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
@@ -207,7 +207,7 @@ public final class Constants {
       public static final int angleMotorID = 6;
       public static final int canCoderID = 23;
       public static final Rotation2d angleOffset = 
-      Rotation2d.fromDegrees(359.384);// Rotation2d.fromRadians(-Math.PI / 18 +
+      Rotation2d.fromDegrees(0);// Rotation2d.fromRadians(-Math.PI / 18 +
                                                                                // Math.PI / 4 + 0.776855);
       // public static final double / =0;
       public static final boolean isDriverEncoderInverted = true;
@@ -222,7 +222,7 @@ public final class Constants {
       public static final int angleMotorID = 8;
       public static final int canCoderID = 24;
       public static final Rotation2d angleOffset = 
-      Rotation2d.fromDegrees(180.527);// Rotation2d.fromRadians(-Math.PI / 18 +
+      Rotation2d.fromDegrees(0);// Rotation2d.fromRadians(-Math.PI / 18 +
                                                                                // 0.634766);
       public static final boolean isDriverEncoderInverted = false;
 

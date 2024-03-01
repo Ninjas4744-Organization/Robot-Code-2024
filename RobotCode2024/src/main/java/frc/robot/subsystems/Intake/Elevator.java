@@ -3,12 +3,10 @@ package frc.robot.subsystems.Intake;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
-import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -34,14 +32,6 @@ public class Elevator extends SubsystemBase {
     _controller.setD(Constants.Elevator.ControlConstants.kD);
     _controller.setIZone(0.6);
 
-    _motor.enableSoftLimit(SoftLimitDirection.kForward, true);
-    // _motor.enableSoftLimit(SoftLimitDirection.kReverse, true);
-
-    _motor.setSoftLimit(SoftLimitDirection.kForward, 0.61f);
-    _motor.setSoftLimit(SoftLimitDirection.kReverse, 0);
-
-    _controller.setOutputRange(-1, 1);
-
     _motor.burnFlash();
   }
 
@@ -53,11 +43,7 @@ public class Elevator extends SubsystemBase {
         () -> new TrapezoidProfile.State(getHeight(), 0),
         this);
   }
-
-  public void setMotor(double percent) {
-    _motor.set(!_limitSwitch.get() && percent == -1 ? 0 : percent);
-  }
-
+  
   public double getHeight() {
     return _motor.getEncoder().getPosition();
   }
@@ -66,14 +52,21 @@ public class Elevator extends SubsystemBase {
     return Math.abs(height - getHeight()) < 0.02;
   }
 
+  public void setMotor(double percent) {
+    _motor.set(!_limitSwitch.get() && percent == -1 ? 0 : percent);
+  }
+
+  public double getMotor(){
+    return _motor.get();
+  }
+
   public void Stop() {
     _motor.stopMotor();
   }
 
   public Command Reset() {
     return Commands.startEnd(
-      () -> {setMotor(-0.3);
-      System.out.println("RESETING");},
+      () -> {setMotor(-0.3);},
       () -> {Stop();},
       this
     ).until(() -> {return !_limitSwitch.get();});
@@ -83,9 +76,6 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
     if (!_limitSwitch.get())
       _motor.getEncoder().setPosition(0);
-
-    SmartDashboard.putNumber("Elevator Height", getHeight());
-    SmartDashboard.putBoolean("Elevator Limit", !_limitSwitch.get());
   }
 
   public Command runOpen(double height) {

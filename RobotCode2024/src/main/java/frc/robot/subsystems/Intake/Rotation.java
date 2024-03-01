@@ -3,7 +3,6 @@ package frc.robot.subsystems.Intake;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
-import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -33,11 +32,6 @@ public class Rotation extends SubsystemBase {
     _controller.setD(Constants.Rotation.ControlConstants.kD);
     _controller.setIZone(3);
 
-    _motor.enableSoftLimit(SoftLimitDirection.kForward, true);
-
-    _motor.setSoftLimit(SoftLimitDirection.kForward, 130);
-    _motor.setSoftLimit(SoftLimitDirection.kReverse, 0);
-
     _controller.setOutputRange(-0.55, 0.55);
 
     _motor.burnFlash();
@@ -64,13 +58,17 @@ public class Rotation extends SubsystemBase {
     _motor.set(percent);
   }
 
+  public double getMotor(){
+    return _motor.get();
+  }
+
   public void Stop() {
     _motor.set(0);
   }
 
   public Command Reset() {
     return Commands.startEnd(
-        () -> {setMotor(-0.1);},
+        () -> {setMotor(-0.15);},
         () -> {Stop();},
         this
       ).until(() -> {return !_limitSwitch.get();});
@@ -81,7 +79,6 @@ public class Rotation extends SubsystemBase {
     if (!_limitSwitch.get())
       _motor.getEncoder().setPosition(0);
 
-    SmartDashboard.putNumber("Rotation", getRotation());
     SmartDashboard.putBoolean("Rotation Limit", !_limitSwitch.get());
   }
 

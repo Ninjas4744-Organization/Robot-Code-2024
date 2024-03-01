@@ -1,20 +1,17 @@
 package frc.robot;
 
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.config.CTREConfigs;
-import frc.lib.util.LimelightHelpers;
 
 public class Robot extends TimedRobot {
   public static CTREConfigs ctreConfigs;
   private Command _autonomousCommand;
   private String _autoSelected;
   private SendableChooser<String> _chooser;
-
   private RobotContainer _robotContainer;
 
   @Override
@@ -22,8 +19,8 @@ public class Robot extends TimedRobot {
     _chooser = new SendableChooser<String>();
     ctreConfigs = new CTREConfigs();
     _robotContainer = new RobotContainer();
-    CameraServer.startAutomaticCapture();
-    CameraServer.startAutomaticCapture();
+    // CameraServer.startAutomaticCapture();
+    // CameraServer.startAutomaticCapture();
 
     _chooser.setDefaultOption("LeftAmp", "LeftAmp");
     _chooser.addOption("LeftAmp Alternate End", "LeftAmpAltEnd");
@@ -51,21 +48,15 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    System.out.println(LimelightHelpers.getBotPose2d_wpiBlue(null));
     _robotContainer.periodic();
     CommandScheduler.getInstance().run();
   }
 
   @Override
   public void autonomousInit() {
-  _autoSelected = _chooser.getSelected();
-  _robotContainer.autoCommand(_autoSelected).schedule();
-  super.autonomousInit();
-  }
-
-  @Override
-  public void disabledInit() {
-    
+    _autoSelected = _chooser.getSelected();
+    // _robotContainer.autoCommand(_autoSelected);
+    _robotContainer.Reset().schedule();
   }
 
   @Override

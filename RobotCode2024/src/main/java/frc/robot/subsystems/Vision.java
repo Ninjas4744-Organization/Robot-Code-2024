@@ -1,15 +1,6 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import org.photonvision.EstimatedRobotPose;
-import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -17,9 +8,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Constants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.util.VisionCamera;
 import frc.lib.util.FieldTagsFilter;
 import frc.lib.util.PointWithTime;
 import frc.lib.util.LimelightHelpers;
@@ -34,7 +23,7 @@ public class Vision extends SubsystemBase {
   // private List<Optional<EstimatedRobotPose>> _currentEstimations;
   private PointWithTime _currentEstimations;
   private FieldTagsFilter _ids;
-  /** Creates a new Vision. */
+  
   public Vision() {
     try {
       CURRENT_FIELD_LAYOUT = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
@@ -49,7 +38,6 @@ public class Vision extends SubsystemBase {
       }
     }
     } catch (IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     
