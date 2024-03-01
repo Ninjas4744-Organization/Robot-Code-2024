@@ -24,6 +24,7 @@ import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.util.LimelightHelpers;
 import frc.lib.util.PointWithTime;
@@ -44,26 +45,24 @@ public class Swerve extends SubsystemBase {
   private Field2d m_field_solution = new Field2d();
   public SwerveDrivePoseEstimator _estimator;
 
-  /** Creates a new SwerveSubsystem. */
-  public Swerve(
-      Supplier<PointWithTime> estimationsSupplier) {
-
+  public Swerve(Supplier<PointWithTime> estimationSupplier) {
     gyro = new AHRS();
     gyro.getRotation2d();
     zeroGyro();
-    _estimationSupplier = estimationsSupplier;
+    _estimationSupplier = estimationSupplier;
+
     // Creates all four swerve modules into a swerve drive
     mSwerveMods = new SwerveModule[] {
-        new SwerveModule(0, Constants.Swerve.Mod0.constants),
-        new SwerveModule(1, Constants.Swerve.Mod1.constants),
-        new SwerveModule(2, Constants.Swerve.Mod2.constants),
-        new SwerveModule(3, Constants.Swerve.Mod3.constants)
+      new SwerveModule(0, Constants.Swerve.Mod0.constants),
+      new SwerveModule(1, Constants.Swerve.Mod1.constants),
+      new SwerveModule(2, Constants.Swerve.Mod2.constants),
+      new SwerveModule(3, Constants.Swerve.Mod3.constants)
     };
+
     // creates new swerve odometry (odometry is where the robot is on the field)
     swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw(), getPositions());
     resetOdometry(new Pose2d());
-    _estimator = new SwerveDrivePoseEstimator(Constants.Swerve.swerveKinematics, getYaw(), getPositions(),
-        new Pose2d());
+    _estimator = new SwerveDrivePoseEstimator(Constants.Swerve.swerveKinematics, getYaw(), getPositions(), new Pose2d());
 
     AutoBuilder.configureHolonomic(
         this::getPose, // Robot pose supplier
@@ -208,24 +207,22 @@ public class Swerve extends SubsystemBase {
   // }
 
   public void log_modules() {
-    // SmartDashboard.putNumber("gyro", getYaw().getDegrees());
-    // for (SwerveModule mod : mSwerveMods) {
-    //   SmartDashboard.putNumber(
-    //       "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
-    //   SmartDashboard.putNumber(
-    //       "Mod " + mod.moduleNumber + " Integrated",
-    //       mod.getState().angle.getDegrees());
-    //   SmartDashboard.putNumber(
-    //       "Mod " + mod.moduleNumber + " Velocity",
-    //       mod.getState().speedMetersPerSecond);
-    // }
+    SmartDashboard.putNumber("gyro", getYaw().getDegrees());
+    for (SwerveModule mod : mSwerveMods) {
+      SmartDashboard.putNumber(
+          "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
+      SmartDashboard.putNumber(
+          "Mod " + mod.moduleNumber + " Integrated",
+          mod.getState().angle.getDegrees());
+      SmartDashboard.putNumber(
+          "Mod " + mod.moduleNumber + " Velocity",
+          mod.getState().speedMetersPerSecond);
+    }
   }
 
 
   @Override
   public void periodic() {
-    // updatePV();
-
     publisher.set(getLastCalculatedPosition());
     _estimator.update(getYaw(), getPositions());
     if(LimelightHelpers.getTV(null) && _estimationSupplier.get() != null){
@@ -233,8 +230,7 @@ public class Swerve extends SubsystemBase {
     }
     swerveOdometry.update(getYaw(), getPositions());
     m_field_solution.setRobotPose(getLastCalculatedPosition());
-    // SmartDashboard.putData("Field_Estimation", m_field_solution);
-    log_modules();
+    // log_modules();
   }
 
 }

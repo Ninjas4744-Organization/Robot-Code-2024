@@ -27,6 +27,7 @@ public class Climber extends SubsystemBase {
     _motor1.restoreFactoryDefaults();
     _motor2 = new CANSparkMax(Constants.Climber.kMotor2, MotorType.kBrushless);
     _motor2.restoreFactoryDefaults();
+    _limitSwitch = new DigitalInput(Constants.Climber.kLimitSwitch);
 
     _motor1.getEncoder().setPositionConversionFactor(Constants.Climber.ControlConstants.kConversionPosFactor);
     _motor1.getEncoder().setVelocityConversionFactor(Constants.Climber.ControlConstants.kConversionVelFactor);
@@ -35,30 +36,11 @@ public class Climber extends SubsystemBase {
     _controller.setP(Constants.Climber.ControlConstants.kP);
     _controller.setI(Constants.Climber.ControlConstants.kI);
     _controller.setD(Constants.Climber.ControlConstants.kD);
-    // _controller.setIZone(3);
-
-    // _motor1.enableSoftLimit(SoftLimitDirection.kForward, true);
-    // _motor1.enableSoftLimit(SoftLimitDirection.kReverse, true);
-
-    _motor1.setSoftLimit(SoftLimitDirection.kForward, 0.4f);
-    _motor1.setSoftLimit(SoftLimitDirection.kReverse, 0);
-
-    // _controller.setOutputRange(-1, 1);
 
     _motor2.follow(_motor1, true);
     
     _motor1.burnFlash();
     _motor2.burnFlash();
-
-    _limitSwitch = new DigitalInput(Constants.Climber.kLimitSwitch);
-  }
-
-  public void setMotor(double percent) {
-    _motor1.set(percent);
-  }
-
-  public double getMotor() {
-    return _motor1.get();
   }
 
   public Command setHeight(double height){
@@ -74,8 +56,36 @@ public class Climber extends SubsystemBase {
     return _motor1.getEncoder().getPosition();
   }
 
+  public boolean isHeight(double height) {
+    return Math.abs(height - getHeight()) < 0.02;
+  }
+
+  public void setMotor(double percent) {
+    _motor1.set(percent);
+  }
+
+  public double getMotor() {
+    return _motor1.get();
+  }
+
   public void Stop() {
     _motor1.stopMotor();
+  }
+
+  public boolean isLimitSwitch() {
+    return !_limitSwitch.get();
+  }
+  
+  @Override
+  public void periodic() {
+    if(isLimitSwitch())
+      _motor1.getEncoder().setPosition(0);
+
+    if(isLimitSwitch() && getMotor() == -1)
+      Stop();
+
+    SmartDashboard.putBoolean("Climber Limit",isLimitSwitch());
+    SmartDashboard.putNumber("Climber Height", getHeight());
   }
 
   public Command Reset(){
@@ -93,19 +103,4 @@ public class Climber extends SubsystemBase {
       () -> {return !_limitSwitch.get();}
     );
   }
-  public boolean isLimitSwitch() {
-    return !_limitSwitch.get();
-  }
-  
-  @Override
-  public void periodic() {
-    if(!_limitSwitch.get())
-      _motor1.getEncoder().setPosition(0);
-
-    if(isLimitSwitch() && getMotor() == -1)
-      Stop();
-
-    SmartDashboard.putBoolean("Climber Limit",isLimitSwitch() );
-    SmartDashboard.putNumber("Climber Height", getHeight());
-  }  
 }

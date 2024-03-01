@@ -33,11 +33,6 @@ public class Rotation extends SubsystemBase {
     _controller.setD(Constants.Rotation.ControlConstants.kD);
     _controller.setIZone(3);
 
-    _motor.enableSoftLimit(SoftLimitDirection.kForward, true);
-
-    _motor.setSoftLimit(SoftLimitDirection.kForward, 130);
-    _motor.setSoftLimit(SoftLimitDirection.kReverse, 0);
-
     _controller.setOutputRange(-0.55, 0.55);
 
     _motor.burnFlash();
@@ -81,7 +76,6 @@ public class Rotation extends SubsystemBase {
     if (!_limitSwitch.get())
       _motor.getEncoder().setPosition(0);
 
-    SmartDashboard.putNumber("Rotation", getRotation());
     SmartDashboard.putBoolean("Rotation Limit", !_limitSwitch.get());
   }
 

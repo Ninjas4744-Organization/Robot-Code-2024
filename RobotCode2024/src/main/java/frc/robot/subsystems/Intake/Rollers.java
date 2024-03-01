@@ -27,7 +27,7 @@ public class Rollers extends SubsystemBase {
     _motor.set(speed);
   }
 
-  public double getRollers() {
+  public double getMotor() {
     return _motor.get();
   }
 
@@ -35,10 +35,8 @@ public class Rollers extends SubsystemBase {
     _motor.set(0);
   }
 
-  public void Override() {Stop();}
-
   public void Reset() {
-    Override();
+    Stop();
     if (this.getCurrentCommand() != null)
       this.getCurrentCommand().cancel();
   }

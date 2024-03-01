@@ -18,7 +18,7 @@ public class Leds extends SubsystemBase {
     _led.start();
 
     for (int i = 0; i < _ledBuffer.getLength(); i++)
-        _ledBuffer.setRGB(i, 0, 255, 0);
+      _ledBuffer.setRGB(i, 0, 255, 0);
     _led.setData(_ledBuffer);
   }
 
@@ -38,15 +38,11 @@ public class Leds extends SubsystemBase {
         _led.setData(_ledBuffer);
       }, this).withTimeout(t),
 
-      // Commands.waitSeconds(t),
-
       Commands.run(() -> {
         for (int i = 0; i < _ledBuffer.getLength(); i++)
         _ledBuffer.setRGB(i, 0, 0, 0);   
         _led.setData(_ledBuffer);
       }, this).withTimeout(t)
-
-      // Commands.waitSeconds(t)
     ).repeatedly();
   }
 }
