@@ -9,11 +9,7 @@ import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.util.FieldTagsFilter;
@@ -26,15 +22,10 @@ public class Vision extends SubsystemBase {
 
   private boolean _redOrBlue;
   private PointWithTime _currentEstimations;
-  private Pose2d _currentSource;
   private FieldTagsFilter _ids;
-
-  private GenericEntry leftsource, centersource, rightsource;
-  private boolean left, center, right;
 
   /** Creates a new Vision. */
   public Vision() {
-
     try {
       CURRENT_FIELD_LAYOUT = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
       var alliance = DriverStation.getAlliance();
@@ -51,43 +42,9 @@ public class Vision extends SubsystemBase {
       e.printStackTrace();
     }
 
-    leftsource = Shuffleboard.getTab("Dashboard")
-        .add("LEFT SOURCE", true)
-        .withWidget("Toggle Button")
-        .withSize(3, 3)
-        .getEntry();
-    centersource = Shuffleboard.getTab("Dashboard")
-        .add("CENTER SOURCE", false)
-        .withWidget("Toggle Button")
-        .withSize(3, 3)
-        .getEntry();
-    rightsource = Shuffleboard.getTab("Dashboard")
-        .add("RIGHT SOURCE", false)
-        .withWidget("Toggle Button")
-        .withSize(3, 3)
-        .getEntry();
-
     _ids = new FieldTagsFilter(_redOrBlue);
     _currentTag = CURRENT_FIELD_LAYOUT.getTags().get(_ids.getAmp() - 1);
 
-  }
-
-  private void leftSource() {
-    left = true;
-    center = false;
-    right = false;
-  }
-
-  private void centerSource() {
-    left = false;
-    center = true;
-    right = false;
-  }
-
-  private void rightTsource() {
-    left = false;
-    center = false;
-    right = true;
   }
 
   public PointWithTime estimationsSupplier() {
@@ -98,7 +55,7 @@ public class Vision extends SubsystemBase {
     return _currentTag;
   }
 
-  public boolean isRelaventTag() {
+  public boolean isRelaventTag(){
     return _ids.isRelavent(_currentTag.ID);
   }
 
@@ -107,7 +64,7 @@ public class Vision extends SubsystemBase {
   }
 
   public Pose2d getTagPose() {
-    return CURRENT_FIELD_LAYOUT.getTagPose(_currentTag.ID - 1).get().toPose2d();
+    return CURRENT_FIELD_LAYOUT.getTagPose(_currentTag.ID-1).get().toPose2d();
   }
 
   public void estimatePosition() {
@@ -122,48 +79,77 @@ public class Vision extends SubsystemBase {
       }
     }
   }
-  public double getCalculatedError(Pose2d currentRobotPose){
-    double y_error = _currentSource.getY() - currentRobotPose.getY();
-    double x_error = _currentSource.getX() - currentRobotPose.getX();
-    Rotation2d sinusOfError = Rotation2d.fromDegrees(180).minus(_currentSource.getRotation().plus(Rotation2d.fromDegrees(90)));
-    double ratioOfTriangles =  (x_error - y_error/sinusOfError.getTan())/y_error/sinusOfError.getTan();
-    return ratioOfTriangles*y_error;
-  }
-  public Pose2d getSource(){
-    return _currentSource;
-  }
-  public void updateSource() {
-    if (left != leftsource.getBoolean(false)) {
-      _currentSource = CURRENT_FIELD_LAYOUT.getTagPose(_ids.getLeftSource()).get().toPose2d();
-
-      leftSource();
-
-    } else if (center != centersource.getBoolean(false)) {
-      Pose2d leftSource = CURRENT_FIELD_LAYOUT.getTagPose(_ids.getLeftSource()).get().toPose2d();
-      Pose2d rightSource = CURRENT_FIELD_LAYOUT.getTagPose(_ids.getRightSource()).get().toPose2d();
-      _currentSource = new Pose2d(
-          new Translation2d(leftSource.getX() - rightSource.getX(), leftSource.getY() - rightSource.getY()),
-          leftSource.getRotation());
-      centerSource();
-    } else if (right != rightsource.getBoolean(false)) {
-      _currentSource = CURRENT_FIELD_LAYOUT.getTagPose(_ids.getRightSource()).get().toPose2d();
-      rightTsource();
-    }
-    leftsource.setBoolean(left);
-    centersource.setBoolean(center);
-    rightsource.setBoolean(right);
-  }
 
   @Override
   public void periodic() {
     estimatePosition();
-    getSource();
+
     if (LimelightHelpers.getTV(null) && (int) LimelightHelpers.getFiducialID(null) != -1) {
       int proccesed_id = (int) LimelightHelpers.getFiducialID(null);
+      // _currentTag = _ids.isRelavent(proccesed_id) ? CURRENT_FIELD_LAYOUT.getTags().get(proccesed_id) : _currentTag;
       _currentTag = CURRENT_FIELD_LAYOUT.getTags().get(proccesed_id - 1);
       SmartDashboard.putNumber("current tag", _currentTag.ID);
     }
-
   }
+
+  public String tagToString(AprilTag tag) {
+    switch(tag.ID){
+      case 1:
+        return "Blue Source";
+      
+      case 2:
+        return "Blue Source";
+
+      case 5:
+        return "Red Amp";
+
+      case 6:
+        return "Blue Amp";
+
+      case 9:
+        return "Red Source";
+
+      case 10:
+        return "Red Source";
+
+      case 11:
+        return "Red Stage";
+
+      case 12:
+        return "Red Stage";
+
+      case 13:
+        return "Red Stage";
+
+      case 14:
+        return "Blue Stage";
+
+      case 15:
+        return "Blue Stage";
+
+      case 16:
+        return "Blue Stage";
+    }
+    
+    return "No Tag In Sight";
+  }
+
+  // private boolean isBlueID(int id) {
+  // return id == 1 || id == 2 || id == 6 || id == 7 || id == 8 || id == 14 || id
+  // == 15 || id == 16;
+  // }
+
+  // private void relaventTags(int id) {
+  // if (_redOrBlue) {
+
+  // _currentTag = isBlueID(id) ? CURRENT_FIELD_LAYOUT.getTags().get(id) :
+  // _currentTag;
+
+  // } else {
+  // _currentTag = !isBlueID(id) ? CURRENT_FIELD_LAYOUT.getTags().get(id) :
+  // _currentTag;
+
+  // }
+  // }
 
 }

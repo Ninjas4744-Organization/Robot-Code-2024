@@ -31,7 +31,7 @@ public class TeleopSwerve extends Command {
   private SlewRateLimiter _translationRateLimiter;
   private SlewRateLimiter _strafeRateLimiter;
   private SlewRateLimiter _rotationRateLimiter;
-  private final double _rangeToCenter = 1.5;
+
   public TeleopSwerve(
       Swerve swerve,
       Vision vision,
@@ -45,14 +45,14 @@ public class TeleopSwerve extends Command {
     _vision = vision;
     _robotCentricSup = robotCentricSup;
     _withTag = withTag;
-
+    
     _translationSup = translationSup;
     _strafeSup = strafeSup;
     _rotationSup = rotationSup;
 
     _controller_theta_pid = new PIDController(0.01111111 * 3.5, 0, 0);
     _controller_x = new PIDController(0.6666666666666667 * 2.5, 0, 0.1);
-
+    
     _translationRateLimiter = new SlewRateLimiter(3);
     _strafeRateLimiter = new SlewRateLimiter(3);
     _rotationRateLimiter = new SlewRateLimiter(3);
@@ -64,16 +64,10 @@ public class TeleopSwerve extends Command {
   public void execute() {
     Pose2d targetPose = _vision.getTagPose();
     Pose2d current_pos = _swerve.getLastCalculatedPosition();
-
-    double error = _vision.isAmp() ? (targetPose.getX() - current_pos.getX()) : _vision.getCalculatedError(current_pos);
-    double degree_error = targetPose.rotateBy(Rotation2d.fromDegrees(180)).getRotation()
-        .minus(current_pos.getRotation()).getDegrees();
-
-    BooleanSupplier driveByTag = () -> _withTag.getAsBoolean() && targetPose.getX() - current_pos.getX() < _rangeToCenter
-        && _vision.isRelaventTag();
-
-    SmartDashboard.putNumber("error distance",
-        error);
+    // SmartDashboard.putNumber("X error",
+    // _controller_x.calculate(targetPose.getX() - current_pos.getX()));
+    SmartDashboard.putNumber("X distance",
+        targetPose.getX() - current_pos.getX());
 
     /* Get Values, Deadband */
     double translationVal = MathUtil.applyDeadband(_translationSup.getAsDouble(), Constants.Swerve.stickDeadband);
@@ -81,28 +75,32 @@ public class TeleopSwerve extends Command {
     double rotationVal = MathUtil.applyDeadband(_rotationSup.getAsDouble(), Constants.Swerve.stickDeadband);
 
     translationVal = _translationRateLimiter.calculate(
-        driveByTag.getAsBoolean()
-            ? -_controller_x.calculate(error)
+        _withTag.getAsBoolean() && inrange(targetPose, current_pos) && _vision.isRelaventTag()
+            ? -_controller_x.calculate(targetPose.getX() - current_pos.getX())
             : translationVal * (_withTag.getAsBoolean() ? Constants.Swerve.kActionCoefficient : 1));
 
     strafeVal = _strafeRateLimiter.calculate(
-        driveByTag.getAsBoolean()
+        _withTag.getAsBoolean() && inrange(targetPose, current_pos) && _vision.isRelaventTag()
             ? MathUtil.clamp(strafeVal, -0.3, 0.3)
             : strafeVal * (_withTag.getAsBoolean() ? Constants.Swerve.kActionCoefficient : 1));
 
     rotationVal = _rotationRateLimiter.calculate(_withTag.getAsBoolean()
-        ? -_controller_theta_pid.calculate(degree_error)
+        ? -_controller_theta_pid.calculate(
+            targetPose.rotateBy(Rotation2d.fromDegrees(180))
+                .getRotation().minus(current_pos.getRotation()).getDegrees())
         : rotationVal * Constants.Swerve.maxAngularVelocity);
 
     _swerve.drive(
         new Translation2d(
             translationVal,
-            strafeVal).times(Constants.Swerve.maxSpeed).rotateBy(
-                _withTag.getAsBoolean() && !_vision.isAmp() ? targetPose.getRotation() : Rotation2d.fromDegrees(0)),
-        rotationVal,
+            strafeVal).times(Constants.Swerve.maxSpeed).rotateBy(_withTag.getAsBoolean() && !_vision.isAmp()? targetPose.getRotation():Rotation2d.fromDegrees(0)),
+            rotationVal,
         !_robotCentricSup.getAsBoolean(),
         true);
 
   }
 
+  private boolean inrange(Pose2d targetPose, Pose2d current_pos) {
+    return targetPose.getX() - current_pos.getX() < 1.5;
+  }
 }

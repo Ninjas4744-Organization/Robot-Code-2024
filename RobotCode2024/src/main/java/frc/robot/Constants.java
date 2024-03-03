@@ -3,7 +3,10 @@ package frc.robot;
 import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -242,5 +245,22 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
 
     // Constraint for the motion profilied robot angle controller
+  }
+
+  public static final class Cameras {
+    public static final class Front {
+      public static final String _name = "front";
+      public static final Transform3d _camera_to_robot = new Transform3d(new Translation3d(-324 / 10 / 100, 0, 0.6),
+          new Rotation3d(0, 25, 0));
+
+    }
+
+    public static final class Back {
+      public static final String _name = "back";
+      public static final Transform3d _camera_to_robot = new Transform3d(new Translation3d(-324 / 10 / 100, 0, 0.3),
+          new Rotation3d(0, 25, 180));
+
+    }
+
   }
 }
