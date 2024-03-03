@@ -7,6 +7,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -36,6 +37,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public Command setHeight(double height) {
+    // return Commands.none();
     return new TrapezoidProfileCommand(
         new TrapezoidProfile(Constants.Elevator.ControlConstants.kConstraints),
         output -> _controller.setReference(output.position, ControlType.kPosition),
@@ -76,6 +78,8 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
     if (!_limitSwitch.get())
       _motor.getEncoder().setPosition(0);
+
+    SmartDashboard.putBoolean("Elevator Limit", !_limitSwitch.get());
   }
 
   public Command runOpen(double height) {

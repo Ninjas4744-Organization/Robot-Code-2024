@@ -83,8 +83,8 @@ public class Climber extends SubsystemBase {
     if(isLimitSwitch() && getMotor() == -1)
       Stop();
 
-    SmartDashboard.putBoolean("Climber Limit",isLimitSwitch());
-    SmartDashboard.putNumber("Climber Height", getHeight());
+    SmartDashboard.putBoolean("Climber Limit", isLimitSwitch());
+    SmartDashboard.putNumber("Climber Height", getHeight() * 100);
   }
 
   public Command Reset(){

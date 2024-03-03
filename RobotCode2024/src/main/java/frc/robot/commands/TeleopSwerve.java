@@ -19,14 +19,17 @@ public class TeleopSwerve extends Command {
   private Swerve _swerve;
   private Vision _vision;
   private BooleanSupplier _robotCentricSup;
-  BooleanSupplier _withTag;
+  private BooleanSupplier _whileTag;
+  private BooleanSupplier _onTag;
+  private Pose2d _targetPose = new Pose2d();
 
   private DoubleSupplier _translationSup;
   private DoubleSupplier _strafeSup;
   private DoubleSupplier _rotationSup;
 
-  private PIDController _controller_x;
-  private PIDController _controller_theta_pid;
+  private PIDController _xController;
+  private PIDController _yController;
+  private PIDController _0Controller;
 
   private SlewRateLimiter _translationRateLimiter;
   private SlewRateLimiter _strafeRateLimiter;
@@ -38,20 +41,23 @@ public class TeleopSwerve extends Command {
       DoubleSupplier translationSup,
       DoubleSupplier strafeSup,
       DoubleSupplier rotationSup,
-      BooleanSupplier withTag,
+      BooleanSupplier whileTag,
+      BooleanSupplier onTag,
       BooleanSupplier robotCentricSup) {
 
     _swerve = swerve;
     _vision = vision;
     _robotCentricSup = robotCentricSup;
-    _withTag = withTag;
+    _whileTag = whileTag;
+    _onTag = onTag;
     
     _translationSup = translationSup;
     _strafeSup = strafeSup;
     _rotationSup = rotationSup;
 
-    _controller_theta_pid = new PIDController(0.01111111 * 3.5, 0, 0);
-    _controller_x = new PIDController(0.6666666666666667 * 2.5, 0, 0.1);
+    _0Controller = new PIDController(0.01111111 * 3.5, 0, 0);
+    _xController = new PIDController(0.6666666666666667 * 2.5, 0, 0.1);
+    _yController = new PIDController(0.6666666666666667 * 2.5, 0, 0.1);
     
     _translationRateLimiter = new SlewRateLimiter(3);
     _strafeRateLimiter = new SlewRateLimiter(3);
@@ -62,45 +68,70 @@ public class TeleopSwerve extends Command {
 
   @Override
   public void execute() {
-    Pose2d targetPose = _vision.getTagPose();
-    Pose2d current_pos = _swerve.getLastCalculatedPosition();
-    // SmartDashboard.putNumber("X error",
-    // _controller_x.calculate(targetPose.getX() - current_pos.getX()));
-    SmartDashboard.putNumber("X distance",
-        targetPose.getX() - current_pos.getX());
+    Pose2d tagPose = _vision.getTagPose();
+    Pose2d currentPose = _swerve.getLastCalculatedPosition();
 
-    /* Get Values, Deadband */
+    // Vision Target Pose
+    if(_onTag.getAsBoolean()){
+      double distFromTag = currentPose.getTranslation().getDistance(tagPose.getTranslation());
+      Rotation2d tagDir = tagPose.getRotation().plus(Rotation2d.fromDegrees(90)); //Getting normal
+      Translation2d distTargetFromTag = new Translation2d(
+        -distFromTag * Math.cos(tagDir.getRadians()),
+        -distFromTag * Math.sin(tagDir.getRadians())
+      );
+      _targetPose = new Pose2d(
+        tagPose.getX() + distTargetFromTag.getX(),
+        tagPose.getY() + distTargetFromTag.getY(),
+        tagDir.plus(Rotation2d.fromDegrees(180))
+      );
+    }
+    
+    // Apply Deadband
     double translationVal = MathUtil.applyDeadband(_translationSup.getAsDouble(), Constants.Swerve.stickDeadband);
     double strafeVal = MathUtil.applyDeadband(_strafeSup.getAsDouble(), Constants.Swerve.stickDeadband);
     double rotationVal = MathUtil.applyDeadband(_rotationSup.getAsDouble(), Constants.Swerve.stickDeadband);
 
+    // Final Values
     translationVal = _translationRateLimiter.calculate(
-        _withTag.getAsBoolean() && inrange(targetPose, current_pos) && _vision.isRelaventTag()
-            ? -_controller_x.calculate(targetPose.getX() - current_pos.getX())
-            : translationVal * (_withTag.getAsBoolean() ? Constants.Swerve.kActionCoefficient : 1));
+        _whileTag.getAsBoolean() && inrange(tagPose, currentPose) && _vision.isRelaventTag()
+            ? _yController.calculate(currentPose.getY(), _targetPose.getY()) * Constants.Swerve.kActionCoefficient
+            + translationVal * Math.sin(_targetPose.getRotation().getRadians()) * Constants.Swerve.kActionCoefficient
+            : translationVal * (_whileTag.getAsBoolean() ? Constants.Swerve.kActionCoefficient : 1));
 
     strafeVal = _strafeRateLimiter.calculate(
-        _withTag.getAsBoolean() && inrange(targetPose, current_pos) && _vision.isRelaventTag()
-            ? MathUtil.clamp(strafeVal, -0.3, 0.3)
-            : strafeVal * (_withTag.getAsBoolean() ? Constants.Swerve.kActionCoefficient : 1));
+        _whileTag.getAsBoolean() && inrange(tagPose, currentPose) && _vision.isRelaventTag()
+            ? _xController.calculate(currentPose.getX(), _targetPose.getX()) * Constants.Swerve.kActionCoefficient
+            + translationVal * Math.cos(_targetPose.getRotation().getRadians()) * Constants.Swerve.kActionCoefficient
+            : strafeVal * (_whileTag.getAsBoolean() ? Constants.Swerve.kActionCoefficient : 1));
 
-    rotationVal = _rotationRateLimiter.calculate(_withTag.getAsBoolean()
-        ? -_controller_theta_pid.calculate(
-            targetPose.rotateBy(Rotation2d.fromDegrees(180))
-                .getRotation().minus(current_pos.getRotation()).getDegrees())
+    rotationVal = _rotationRateLimiter.calculate(_whileTag.getAsBoolean()
+        ? -_0Controller.calculate(_targetPose.getRotation().getDegrees())
         : rotationVal * Constants.Swerve.maxAngularVelocity);
 
     _swerve.drive(
-        new Translation2d(
-            translationVal,
-            strafeVal).times(Constants.Swerve.maxSpeed).rotateBy(_withTag.getAsBoolean() && !_vision.isAmp()? targetPose.getRotation():Rotation2d.fromDegrees(0)),
-            rotationVal,
-        !_robotCentricSup.getAsBoolean(),
-        true);
-
+      new Translation2d(translationVal, strafeVal).times(Constants.Swerve.maxSpeed),
+      rotationVal,
+      !_robotCentricSup.getAsBoolean(),
+      true
+    );
+    
+    // Dashboard
+    // SmartDashboard.putNumber("Dist From Tag", distFromTag);
+    // SmartDashboard.putNumber("X PID", _xController.calculate(currentPose.getX(), _targetPose.getX()));
+    // SmartDashboard.putNumber("Y PID", _yController.calculate(currentPose.getY(), _targetPose.getY()));
+    // SmartDashboard.putNumber("X Movement", translationVal * Math.cos(_targetPose.getRotation().getRadians()));
+    // SmartDashboard.putNumber("Y Movement", translationVal * Math.sin(_targetPose.getRotation().getRadians()));
+    // SmartDashboard.putNumber("X Final Movement", strafeVal);
+    // SmartDashboard.putNumber("Y Final Movement", translationVal);
+    // SmartDashboard.putNumber("X distance", tagPose.getX() - currentPose.getX());
+    // SmartDashboard.putNumber("Y distance", tagPose.getY() - currentPose.getY());
+    // SmartDashboard.putNumber("Tag X", tagPose.getX());
+    // SmartDashboard.putNumber("Tag Y", tagPose.getY());
+    // SmartDashboard.putNumber("Tag 0", tagPose.getRotation().getDegrees());
   }
 
-  private boolean inrange(Pose2d targetPose, Pose2d current_pos) {
-    return targetPose.getX() - current_pos.getX() < 1.5;
+  private boolean inrange(Pose2d tagPose, Pose2d currentPose) {
+    double distFromTag = currentPose.getTranslation().getDistance(tagPose.getTranslation());
+    return distFromTag < 1.5;
   }
 }

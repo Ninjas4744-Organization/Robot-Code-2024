@@ -84,12 +84,14 @@ public class Vision extends SubsystemBase {
   public void periodic() {
     estimatePosition();
 
+    LimelightHelpers.setLEDMode_ForceOff(null);
     if (LimelightHelpers.getTV(null) && (int) LimelightHelpers.getFiducialID(null) != -1) {
+      LimelightHelpers.setLEDMode_ForceOn(null);
       int proccesed_id = (int) LimelightHelpers.getFiducialID(null);
       // _currentTag = _ids.isRelavent(proccesed_id) ? CURRENT_FIELD_LAYOUT.getTags().get(proccesed_id) : _currentTag;
       _currentTag = CURRENT_FIELD_LAYOUT.getTags().get(proccesed_id - 1);
-      SmartDashboard.putNumber("current tag", _currentTag.ID);
     }
+    SmartDashboard.putString("Vision", tagToString(_currentTag) + " " + _currentTag.ID);
   }
 
   public String tagToString(AprilTag tag) {
