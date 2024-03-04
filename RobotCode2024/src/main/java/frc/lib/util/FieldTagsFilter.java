@@ -36,15 +36,16 @@ public class FieldTagsFilter {
     }
 
     public int getAmp(){
-        return ids[2];
+        return ids[3];
       }
     
-    public int getSourceRight(){
+    public int getRightSource(){
         return ids[0];
     }
 
-    public int getSourceLeft(){
+    public int getLeftSource(){
         return ids[1];
     }
+    
     
 }
