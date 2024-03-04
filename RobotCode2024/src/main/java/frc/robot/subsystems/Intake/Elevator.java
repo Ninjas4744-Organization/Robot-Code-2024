@@ -24,6 +24,7 @@ public class Elevator extends SubsystemBase {
     _motor = new CANSparkMax(Constants.Elevator.kMotorID, MotorType.kBrushless);
     _motor.restoreFactoryDefaults();
     _motor.setInverted(true);
+    _motor.setSmartCurrentLimit(Constants.kCurrentLimit);
     _motor.getEncoder().setPositionConversionFactor(Constants.Elevator.ControlConstants.kConversionPosFactor);
     _motor.getEncoder().setVelocityConversionFactor(Constants.Elevator.ControlConstants.kConversionVelFactor);
     _limitSwitch = new DigitalInput(Constants.Elevator.kLimitSwitchID);

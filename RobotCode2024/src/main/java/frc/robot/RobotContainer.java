@@ -4,7 +4,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathPlannerPath;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -101,25 +105,23 @@ public class RobotContainer {
         () -> { return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient; },
         () -> { return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient; },
         () -> { return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient * Constants.Swerve.kDriveRotationCoefficient; },
-        () -> { return withTag; },
-        () -> { return onTag; },
+        () -> { return false; },
         () -> { return false; }
       )
     );
 
     _joystick.R2().whileTrue(
-      Commands.startEnd(
-        () -> withTag = true,
-        () -> withTag = false
+      new TeleopSwerve(
+        _swerve,
+        _vision,
+        () -> { return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient; },
+        () -> { return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient; },
+        () -> { return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient * Constants.Swerve.kDriveRotationCoefficient; },
+        () -> { return true; },
+        () -> { return false; }
       )
     );
-    _joystick.R2().onTrue(
-      Commands.startEnd(
-        () -> onTag = true,
-        () -> onTag = false
-      )
-    );
-
+   
     _joystick.L1().onTrue(Commands.runOnce(() -> { _swerve.zeroGyro(); }, _swerve));
   }
 
@@ -173,9 +175,10 @@ public class RobotContainer {
         Commands.startEnd(
             () -> {
               _climber.setMotor(1);
+
             },
             () -> {
-              _climber.Stop();
+              _climber.setMotor(0);
             },
             _climber));
 
@@ -183,9 +186,10 @@ public class RobotContainer {
         Commands.startEnd(
             () -> {
               _climber.setMotor(-1);
+
             },
             () -> {
-              _climber.Stop();
+              _climber.setMotor(0);
             },
             _climber));
 
@@ -279,5 +283,9 @@ public class RobotContainer {
 
   public void Reset(){
     _commandBuilder.Reset().schedule();
+  }
+
+  public Command autoCommand(String auto) {
+    return _commandBuilder.autoCommand(auto);
   }
 }

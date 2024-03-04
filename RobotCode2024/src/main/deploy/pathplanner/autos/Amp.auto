@@ -20,7 +20,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LeftToAmp"
+            "pathName": "Score"
           }
         },
         {
@@ -30,14 +30,20 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 5.0
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "ExitAmp"
+            "pathName": "AmpExit"
           }
         }
       ]
     }
   },
-  "folder": "Left Autos",
+  "folder": null,
   "choreoAuto": false
 }

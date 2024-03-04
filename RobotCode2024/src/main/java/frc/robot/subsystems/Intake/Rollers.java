@@ -17,6 +17,9 @@ public class Rollers extends SubsystemBase {
 
   public Rollers() {
     _motor = new CANSparkMax(Constants.Rollers.kMotorID, MotorType.kBrushless);
+    _motor.restoreFactoryDefaults();
+    _motor.setSmartCurrentLimit(35);
+    _motor.burnFlash();
     _beamBreaker = new DigitalInput(Constants.Rollers.kBeamBreakerID);
   }
 

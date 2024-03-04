@@ -39,10 +39,14 @@ public class Vision extends SubsystemBase {
       CURRENT_FIELD_LAYOUT = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
       var alliance = DriverStation.getAlliance();
       if (alliance.isPresent()) {
-        _redOrBlue = !(alliance.get() == DriverStation.Alliance.Blue);
+        _redOrBlue = (alliance.get() == DriverStation.Alliance.Blue);
         if (_redOrBlue) {
+                  System.out.println("BLUE");
+
           CURRENT_FIELD_LAYOUT.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
         } else {
+                  System.out.println("RED");
+
           CURRENT_FIELD_LAYOUT.setOrigin(AprilTagFieldLayout.OriginPosition.kRedAllianceWallRightSide);
         }
       }
@@ -66,9 +70,9 @@ public class Vision extends SubsystemBase {
         .withWidget("Toggle Button")
         .withSize(3, 3)
         .getEntry();
-
+    _currentSource = new Pose2d();
     _ids = new FieldTagsFilter(_redOrBlue);
-    _currentTag = CURRENT_FIELD_LAYOUT.getTags().get(_ids.getAmp() - 1);
+    _currentTag = CURRENT_FIELD_LAYOUT.getTags().get(5);
 
   }
 
@@ -107,7 +111,7 @@ public class Vision extends SubsystemBase {
   }
 
   public Pose2d getTagPose() {
-    return CURRENT_FIELD_LAYOUT.getTagPose(_currentTag.ID - 1).get().toPose2d();
+    return CURRENT_FIELD_LAYOUT.getTagPose(_currentTag.ID ).get().toPose2d();
   }
 
   public void estimatePosition() {
@@ -160,7 +164,7 @@ public class Vision extends SubsystemBase {
     getSource();
     if (LimelightHelpers.getTV(null) && (int) LimelightHelpers.getFiducialID(null) != -1) {
       int proccesed_id = (int) LimelightHelpers.getFiducialID(null);
-      _currentTag = CURRENT_FIELD_LAYOUT.getTags().get(proccesed_id - 1);
+      _currentTag = CURRENT_FIELD_LAYOUT.getTags().get(5);
       SmartDashboard.putNumber("current tag", _currentTag.ID);
     }
 

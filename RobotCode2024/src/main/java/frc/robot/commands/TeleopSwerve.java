@@ -55,7 +55,7 @@ public class TeleopSwerve extends Command {
 
     _translationRateLimiter = new SlewRateLimiter(3);
     _strafeRateLimiter = new SlewRateLimiter(3);
-    _rotationRateLimiter = new SlewRateLimiter(3);
+    _rotationRateLimiter = new SlewRateLimiter(5);
 
     addRequirements(_swerve, _vision);
   }
@@ -63,9 +63,11 @@ public class TeleopSwerve extends Command {
   @Override
   public void execute() {
     Pose2d targetPose = _vision.getTagPose();
+    SmartDashboard.putNumber("target X",targetPose.getX() );
     Pose2d current_pos = _swerve.getLastCalculatedPosition();
 
-    double error = _vision.isAmp() ? (targetPose.getX() - current_pos.getX()) : _vision.getCalculatedError(current_pos);
+    // double error = _vision.isAmp() ? (targetPose.getX() - current_pos.getX()) : _vision.getCalculatedError(current_pos);
+    double error = targetPose.getX() - current_pos.getX();
     double degree_error = targetPose.rotateBy(Rotation2d.fromDegrees(180)).getRotation()
         .minus(current_pos.getRotation()).getDegrees();
 
@@ -74,6 +76,11 @@ public class TeleopSwerve extends Command {
 
     SmartDashboard.putNumber("error distance",
         error);
+    SmartDashboard.putNumber("error theta",
+        degree_error);
+    SmartDashboard.putNumber("output X",
+        -_controller_x.calculate(error));
+    // _controller_x.calculate(degree_error)
 
     /* Get Values, Deadband */
     double translationVal = MathUtil.applyDeadband(_translationSup.getAsDouble(), Constants.Swerve.stickDeadband);
@@ -83,16 +90,15 @@ public class TeleopSwerve extends Command {
     translationVal = _translationRateLimiter.calculate(
         driveByTag.getAsBoolean()
             ? -_controller_x.calculate(error)
-            : translationVal * (_withTag.getAsBoolean() ? Constants.Swerve.kActionCoefficient : 1));
-
+            :
+             translationVal * (_withTag.getAsBoolean() ? Constants.Swerve.kActionCoefficient : 1));
     strafeVal = _strafeRateLimiter.calculate(
-        driveByTag.getAsBoolean()
-            ? MathUtil.clamp(strafeVal, -0.3, 0.3)
-            : strafeVal * (_withTag.getAsBoolean() ? Constants.Swerve.kActionCoefficient : 1));
+        // driveByTag.getAsBoolean() ? MathUtil.clamp(strafeVal, -0.3, 0.3): 
+        strafeVal * (_withTag.getAsBoolean() ? Constants.Swerve.kActionCoefficient : 1));
 
-    rotationVal = _rotationRateLimiter.calculate(_withTag.getAsBoolean()
-        ? -_controller_theta_pid.calculate(degree_error)
-        : rotationVal * Constants.Swerve.maxAngularVelocity);
+    rotationVal = _withTag.getAsBoolean() ?-_controller_theta_pid.calculate(degree_error):_rotationRateLimiter.calculate(
+       
+         rotationVal * Constants.Swerve.maxAngularVelocity);
 
     _swerve.drive(
         new Translation2d(

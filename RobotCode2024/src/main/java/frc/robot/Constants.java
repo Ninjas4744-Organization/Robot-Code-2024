@@ -13,10 +13,11 @@ import frc.lib.util.SwerveModuleConstants;
 public final class Constants {
   public static final int kJoystickPort = 0;
   public static final int kJoystick2Port = 1;
+  public static final int kCurrentLimit = 40;
 
   public static final class Climber {
-    public static final int kMotor1ID = 20;
-    public static final int kMotor2ID = 21;
+    public static final int kMotor1ID = 21;
+    public static final int kMotor2ID = 20;
     public static final int kLimitSwitchID = 2;
 
     public static final double kMaxClimber = 0.4;

@@ -23,6 +23,7 @@ public class Rotation extends SubsystemBase {
   public Rotation() {
     _motor = new CANSparkMax(Constants.Rotation.kMotorID, MotorType.kBrushless);
     _motor.restoreFactoryDefaults();
+    _motor.setSmartCurrentLimit(Constants.kCurrentLimit);
     _motor.getEncoder().setPositionConversionFactor(Constants.Rotation.ControlConstants.kConversionPosFactor);
     _motor.getEncoder().setVelocityConversionFactor(Constants.Rotation.ControlConstants.kConversionVelFactor);
     _limitSwitch = new DigitalInput(Constants.Rotation.kLimitSwitchID);
@@ -65,7 +66,7 @@ public class Rotation extends SubsystemBase {
 
   public Command Reset() {
     return Commands.startEnd(
-        () -> {setMotor(-0.1);},
+        () -> {setMotor(-0.2);},
         () -> {Stop();},
         this
       ).until(() -> {return !_limitSwitch.get();});

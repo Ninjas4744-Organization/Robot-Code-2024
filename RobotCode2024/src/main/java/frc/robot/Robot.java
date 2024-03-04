@@ -54,9 +54,14 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    _autoSelected = _chooser.getSelected();
-    // _robotContainer.autoCommand(_autoSelected).schedule();
-    _robotContainer.Reset();
+    if (_autonomousCommand != null) {
+      _autonomousCommand.cancel();
+    }
+
+    // _autoSelected = _chooser.getSelected();
+    _autonomousCommand = _robotContainer.autoCommand("Amp Alt 2");
+    _autonomousCommand.schedule();
+    // _robotContainer.Reset();
   }
 
   @Override

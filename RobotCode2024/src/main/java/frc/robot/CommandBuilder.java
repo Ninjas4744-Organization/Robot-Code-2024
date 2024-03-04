@@ -62,7 +62,7 @@ public class CommandBuilder {
       Commands.waitUntil(condition),
 
       Commands.either(
-        _rollers.runIntake(0.7).raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
+        _rollers.runIntake(1).raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
         _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
         () -> {return height == Constants.Rotation.States.kTrapOpenRotation;}
       ),
@@ -87,6 +87,8 @@ public class CommandBuilder {
         }
       ),
 
+      Commands.waitSeconds(0.1),
+
       _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
 
       Commands.parallel(
@@ -98,12 +100,9 @@ public class CommandBuilder {
 
   public Command autoCommand(String auto) {
     PathPlannerPath _path = PathPlannerPath.fromPathFile("LeftToAmp");
+    _swerve.resetOdometry(_path.getPreviewStartingHolonomicPose());
 
-    return Commands.sequence(
-        Commands.run(() -> {
-          _swerve.resetOdometry(_path.getPreviewStartingHolonomicPose());
-        }, _swerve).withTimeout(0.5),
-        AutoBuilder.buildAuto(auto));
+    return AutoBuilder.buildAuto(auto);
   }
 
   public Command Reset() {
@@ -112,8 +111,8 @@ public class CommandBuilder {
 
     return Commands.parallel(
       _elevator.Reset(),
-      _rotation.Reset(),
-      _climber.Reset()
-  ).until(() -> {return _elevator.isHeight(0) && _rotation.isRotation(0) && _climber.isLimitSwitch();});
+      _rotation.Reset()
+      // _climber.Reset()
+  ).until(() -> {return _elevator.isHeight(0) && _rotation.isRotation(0)/* && _climber.isLimitSwitch()*/;});
   }
 }
