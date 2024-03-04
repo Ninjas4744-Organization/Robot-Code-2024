@@ -65,11 +65,16 @@ public class CommandBuilder {
         _rollers.runIntake(1).raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
         _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
         () -> {return height == Constants.Rotation.States.kTrapOpenRotation;}
-      ),
+      )
 
-      Commands.parallel(
-        _elevator.runClose(),
-        _rotation.runOpen(Constants.Rotation.States.kUpRotation))
+      // Commands.parallel(
+      //   _elevator.runClose(),
+      //   Commands.either(
+      //     _rotation.runOpen(Constants.Rotation.States.kUpRotation)),
+      //     _rotation.runClose(),
+      //     () -> {return height == Constants.Rotation.States.kTrapOpenRotation;}
+        
+      // )
     );
   }
 
@@ -93,7 +98,8 @@ public class CommandBuilder {
 
       Commands.parallel(
         _elevator.runClose(),
-        _rotation.runOpen(Constants.Rotation.States.kUpRotation)
+        // _rotation.runOpen(Constants.Rotation.States.kUpRotation)
+        _rotation.runClose()
       )
     );
   }
@@ -111,8 +117,8 @@ public class CommandBuilder {
 
     return Commands.parallel(
       _elevator.Reset(),
-      _rotation.Reset()
-      // _climber.Reset()
-  ).until(() -> {return _elevator.isHeight(0) && _rotation.isRotation(0)/* && _climber.isLimitSwitch()*/;});
+      _rotation.Reset(),
+      _climber.Reset()
+  ).until(() -> {return _elevator.isHeight(0) && _rotation.isRotation(0) && _climber.isLimitSwitch();});
   }
 }

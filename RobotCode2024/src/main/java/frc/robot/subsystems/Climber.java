@@ -94,9 +94,10 @@ public class Climber extends SubsystemBase {
     if(isLimitSwitch())
       _motor1.getEncoder().setPosition(0);
 
-    // if(isLimitSwitch() && getMotor() == -1)
-    //   Stop();
-    SmartDashboard.putBoolean("Climb limit",isLimitSwitch());
+    if(isLimitSwitch() && getMotor() == -1)
+      Stop();
+
+    SmartDashboard.putBoolean("Climb limit", isLimitSwitch());
   }
 
   public Command Reset(){
@@ -104,7 +105,7 @@ public class Climber extends SubsystemBase {
       () -> {setMotor(-0.5);},
       () -> {Stop();},
       this
-    ).until(() -> {return !_limitSwitch.get();});
+    ).until(() -> {return isLimitSwitch();});
   }
 
   // public Command runClimb(){

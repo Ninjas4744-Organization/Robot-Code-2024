@@ -47,8 +47,9 @@ public class Vision extends SubsystemBase {
         } else {
                   System.out.println("RED");
 
-          CURRENT_FIELD_LAYOUT.setOrigin(AprilTagFieldLayout.OriginPosition.kRedAllianceWallRightSide);
+          CURRENT_FIELD_LAYOUT.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
         }
+
       }
     } catch (IOException e) {
       // TODO Auto-generated catch block
@@ -109,7 +110,9 @@ public class Vision extends SubsystemBase {
   public boolean isAmp() {
     return _currentTag.ID == 5 || _currentTag.ID == 6;
   }
-
+  public boolean getAlliance(){
+    return _redOrBlue;
+  }
   public Pose2d getTagPose() {
     return CURRENT_FIELD_LAYOUT.getTagPose(_currentTag.ID ).get().toPose2d();
   }
@@ -117,7 +120,7 @@ public class Vision extends SubsystemBase {
   public void estimatePosition() {
     if (LimelightHelpers.getTV(null)) {
       if (LimelightHelpers.getBotPose2d_wpiRed(null).getX() != 0 && !_redOrBlue) {
-        _currentEstimations = new PointWithTime(LimelightHelpers.getBotPose2d_wpiRed(null),
+        _currentEstimations = new PointWithTime(LimelightHelpers.getBotPose2d_wpiBlue(null),
             edu.wpi.first.wpilibj.Timer.getFPGATimestamp());
       }
       if (LimelightHelpers.getBotPose2d_wpiBlue(null).getX() != 0 && _redOrBlue) {
@@ -164,7 +167,7 @@ public class Vision extends SubsystemBase {
     getSource();
     if (LimelightHelpers.getTV(null) && (int) LimelightHelpers.getFiducialID(null) != -1) {
       int proccesed_id = (int) LimelightHelpers.getFiducialID(null);
-      _currentTag = CURRENT_FIELD_LAYOUT.getTags().get(5);
+      _currentTag = CURRENT_FIELD_LAYOUT.getTags().get(proccesed_id-1);
       SmartDashboard.putNumber("current tag", _currentTag.ID);
     }
 
