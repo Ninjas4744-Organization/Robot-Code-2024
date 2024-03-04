@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
@@ -23,6 +19,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -46,9 +43,10 @@ public class Swerve extends SubsystemBase {
   public SwerveDrivePoseEstimator _estimator;
 
   public Swerve(Supplier<PointWithTime> estimationSupplier) {
+    log_modules();
     gyro = new AHRS();
-    gyro.getRotation2d();
-    zeroGyro();
+    
+    
     _estimationSupplier = estimationSupplier;
 
     // Creates all four swerve modules into a swerve drive
@@ -207,30 +205,51 @@ public class Swerve extends SubsystemBase {
   // }
 
   public void log_modules() {
-    SmartDashboard.putNumber("gyro", getYaw().getDegrees());
-    for (SwerveModule mod : mSwerveMods) {
-      SmartDashboard.putNumber(
-          "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
-      SmartDashboard.putNumber(
-          "Mod " + mod.moduleNumber + " Integrated",
-          mod.getState().angle.getDegrees());
-      SmartDashboard.putNumber(
-          "Mod " + mod.moduleNumber + " Velocity",
-          mod.getState().speedMetersPerSecond);
-    }
-  }
+    // Shuffleboard.getTab("Debug").add("gyro", getYaw().getDegrees());
+    // for (SwerveModule mod : mSwerveMods) {
+    //   Shuffleboard.getTab("Debug").add(
+    //       "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
+    //   Shuffleboard.getTab("Debug").add(
+    //       "Mod " + mod.moduleNumber + " Integrated",
+    //       mod.getState().angle.getDegrees());
+    //   Shuffleboard.getTab("Debug").add(
+    //       "Mod " + mod.moduleNumber + " Velocity",
+    //       mod.getState().speedMetersPerSecond);
+    // }
+    // SmartDashboard.putNumber("gyro", getYaw().getDegrees());
 
+    // for (SwerveModule mod : mSwerveMods) {
+
+    //   SmartDashboard.putNumber(
+
+    //       "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
+
+    //   SmartDashboard.putNumber(
+
+    //       "Mod " + mod.moduleNumber + " Integrated",
+
+    //       mod.getState().angle.getDegrees());
+
+    //   SmartDashboard.putNumber(
+
+    //       "Mod " + mod.moduleNumber + " Velocity",
+
+    //       mod.getState().speedMetersPerSecond);
+
+    // }
+  }
 
   @Override
   public void periodic() {
     publisher.set(getLastCalculatedPosition());
     _estimator.update(getYaw(), getPositions());
-    if(LimelightHelpers.getTV(null) && _estimationSupplier.get() != null){
+
+    if(LimelightHelpers.getTV(null) && _estimationSupplier.get() != null)
       _estimator.addVisionMeasurement(_estimationSupplier.get().getPoint(),_estimationSupplier.get().getTime());
-    }
+
     swerveOdometry.update(getYaw(), getPositions());
     m_field_solution.setRobotPose(getLastCalculatedPosition());
+
     // log_modules();
   }
-
 }

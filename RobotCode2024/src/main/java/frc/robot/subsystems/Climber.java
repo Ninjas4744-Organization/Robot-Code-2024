@@ -8,6 +8,7 @@ import com.revrobotics.SparkPIDController;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -22,11 +23,11 @@ public class Climber extends SubsystemBase {
   private SparkPIDController _controller;
 
   public Climber() {
-    _motor1 = new CANSparkMax(Constants.Climber.kMotor1, MotorType.kBrushless);
+    _motor1 = new CANSparkMax(Constants.Climber.kMotor1ID, MotorType.kBrushless);
     _motor1.restoreFactoryDefaults();
-    _motor2 = new CANSparkMax(Constants.Climber.kMotor2, MotorType.kBrushless);
+    _motor2 = new CANSparkMax(Constants.Climber.kMotor2ID, MotorType.kBrushless);
     _motor2.restoreFactoryDefaults();
-    _limitSwitch = new DigitalInput(Constants.Climber.kLimitSwitch);
+    _limitSwitch = new DigitalInput(Constants.Climber.kLimitSwitchID);
 
     _motor1.getEncoder().setPositionConversionFactor(Constants.Climber.ControlConstants.kConversionPosFactor);
     _motor1.getEncoder().setVelocityConversionFactor(Constants.Climber.ControlConstants.kConversionVelFactor);
@@ -83,8 +84,11 @@ public class Climber extends SubsystemBase {
     if(isLimitSwitch() && getMotor() == -1)
       Stop();
 
-    SmartDashboard.putBoolean("Climber Limit", isLimitSwitch());
-    SmartDashboard.putNumber("Climber Height", getHeight() * 100);
+    // Shuffleboard.getTab("Game").add("Climber Limit", isLimitSwitch());
+    // Shuffleboard.getTab("Game").add("Climber Height", getHeight() * 100);
+
+    // Shuffleboard.getTab("Debug").add("Climber Limit", isLimitSwitch());
+    // Shuffleboard.getTab("Debug").add("Climber Height", getHeight());
   }
 
   public Command Reset(){

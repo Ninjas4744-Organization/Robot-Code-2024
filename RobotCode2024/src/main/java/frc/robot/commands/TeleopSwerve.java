@@ -72,12 +72,12 @@ public class TeleopSwerve extends Command {
     Pose2d currentPose = _swerve.getLastCalculatedPosition();
 
     // Vision Target Pose
+    double distFromTag = currentPose.getTranslation().getDistance(tagPose.getTranslation());
     if(_onTag.getAsBoolean()){
-      double distFromTag = currentPose.getTranslation().getDistance(tagPose.getTranslation());
       Rotation2d tagDir = tagPose.getRotation().plus(Rotation2d.fromDegrees(90)); //Getting normal
       Translation2d distTargetFromTag = new Translation2d(
-        -distFromTag * Math.cos(tagDir.getRadians()),
-        -distFromTag * Math.sin(tagDir.getRadians())
+        distFromTag * Math.cos(tagDir.getRadians()),
+        distFromTag * Math.sin(tagDir.getRadians())
       );
       _targetPose = new Pose2d(
         tagPose.getX() + distTargetFromTag.getX(),
@@ -116,7 +116,9 @@ public class TeleopSwerve extends Command {
     );
     
     // Dashboard
-    // SmartDashboard.putNumber("Dist From Tag", distFromTag);
+    SmartDashboard.putNumber("Target Pose X", _targetPose.getX());
+    SmartDashboard.putNumber("Target Pose Y", _targetPose.getY());
+    SmartDashboard.putNumber("Dist From Tag", distFromTag);
     // SmartDashboard.putNumber("X PID", _xController.calculate(currentPose.getX(), _targetPose.getX()));
     // SmartDashboard.putNumber("Y PID", _yController.calculate(currentPose.getY(), _targetPose.getY()));
     // SmartDashboard.putNumber("X Movement", translationVal * Math.cos(_targetPose.getRotation().getRadians()));

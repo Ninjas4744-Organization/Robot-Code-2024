@@ -10,6 +10,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.util.FieldTagsFilter;
@@ -91,7 +92,8 @@ public class Vision extends SubsystemBase {
       // _currentTag = _ids.isRelavent(proccesed_id) ? CURRENT_FIELD_LAYOUT.getTags().get(proccesed_id) : _currentTag;
       _currentTag = CURRENT_FIELD_LAYOUT.getTags().get(proccesed_id - 1);
     }
-    SmartDashboard.putString("Vision", tagToString(_currentTag) + " " + _currentTag.ID);
+    // Shuffleboard.getTab("Game").add("Vision", tagToString(_currentTag) + " " + _currentTag.ID);
+    // Shuffleboard.getTab("Debug").add("Vision", tagToString(_currentTag) + " " + _currentTag.ID);
   }
 
   public String tagToString(AprilTag tag) {

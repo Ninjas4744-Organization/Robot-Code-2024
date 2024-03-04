@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -27,6 +28,7 @@ public class Leds extends SubsystemBase {
       for (int i = 0; i < _ledBuffer.getLength(); i++)
         _ledBuffer.setRGB(i, r, g, b);
       _led.setData(_ledBuffer);
+      // Shuffleboard.getTab("Debug").add("Led Color", String.format("(%d, %d, %d) Solid", r, g, b));
     }, this);
   }
 
@@ -36,12 +38,14 @@ public class Leds extends SubsystemBase {
         for (int i = 0; i < _ledBuffer.getLength(); i++)
           _ledBuffer.setRGB(i, r, g, b);   
         _led.setData(_ledBuffer);
+      // Shuffleboard.getTab("Debug").add("Led Color", String.format("(%d, %d, %d) Beep On", r, g, b));
       }, this).withTimeout(t),
 
       Commands.run(() -> {
         for (int i = 0; i < _ledBuffer.getLength(); i++)
-        _ledBuffer.setRGB(i, 0, 0, 0);   
+          _ledBuffer.setRGB(i, 0, 0, 0);   
         _led.setData(_ledBuffer);
+      // Shuffleboard.getTab("Debug").add("Led Color", String.format("(%d, %d, %d) Beep Off", 0, 0, 0));
       }, this).withTimeout(t)
     ).repeatedly();
   }

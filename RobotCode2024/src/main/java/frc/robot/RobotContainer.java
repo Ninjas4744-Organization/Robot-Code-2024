@@ -7,6 +7,7 @@ import java.util.Optional;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -39,6 +40,9 @@ public class RobotContainer {
   private String Mode = "";
 
   public RobotContainer() {
+    // Shuffleboard.getTab("Game").add("Mode", Mode);
+    // Shuffleboard.getTab("Debug").add("Mode", Mode);
+
     _joystick = new CommandPS5Controller(Constants.kJoystickPort);
     _joystick2 = new CommandPS5Controller(Constants.kJoystick2Port);
     _vision = new Vision();
@@ -99,7 +103,7 @@ public class RobotContainer {
         () -> { return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient * Constants.Swerve.kDriveRotationCoefficient; },
         () -> { return withTag; },
         () -> { return onTag; },
-        () -> { return true; }
+        () -> { return false; }
       )
     );
 
@@ -228,7 +232,7 @@ public class RobotContainer {
   }
 
   public void periodic(){
-    SmartDashboard.putString("Mode", Mode);
+    
   }
 
   private HashMap<Integer, Command> getAcceptCommands() {

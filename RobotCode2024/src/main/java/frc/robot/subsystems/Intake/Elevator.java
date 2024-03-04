@@ -7,6 +7,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -20,12 +21,12 @@ public class Elevator extends SubsystemBase {
   private SparkPIDController _controller;
 
   public Elevator() {
-    _motor = new CANSparkMax(Constants.Elevator.kElevatorMotor, MotorType.kBrushless);
+    _motor = new CANSparkMax(Constants.Elevator.kMotorID, MotorType.kBrushless);
     _motor.restoreFactoryDefaults();
     _motor.setInverted(true);
     _motor.getEncoder().setPositionConversionFactor(Constants.Elevator.ControlConstants.kConversionPosFactor);
     _motor.getEncoder().setVelocityConversionFactor(Constants.Elevator.ControlConstants.kConversionVelFactor);
-    _limitSwitch = new DigitalInput(Constants.Elevator.kLowerLimitElevator);
+    _limitSwitch = new DigitalInput(Constants.Elevator.kLimitSwitchID);
 
     _controller = _motor.getPIDController();
     _controller.setP(Constants.Elevator.ControlConstants.kP);
@@ -79,7 +80,10 @@ public class Elevator extends SubsystemBase {
     if (!_limitSwitch.get())
       _motor.getEncoder().setPosition(0);
 
-    SmartDashboard.putBoolean("Elevator Limit", !_limitSwitch.get());
+    // Shuffleboard.getTab("Game").add("Elevator Limit", !_limitSwitch.get());
+
+    // Shuffleboard.getTab("Debug").add("Elevator Limit", _limitSwitch.get());
+    // Shuffleboard.getTab("Debug").add("Elevator Height", getHeight());
   }
 
   public Command runOpen(double height) {

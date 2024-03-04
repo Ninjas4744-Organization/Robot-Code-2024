@@ -3,10 +3,7 @@ package frc.robot;
 import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -18,13 +15,12 @@ public final class Constants {
   public static final int kJoystick2Port = 1;
 
   public static final class Climber {
-    public static final int kMotor1 = 20;
-    public static final int kMotor2 = 23;
-    public static final int kLimitSwitch = 2;
+    public static final int kMotor1ID = 20;
+    public static final int kMotor2ID = 21;
+    public static final int kLimitSwitchID = 2;
 
     public static final double kMaxClimber = 0.4;
     public static final double kTrapChainHeight = 0.35;
-
 
     public static final class ControlConstants {
       public static final double kGearRatio = 27;
@@ -42,8 +38,8 @@ public final class Constants {
   }
 
   public static final class Rotation {
-    public static final int kRotationMotor = 21;
-    public static final int kLimitSwitch = 9;
+    public static final int kMotorID = 22;
+    public static final int kLimitSwitchID = 9;
 
     public final static class States {
       public static final double kUpRotation = 120;
@@ -68,15 +64,15 @@ public final class Constants {
   }
 
   public static final class Rollers {
-    public static final int kRollersMotor = 24;
-    public static final int kBeamBreaker = 5;
+    public static final int kMotorID = 23;
+    public static final int kBeamBreakerID = 5;
     public static final double kTimeToOutake = 1;
     // public static final double kTimeToIntake = 0.25;
   }
 
   public static final class Elevator {
-    public static final int kElevatorMotor = 22;
-    public static final int kLowerLimitElevator = 7;
+    public static final int kMotorID = 24;
+    public static final int kLimitSwitchID = 7;
 
     public static final class States {
       // public static final double kRealZero = -0.015;
@@ -179,7 +175,7 @@ public final class Constants {
     public static final class Mod0 {
       public static final int driveMotorID = 10;
       public static final int angleMotorID = 11;
-      public static final int canCoderID = 21;
+      public static final int canCoderID = 30;
       public static final Rotation2d angleOffset = 
       Rotation2d.fromDegrees(0);
       public static final boolean isDriverEncoderInverted = false;
@@ -191,7 +187,7 @@ public final class Constants {
     public static final class Mod1 {
       public static final int driveMotorID = 12;
       public static final int angleMotorID = 13;
-      public static final int canCoderID = 22;
+      public static final int canCoderID = 31;
       public static final Rotation2d angleOffset = 
       Rotation2d.fromDegrees(0);
       public static final boolean isDriverEncoderInverted = false;
@@ -203,7 +199,7 @@ public final class Constants {
     public static final class Mod2 {
       public static final int driveMotorID = 14;
       public static final int angleMotorID = 15;
-      public static final int canCoderID = 23;
+      public static final int canCoderID = 32;
       public static final Rotation2d angleOffset = 
       Rotation2d.fromDegrees(0);
       public static final boolean isDriverEncoderInverted = true;
@@ -216,7 +212,7 @@ public final class Constants {
     public static final class Mod3 {
       public static final int driveMotorID = 16;
       public static final int angleMotorID = 17;
-      public static final int canCoderID = 24;
+      public static final int canCoderID = 33;
       public static final Rotation2d angleOffset = 
       Rotation2d.fromDegrees(0);
       public static final boolean isDriverEncoderInverted = false;
@@ -245,22 +241,5 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
 
     // Constraint for the motion profilied robot angle controller
-  }
-
-  public static final class Cameras {
-    public static final class Front {
-      public static final String _name = "front";
-      public static final Transform3d _camera_to_robot = new Transform3d(new Translation3d(-324 / 10 / 100, 0, 0.6),
-          new Rotation3d(0, 25, 0));
-
-    }
-
-    public static final class Back {
-      public static final String _name = "back";
-      public static final Transform3d _camera_to_robot = new Transform3d(new Translation3d(-324 / 10 / 100, 0, 0.3),
-          new Rotation3d(0, 25, 180));
-
-    }
-
   }
 }
