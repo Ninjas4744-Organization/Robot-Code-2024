@@ -165,12 +165,14 @@ public class Vision extends SubsystemBase {
   public void periodic() {
     estimatePosition();
     getSource();
+
+    LimelightHelpers.setLEDMode_ForceOff(null);
     if (LimelightHelpers.getTV(null) && (int) LimelightHelpers.getFiducialID(null) != -1) {
+      LimelightHelpers.setLEDMode_ForceOn(null);
+
       int proccesed_id = (int) LimelightHelpers.getFiducialID(null);
       _currentTag = CURRENT_FIELD_LAYOUT.getTags().get(proccesed_id-1);
       SmartDashboard.putNumber("current tag", _currentTag.ID);
     }
-
   }
-
 }
