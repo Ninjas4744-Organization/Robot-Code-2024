@@ -2,7 +2,7 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.7,
+      "x": 0.73,
       "y": 7.2
     },
     "rotation": 90.0
@@ -26,7 +26,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Score"
+            "pathName": "AmpScore"
           }
         },
         {
@@ -44,6 +44,6 @@
       ]
     }
   },
-  "folder": null,
+  "folder": "Amp Autos",
   "choreoAuto": false
 }

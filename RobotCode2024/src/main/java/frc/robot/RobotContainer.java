@@ -9,6 +9,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -152,87 +153,68 @@ public class RobotContainer {
 
   private void configureManualBindings(){
     _joystick2.povRight().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _rollers.setMotor(1);
-            },
-            () -> {
-              _rollers.Stop();
-            },
-            _rollers));
+      Commands.startEnd(
+        () -> {_rollers.setMotor(1);},
+        () -> {_rollers.Stop();},
+        _rollers
+      )
+    );
 
     _joystick2.povLeft().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _rollers.setMotor(-1);
-            },
-            () -> {
-              _rollers.Stop();
-            },
-            _rollers));
+      Commands.startEnd(
+        () -> {_rollers.setMotor(-1);},
+        () -> {_rollers.Stop();},
+        _rollers
+      )
+    );
 
     _joystick2.povUp().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _climber.setMotor(1);
-
-            },
-            () -> {
-              _climber.setMotor(0);
-            },
-            _climber));
+      Commands.startEnd(
+        () -> {_climber.setMotor(1);},
+        () -> {_climber.setMotor(0);},
+        _climber
+      )
+    );
 
     _joystick2.povDown().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _climber.setMotor(-1);
-
-            },
-            () -> {
-              _climber.setMotor(0);
-            },
-            _climber));
+      Commands.startEnd(
+        () -> {_climber.setMotor(-1);},
+        () -> {_climber.setMotor(0);},
+        _climber
+      )
+    );
 
     _joystick2.R2().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _elevator.setMotor(0.4);
-            },
-            () -> {
-              _elevator.Stop();
-            },
-            _elevator));
+      Commands.startEnd(
+        () -> {_elevator.setMotor(0.4);},
+        () -> {_elevator.Stop();},
+        _elevator
+      )
+    );
 
     _joystick2.L2().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _elevator.setMotor(-0.4);
-            },
-            () -> {
-              _elevator.Stop();
-            },
-            _elevator));
+      Commands.startEnd(
+        () -> {_elevator.setMotor(-0.4);},
+        () -> {_elevator.Stop();},
+        _elevator
+      )
+    );
 
     _joystick2.R1().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _rotation.setMotor(0.1);
-            },
-            () -> {
-
-              _rotation.Stop();
-            },
-            _rotation));
+      Commands.startEnd(
+        () -> {_rotation.setMotor(0.1);},
+        () -> {_rotation.Stop();},
+        _rotation
+      )
+    );
 
     _joystick2.L1().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _rotation.setMotor(-0.07);
-            },
-            () -> {
-              _rotation.Stop();
-            },
-            _rotation));
+      Commands.startEnd(
+        () -> {_rotation.setMotor(-0.07);},
+        () -> {_rotation.Stop();},
+        _rotation
+      )
+    );
   }
 
   public void periodic(){
@@ -282,6 +264,7 @@ public class RobotContainer {
   }
 
   public void Reset(){
+    _swerve.resetOdometry(new Pose2d());
     _commandBuilder.Reset().schedule();
   }
 

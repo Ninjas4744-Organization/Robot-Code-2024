@@ -66,13 +66,11 @@ public class Climber extends SubsystemBase {
   }
 
   public void setMotor(double percent) {
-    if (isLimitSwitch() && percent == -1) {
-    _motor1.set(0);
-    _motor2.set(0);  
-    }
+    if (isLimitSwitch() && percent < 0) 
+      Stop(); 
     else{
       _motor1.set(percent);
-    _motor2.set(percent);
+      _motor2.set(percent);
     }
   }
 
@@ -94,7 +92,7 @@ public class Climber extends SubsystemBase {
     if(isLimitSwitch())
       _motor1.getEncoder().setPosition(0);
 
-    if(isLimitSwitch() && getMotor() == -1)
+    if(isLimitSwitch() && getMotor() < 0)
       Stop();
 
     SmartDashboard.putBoolean("Climb limit", isLimitSwitch());

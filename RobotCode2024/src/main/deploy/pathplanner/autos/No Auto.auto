@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.651,
-      "y": 2.25
+      "x": 1.0,
+      "y": 4.0
     },
     "rotation": 0
   },
@@ -16,16 +16,10 @@
           "data": {
             "name": "Reset"
           }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "RightExit"
-          }
         }
       ]
     }
   },
-  "folder": "Right Autos",
+  "folder": null,
   "choreoAuto": false
 }

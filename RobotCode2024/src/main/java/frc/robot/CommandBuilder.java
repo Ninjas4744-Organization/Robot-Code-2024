@@ -65,16 +65,16 @@ public class CommandBuilder {
         _rollers.runIntake(1).raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
         _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
         () -> {return height == Constants.Rotation.States.kTrapOpenRotation;}
-      )
+      ),
 
-      // Commands.parallel(
-      //   _elevator.runClose(),
-      //   Commands.either(
-      //     _rotation.runOpen(Constants.Rotation.States.kUpRotation)),
-      //     _rotation.runClose(),
-      //     () -> {return height == Constants.Rotation.States.kTrapOpenRotation;}
-        
-      // )
+      Commands.parallel(
+        _elevator.runClose(),
+        Commands.either(
+          _rotation.runOpen(Constants.Rotation.States.kUpRotation),
+          _rotation.runClose(),
+          () -> {return height == Constants.Rotation.States.kTrapOpenRotation;}
+        )
+      )
     );
   }
 
@@ -98,15 +98,15 @@ public class CommandBuilder {
 
       Commands.parallel(
         _elevator.runClose(),
-        // _rotation.runOpen(Constants.Rotation.States.kUpRotation)
-        _rotation.runClose()
+        _rotation.runOpen(Constants.Rotation.States.kUpRotation)
+        // _rotation.runClose()
       )
     );
   }
 
   public Command autoCommand(String auto) {
-    PathPlannerPath _path = PathPlannerPath.fromPathFile("LeftToAmp");
-    _swerve.resetOdometry(_path.getPreviewStartingHolonomicPose());
+    // PathPlannerPath _path = PathPlannerPath.fromPathFile("Score");
+    // _swerve.resetOdometry(_path.getPreviewStartingHolonomicPose());
 
     return AutoBuilder.buildAuto(auto);
   }

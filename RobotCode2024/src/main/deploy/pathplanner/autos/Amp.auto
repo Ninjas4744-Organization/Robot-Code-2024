@@ -20,7 +20,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Score"
+            "pathName": "AmpScore"
           }
         },
         {
@@ -44,6 +44,6 @@
       ]
     }
   },
-  "folder": null,
+  "folder": "Amp Autos",
   "choreoAuto": false
 }

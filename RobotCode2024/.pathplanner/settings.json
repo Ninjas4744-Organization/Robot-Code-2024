@@ -4,13 +4,12 @@
   "holonomicMode": true,
   "pathFolders": [
     "Amp Paths",
-    "Exit Paths",
-    "Ground Paths"
+    "Exit Paths"
   ],
   "autoFolders": [
     "Center Autos",
-    "Left Autos",
-    "Right Autos"
+    "Amp Autos",
+    "Source Autos"
   ],
   "defaultMaxVel": 3.0,
   "defaultMaxAccel": 3.0,

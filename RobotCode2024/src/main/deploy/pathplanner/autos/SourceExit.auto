@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.7,
-      "y": 7.2
+      "x": 0.651,
+      "y": 2.25
     },
-    "rotation": 0
+    "rotation": 90.0
   },
   "command": {
     "type": "sequential",
@@ -20,24 +20,12 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LeftToAmp"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Outake"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "ExitAmpAltPlace"
+            "pathName": "SourceExit"
           }
         }
       ]
     }
   },
-  "folder": "Left Autos",
+  "folder": "Source Autos",
   "choreoAuto": false
 }

@@ -2,25 +2,31 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.7,
-      "y": 4.0
+      "x": 1.4,
+      "y": 5.55
     },
-    "rotation": 0.0
+    "rotation": 90.0
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "Reset"
+          }
+        },
+        {
           "type": "wait",
           "data": {
-            "waitTime": 3.0
+            "waitTime": 5.0
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "CenterToAmp"
+            "pathName": "AmpScoreCenter"
           }
         },
         {
@@ -32,7 +38,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "ExitAmpAltPlace"
+            "pathName": "AmpExit"
           }
         }
       ]

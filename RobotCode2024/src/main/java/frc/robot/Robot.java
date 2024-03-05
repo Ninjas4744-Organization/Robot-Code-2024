@@ -21,26 +21,19 @@ public class Robot extends TimedRobot {
     ctreConfigs = new CTREConfigs();
     _robotContainer = new RobotContainer(); 
 
-    _chooser.setDefaultOption("LeftAmp", "LeftAmp");
-    _chooser.addOption("LeftAmp Alternate End", "LeftAmpAltEnd");
+    _chooser.setDefaultOption("No Auto", "No Auto");
 
-    _chooser.addOption("LeftAmp One Ground", "LeftAmpOneGround");
-    _chooser.addOption("LeftAmp One Ground Alternate End", "LeftAmpOneGroundAltEnd");
+    _chooser.addOption("Amp", "Amp");
+    _chooser.addOption("Amp Alt", "Amp Alt");
+    _chooser.addOption("Amp Alt 2", "Amp Alt 2");
 
-    _chooser.addOption("LeftAmp Two Ground", "LeftAmpTwoGround");
-    _chooser.addOption("LeftAmp Two Ground Alternate End", "LeftAmpTwoGroundAltEnd");
+    _chooser.addOption("AmpExit", "AmpExit");
+    _chooser.addOption("CenterExit", "CenterExit");
+    _chooser.addOption("SourceExit", "SourceExit");
 
     _chooser.addOption("CenterAmp", "CenterAmp");
-    _chooser.addOption("CenterAmp Alternate End", "CenterAmpAltEnd");
-
-    _chooser.addOption("CenterAmp One Ground", "CenterAmpOneGround");
-    _chooser.addOption("CenterAmp One Ground Alternate End", "CenterAmpOneGroundAltEnd");
-
-    _chooser.addOption("CenterAmp Two Ground", "CenterAmpTwoGround");
-    _chooser.addOption("CenterAmp Two Ground Alternate End", "CenterAmpTwoGroundAltEnd");
-
-    _chooser.addOption("RightExit", "RightExit");
-    _chooser.addOption("RightExit Alternate End", "RightExitAltEnd");
+    _chooser.addOption("CenterAmp Alt", "CenterAmp Alt");
+    _chooser.addOption("CenterAmp Alt 2", "CenterAmp Alt 2");
 
     SmartDashboard.putData("Autonomous Options", _chooser);
   }
@@ -58,10 +51,9 @@ public class Robot extends TimedRobot {
       _autonomousCommand.cancel();
     }
 
-    // _autoSelected = _chooser.getSelected();
-    _autonomousCommand = _robotContainer.autoCommand("Amp Alt 2");
+    _autoSelected = _chooser.getSelected();
+    _autonomousCommand = _robotContainer.autoCommand(_autoSelected);
     _autonomousCommand.schedule();
-    // _robotContainer.Reset();
   }
 
   @Override

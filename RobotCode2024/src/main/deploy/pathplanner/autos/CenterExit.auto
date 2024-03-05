@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.7,
-      "y": 7.2
+      "x": 1.4,
+      "y": 5.55
     },
     "rotation": 90.0
   },
@@ -20,24 +20,12 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LeftToAmp"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Outake"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "ExitAmp"
+            "pathName": "CenterExit"
           }
         }
       ]
     }
   },
-  "folder": "Left Autos",
+  "folder": "Center Autos",
   "choreoAuto": false
 }
