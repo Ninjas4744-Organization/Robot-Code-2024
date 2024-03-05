@@ -23,14 +23,14 @@ public class FieldTagsFilter {
     void red(){
         ids = new int[]{
             3,4,5,
-            // 11,12,13
+            11,12,13
         };
         
     }
     void blue(){
         ids = new int[]{
         1,2,6,
-        // 14,15,16
+        14,15,16
         };
         
     }
@@ -39,12 +39,13 @@ public class FieldTagsFilter {
         return ids[2];
       }
     
-    public int getSourceRight(){
+    public int getRightSource(){
         return ids[0];
     }
 
-    public int getSourceLeft(){
+    public int getLeftSource(){
         return ids[1];
     }
+    
     
 }

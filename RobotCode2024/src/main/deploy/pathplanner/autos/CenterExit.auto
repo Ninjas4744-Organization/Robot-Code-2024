@@ -20,25 +20,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "AmpScoreCenter"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Outake"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 5.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "AmpExit"
+            "pathName": "CenterExit"
           }
         }
       ]

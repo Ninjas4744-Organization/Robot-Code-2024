@@ -4,9 +4,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathPlannerPath;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -35,9 +41,13 @@ public class RobotContainer {
   private CommandPS5Controller _joystick;
   private CommandPS5Controller _joystick2;
   private Boolean withTag = false;
+  private Boolean onTag = false;
   private String Mode = "";
 
   public RobotContainer() {
+    // Shuffleboard.getTab("Game").add("Mode", Mode);
+    // Shuffleboard.getTab("Debug").add("Mode", Mode);
+
     _joystick = new CommandPS5Controller(Constants.kJoystickPort);
     _joystick2 = new CommandPS5Controller(Constants.kJoystick2Port);
     _vision = new Vision();
@@ -69,10 +79,11 @@ public class RobotContainer {
     // Trigger tIntake = new Trigger(() -> {return _rollers.getMotor() == -1;});
     // Trigger tClimb = new Trigger(() -> {return _climber.getHeight() > 0.02;});
 
-    Trigger tAmp = new Trigger(() -> {return _rotation.isRotation(Constants.Rotation.States.kAmpOpenRotation);});
-    Trigger tSrc = new Trigger(() -> {return _rotation.isRotation(Constants.Rotation.States.kSourceOpenRotation);});
+    Trigger tClose = new Trigger(() -> {return _elevator.isHeight(0) && _rotation.isRotation(0);});
+    Trigger tAmp = new Trigger(() -> {return _elevator.isHeight(Constants.Elevator.States.kAmpOpenHeight);});
+    Trigger tSrc = new Trigger(() -> {return _elevator.isHeight(Constants.Elevator.States.kSourceOpenHeight);});
     Trigger tUp = new Trigger(() -> {return _rotation.isRotation(Constants.Rotation.States.kUpRotation);});
-    Trigger tTrap = new Trigger(() -> {return _rotation.isRotation(Constants.Rotation.States.kTrapOpenRotation);});
+    Trigger tTrap = new Trigger(() -> {return _elevator.isHeight(Constants.Elevator.States.kTrapOpenHeight);});
 
     // tNote.whileFalse(_leds.setColor(255, 0, 0));
     // tNote.whileTrue(_leds.setColor(0, 255, 0));
@@ -80,9 +91,10 @@ public class RobotContainer {
     // tClimb.whileTrue(_leds.setColor(255, 255, 0));
     // tTrap.whileTrue(_leds.setColorBeep(255, 255, 0, 0.2));
 
+    tClose.onTrue(Commands.runOnce(() -> {Mode = "Close";}));
     tAmp.onTrue(Commands.runOnce(() -> {Mode = "Amp";}));
     tSrc.onTrue(Commands.runOnce(() -> {Mode = "Source";}));
-    tUp.onTrue(Commands.runOnce(() -> {Mode = "Idle";}));
+    tUp.onTrue(Commands.runOnce(() -> {Mode = "Saving";}));
     tTrap.onTrue(Commands.runOnce(() -> {Mode = "Trap";}));
   }
 
@@ -94,25 +106,30 @@ public class RobotContainer {
         () -> { return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient; },
         () -> { return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient; },
         () -> { return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient * Constants.Swerve.kDriveRotationCoefficient; },
-        () -> { return withTag; },
+        () -> { return false; },
         () -> { return false; }
       )
     );
 
-    // _joystick.R2().whileTrue(
-    //   Commands.startEnd(
-    //     () -> withTag = true,
-    //     () -> withTag = false
-    //   )
-    // );
-
+    _joystick.R2().whileTrue(
+      new TeleopSwerve(
+        _swerve,
+        _vision,
+        () -> { return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient; },
+        () -> { return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient; },
+        () -> { return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient * Constants.Swerve.kDriveRotationCoefficient; },
+        () -> { return true; },
+        () -> { return false; }
+      )
+    );
+   
     _joystick.L1().onTrue(Commands.runOnce(() -> { _swerve.zeroGyro(); }, _swerve));
   }
 
   private void configureOperatorBindings(){
-    _joystick2.cross().onTrue(Commands.select(getAcceptCommands(), () -> {return getAcceptId();}));
+    // _joystick2.cross().onTrue(Commands.select(getAcceptCommands(), () -> {return getAcceptId();}));
 
-    _joystick2.circle().onTrue(
+    _joystick2.cross().onTrue(
       Commands.parallel(
         _elevator.Reset(),
         _rotation.Reset()
@@ -126,99 +143,82 @@ public class RobotContainer {
       )
     );
 
-    // _joystick2.triangle().onTrue(_commandBuilder.runInOutTake(
-    //     Constants.Elevator.States.kAmpOpenHeight, Constants.Rotation.States.kAmpOpenRotation,
-    //     _joystick2.getHID()::getTriangleButton));
+    _joystick2.triangle().onTrue(_commandBuilder.runInOutTake(
+        Constants.Elevator.States.kAmpOpenHeight, Constants.Rotation.States.kAmpOpenRotation,
+        _joystick2.getHID()::getTriangleButton));
 
-    // _joystick2.circle().onTrue(_commandBuilder.runOutake(Constants.Elevator.States.kTrapOpenHeight,
-    //     Constants.Rotation.States.kTrapOpenRotation, _joystick2.getHID()::getCircleButton));
+    _joystick2.circle().onTrue(_commandBuilder.runOutake(Constants.Elevator.States.kTrapOpenHeight,
+        Constants.Rotation.States.kTrapOpenRotation, _joystick2.getHID()::getCircleButton));
   }
 
   private void configureManualBindings(){
     _joystick2.povRight().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _rollers.setMotor(1);
-            },
-            () -> {
-              _rollers.Stop();
-            },
-            _rollers));
+      Commands.startEnd(
+        () -> {_rollers.setMotor(1);},
+        () -> {_rollers.Stop();},
+        _rollers
+      )
+    );
 
     _joystick2.povLeft().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _rollers.setMotor(-1);
-            },
-            () -> {
-              _rollers.Stop();
-            },
-            _rollers));
+      Commands.startEnd(
+        () -> {_rollers.setMotor(-1);},
+        () -> {_rollers.Stop();},
+        _rollers
+      )
+    );
 
     _joystick2.povUp().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _climber.setMotor(1);
-            },
-            () -> {
-              _climber.Stop();
-            },
-            _climber));
+      Commands.startEnd(
+        () -> {_climber.setMotor(1);},
+        () -> {_climber.setMotor(0);},
+        _climber
+      )
+    );
 
     _joystick2.povDown().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _climber.setMotor(-1);
-            },
-            () -> {
-              _climber.Stop();
-            },
-            _climber));
+      Commands.startEnd(
+        () -> {_climber.setMotor(-1);},
+        () -> {_climber.setMotor(0);},
+        _climber
+      )
+    );
 
     _joystick2.R2().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _elevator.setMotor(0.4);
-            },
-            () -> {
-              _elevator.Stop();
-            },
-            _elevator));
+      Commands.startEnd(
+        () -> {_elevator.setMotor(0.4);},
+        () -> {_elevator.Stop();},
+        _elevator
+      )
+    );
 
     _joystick2.L2().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _elevator.setMotor(-0.4);
-            },
-            () -> {
-              _elevator.Stop();
-            },
-            _elevator));
+      Commands.startEnd(
+        () -> {_elevator.setMotor(-0.4);},
+        () -> {_elevator.Stop();},
+        _elevator
+      )
+    );
 
     _joystick2.R1().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _rotation.setMotor(0.1);
-            },
-            () -> {
-
-              _rotation.Stop();
-            },
-            _rotation));
+      Commands.startEnd(
+        () -> {_rotation.setMotor(0.1);},
+        () -> {_rotation.Stop();},
+        _rotation
+      )
+    );
 
     _joystick2.L1().whileTrue(
-        Commands.startEnd(
-            () -> {
-              _rotation.setMotor(-0.07);
-            },
-            () -> {
-              _rotation.Stop();
-            },
-            _rotation));
+      Commands.startEnd(
+        () -> {_rotation.setMotor(-0.07);},
+        () -> {_rotation.Stop();},
+        _rotation
+      )
+    );
   }
 
   public void periodic(){
-    SmartDashboard.putString("Mode", Mode);
+    
   }
 
   private HashMap<Integer, Command> getAcceptCommands() {
@@ -264,6 +264,11 @@ public class RobotContainer {
   }
 
   public void Reset(){
+    _swerve.resetOdometry(new Pose2d());
     _commandBuilder.Reset().schedule();
+  }
+
+  public Command autoCommand(String auto) {
+    return _commandBuilder.autoCommand(auto);
   }
 }

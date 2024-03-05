@@ -2,25 +2,25 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.6465019492093177,
-      "y": 4.0
+      "x": 1.4,
+      "y": 5.55
     },
-    "rotation": -90.0
+    "rotation": 90.0
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 3.0
+            "name": "Reset"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "CenterToAmp"
+            "pathName": "AmpScoreCenter"
           }
         },
         {
@@ -32,31 +32,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "AmpToGround"
+            "pathName": "AmpBack"
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "Floor Intake"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "GroundToAmp"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Floor Outake"
+            "waitTime": 2.0
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "ExitAmp"
+            "pathName": "AmpExit"
           }
         }
       ]

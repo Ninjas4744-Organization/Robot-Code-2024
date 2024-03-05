@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.7,
-        "y": 4.0
+        "x": 1.85,
+        "y": 7.62
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.8999999999999997,
-        "y": 4.0
+        "x": 1.8612722961537207,
+        "y": 7.6120437547579805
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "AmpPoint"
     },
     {
       "anchor": {
-        "x": 1.8,
-        "y": 7.5
+        "x": 1.0,
+        "y": 7.62
       },
       "prevControl": {
-        "x": 1.8,
-        "y": 7.6
+        "x": 0.9834383761302212,
+        "y": 7.62
       },
       "nextControl": null,
       "isLocked": false,
@@ -32,18 +32,21 @@
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
+    "maxVelocity": 1.5,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
-    "velocity": 0.0,
+    "velocity": 0,
     "rotation": 90.0,
     "rotateFast": false
   },
   "reversed": false,
   "folder": "Amp Paths",
-  "previewStartingState": null,
+  "previewStartingState": {
+    "rotation": 0,
+    "velocity": 0
+  },
   "useDefaultConstraints": false
 }

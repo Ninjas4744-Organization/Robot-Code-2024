@@ -7,6 +7,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -20,11 +21,12 @@ public class Rotation extends SubsystemBase {
   private SparkPIDController _controller;
 
   public Rotation() {
-    _motor = new CANSparkMax(Constants.Rotation.kRotationMotor, MotorType.kBrushless);
+    _motor = new CANSparkMax(Constants.Rotation.kMotorID, MotorType.kBrushless);
     _motor.restoreFactoryDefaults();
+    _motor.setSmartCurrentLimit(Constants.kCurrentLimit);
     _motor.getEncoder().setPositionConversionFactor(Constants.Rotation.ControlConstants.kConversionPosFactor);
     _motor.getEncoder().setVelocityConversionFactor(Constants.Rotation.ControlConstants.kConversionVelFactor);
-    _limitSwitch = new DigitalInput(Constants.Rotation.kLimitSwitch);
+    _limitSwitch = new DigitalInput(Constants.Rotation.kLimitSwitchID);
 
     _controller = _motor.getPIDController();
     _controller.setP(Constants.Rotation.ControlConstants.kP);
@@ -64,7 +66,7 @@ public class Rotation extends SubsystemBase {
 
   public Command Reset() {
     return Commands.startEnd(
-        () -> {setMotor(-0.1);},
+        () -> {setMotor(-0.2);},
         () -> {Stop();},
         this
       ).until(() -> {return !_limitSwitch.get();});
@@ -75,7 +77,10 @@ public class Rotation extends SubsystemBase {
     if (!_limitSwitch.get())
       _motor.getEncoder().setPosition(0);
 
-    SmartDashboard.putBoolean("Rotation Limit", !_limitSwitch.get());
+    // Shuffleboard.getTab("Game").add("Rotation Limit", !_limitSwitch.get());
+
+    // Shuffleboard.getTab("Debug").add("Rotation Limit", !_limitSwitch.get());
+    // Shuffleboard.getTab("Debug").add("Rotation Angle", getRotation());
   }
 
   public Command runOpen(double rotation) {

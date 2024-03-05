@@ -2,7 +2,7 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.7,
+      "x": 0.73,
       "y": 7.2
     },
     "rotation": 90.0
@@ -18,9 +18,15 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 5.0
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "LeftToAmp"
+            "pathName": "AmpScore"
           }
         },
         {
@@ -28,10 +34,16 @@
           "data": {
             "name": "Outake"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "AmpExit"
+          }
         }
       ]
     }
   },
-  "folder": "Left Autos",
+  "folder": "Amp Autos",
   "choreoAuto": false
 }

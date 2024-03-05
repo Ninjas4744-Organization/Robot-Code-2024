@@ -4,6 +4,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -15,8 +16,11 @@ public class Rollers extends SubsystemBase {
   private DigitalInput _beamBreaker;
 
   public Rollers() {
-    _motor = new CANSparkMax(Constants.Rollers.kRollersMotor, MotorType.kBrushless);
-    _beamBreaker = new DigitalInput(Constants.Rollers.kBeamBreaker);
+    _motor = new CANSparkMax(Constants.Rollers.kMotorID, MotorType.kBrushless);
+    _motor.restoreFactoryDefaults();
+    _motor.setSmartCurrentLimit(35);
+    _motor.burnFlash();
+    _beamBreaker = new DigitalInput(Constants.Rollers.kBeamBreakerID);
   }
 
   public boolean isNote() {
@@ -43,7 +47,10 @@ public class Rollers extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putBoolean("Intake Note", isNote());
+    // Shuffleboard.getTab("Game").add("Intake Note", isNote());
+
+    // Shuffleboard.getTab("Debug").add("Intake Note", isNote());
+    // Shuffleboard.getTab("Debug").add("Rollers Percent", getMotor());
   }
 
   public Command runIntake() {
