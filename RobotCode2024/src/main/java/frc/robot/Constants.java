@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.path.PathConstraints;
+import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -10,6 +11,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import frc.lib.drivers.NinjaMotorController;
+import frc.lib.drivers.NinjaMotorController.MotorControllerConstants;
 import frc.lib.util.SwerveModuleConstants;
 
 public final class Constants {
@@ -18,30 +20,75 @@ public final class Constants {
   public static final int kCurrentLimit = 40;
 
   public static final class Climber {
-    public static final int kMotor1ID = 21;
-    public static final int kMotor2ID = 20;
+    public static final NinjaMotorController.NinjaMotorSubsystemConstants kClimberConstants = new NinjaMotorController.NinjaMotorSubsystemConstants();
+    static {
+        kClimberConstants.kSubsystemName = "Climber";
+
+        kClimberConstants.kMasterConstants.invert = false; 
+
+        kClimberConstants.kMasterConstants.id = 21;
+
+        kClimberConstants.kSlaveConstants = new MotorControllerConstants[1];
+        kClimberConstants.kSlaveConstants[0].id = 22;
+        kClimberConstants.kSlaveConstants[0].invert = false;
+
+        kClimberConstants.kSparkMaxMode = IdleMode.kBrake;
+
+        kClimberConstants.kHomePosition = 1.3; // Stowed Position (inches)
+        kClimberConstants.kRotationsPerUnitDistance = 10.6154;
+        kClimberConstants.kSoftLimitDeadband = 0.05;
+
+        kClimberConstants.Kp = 12;
+        kClimberConstants.Kd = 0;
+        kClimberConstants.Ki = 0;
+
+        kClimberConstants.kEnableSupplyCurrentLimit = true;
+        kClimberConstants.kSupplyCurrentLimit = 100;
+
+        kClimberConstants.kMinUnitsLimit = 0;
+        kClimberConstants.kMaxUnitsLimit = 0.4;
+        kClimberConstants.kCruiseVelocity = 30;
+        kClimberConstants.kAcceleration = 60;
+        kClimberConstants.kGearRatio = 0.0023295454545455;
+        
+    }
+   
     public static final int kLimitSwitchID = 2;
 
-    public static final double kMaxClimber = 0.4;
     public static final double kTrapChainHeight = 0.35;
 
-    public static final class ControlConstants {
-      public static final double kGearRatio = 27;
-      public static final double kConversionPosFactor = 0.0023295454545455;
-      public static final double kConversionVelFactor = kConversionPosFactor / 60;
-
-      public static final double kP = 12;
-      public static final double kI = 0;
-      public static final double kD = 0;
-
-      public static final double kMaxVelocity = 30;
-      public static final double kMaxAcceleration = 60;
-      public static final TrapezoidProfile.Constraints kConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
-    }
   }
 
   public static final class Rotation {
-    public static final int kMotorID = 22;
+    public static final NinjaMotorController.NinjaMotorSubsystemConstants kRotationConstants = new NinjaMotorController.NinjaMotorSubsystemConstants();
+    static {
+        kRotationConstants.kSubsystemName = "Rotation";
+
+        kRotationConstants.kMasterConstants.invert = false; 
+
+        kRotationConstants.kMasterConstants.id = 22;
+        
+
+        kRotationConstants.kSparkMaxMode = IdleMode.kBrake;
+
+        kRotationConstants.kHomePosition = 1.3; // Stowed Position (inches)
+        kRotationConstants.kRotationsPerUnitDistance = 10.6154;
+        kRotationConstants.kSoftLimitDeadband = 0.05;
+
+        kRotationConstants.Kp = 0.0185;
+        kRotationConstants.Kd = 0.0002;
+        kRotationConstants.Ki = 0.0;
+
+        kRotationConstants.kEnableSupplyCurrentLimit = true;
+        kRotationConstants.kSupplyCurrentLimit = 100;
+
+        kRotationConstants.kMinUnitsLimit = 0;
+        kRotationConstants.kMaxUnitsLimit = Double.MAX_VALUE;
+        kRotationConstants.kCruiseVelocity = 60;
+        kRotationConstants.kAcceleration = 120;
+        kRotationConstants.kGearRatio = 7.2;
+        
+    }
     public static final int kLimitSwitchID = 9;
 
     public final static class States {
@@ -49,20 +96,6 @@ public final class Constants {
       public static final double kSourceOpenRotation = 70;
       public static final double kAmpOpenRotation = 0;
       public static final double kTrapOpenRotation = 87;
-    }
-
-    public static final class ControlConstants {
-      public static final double kGearRatio = 27;
-      public static final double kConversionPosFactor = /* 360 / kGearRatio */7.2;
-      public static final double kConversionVelFactor = kConversionPosFactor / 60;
-
-      public static final double kP = 0.0185;
-      public static final double kI = 0.0002;
-      public static final double kD = 0;
-
-      public static final double kMaxVelocity = 60;
-      public static final double kMaxAcceleration = kMaxVelocity * 2;
-      public static final TrapezoidProfile.Constraints kConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
     }
   }
 
@@ -76,52 +109,41 @@ public final class Constants {
   public static final class Elevator {
     public static final NinjaMotorController.NinjaMotorSubsystemConstants kElevatorConstants = new NinjaMotorController.NinjaMotorSubsystemConstants();
     static {
-        kElevatorConstants.kSubsystemName = "Forks";
+        kElevatorConstants.kSubsystemName = "Elevator";
 
-        kElevatorConstants.kMasterConstants.id = 1;
+        kElevatorConstants.kMasterConstants.invert = false; 
+
+        kElevatorConstants.kMasterConstants.id = 24;
         
 
-        // kElevatorConstants.kNeutralMode = NeutralModeValue.Brake;
+        kElevatorConstants.kSparkMaxMode = IdleMode.kBrake;
 
         kElevatorConstants.kHomePosition = 1.3; // Stowed Position (inches)
         kElevatorConstants.kRotationsPerUnitDistance = 10.6154;
         kElevatorConstants.kSoftLimitDeadband = 0.05;
 
-        kElevatorConstants.kPositionKp = 1.5;
-        kElevatorConstants.kPositionKd = 0.0;
-        kElevatorConstants.kPositionKi = 0.0;
+        kElevatorConstants.Kp = 1.5;
+        kElevatorConstants.Kd = 0.0;
+        kElevatorConstants.Ki = 0.0;
 
         kElevatorConstants.kEnableSupplyCurrentLimit = true;
         kElevatorConstants.kSupplyCurrentLimit = 100;
 
         kElevatorConstants.kMinUnitsLimit = 0;
-        kElevatorConstants.kMaxUnitsLimit = (float) 8.8;
+        kElevatorConstants.kMaxUnitsLimit = Double.MAX_VALUE;
+        kElevatorConstants.kCruiseVelocity = 6;
+        kElevatorConstants.kAcceleration = 12;
+        kElevatorConstants.kGearRatio = (50/10/100*Math.PI)/16;
+        
     }
-    public static final int kMotorID = 24;
-    public static final int kLimitSwitchID = 7;
-
+    
     public static final class States {
-      // public static final double kRealZero = -0.015;
       public static final double kSourceOpenHeight = 0.1;
       public static final double kAmpOpenHeight = 0.4;
       public static final double kTrapOpenHeight = 0.38;
       public static final double Close = 0;
     }
 
-    public static final class ControlConstants {
-      public static final double kGearRatio = 16.0;
-      public static final double kWinchDiameter = 50 / 10 / 100.0;// milimiters/centimeters/meter
-      public static final double kConversionPosFactor = (kWinchDiameter * Math.PI) / kGearRatio;
-      public static final double kConversionVelFactor = (kWinchDiameter * Math.PI) / kGearRatio / 60;
-
-      public static final double kP = 4.5;
-      public static final double kI = 0.0017;
-      public static final double kD = 0;
-
-      public static final double kMaxVelocity = 6;
-      public static final double kMaxAcceleration = kMaxVelocity * 2;
-      public static final TrapezoidProfile.Constraints kConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
-    }
   }
 
   public static final class Swerve {

@@ -41,7 +41,8 @@ public class GenericSparkMaxSubsystem extends NinjaMotorController {
 
     _profile = new TrapezoidProfile(new Constraints(_constants.kCruiseVelocity, _constants.kAcceleration));
     _controller = _master.getPIDController();
-
+    _relEncoder.setPositionConversionFactor(constants.kGearRatio);
+    _relEncoder.setVelocityConversionFactor(constants.kGearRatio/60);
     _master.burnFlash();
 
     for (int i = 0; i < _slaves.length; ++i) {
@@ -67,14 +68,14 @@ public class GenericSparkMaxSubsystem extends NinjaMotorController {
   }
 
   @Override
-  public void setForwardSoftLimit(float sofLimit) {
-    _master.setSoftLimit(SoftLimitDirection.kForward, sofLimit);
+  public void setForwardSoftLimit(double sofLimit) {
+    _master.setSoftLimit(SoftLimitDirection.kForward, (float)sofLimit);
     _master.enableSoftLimit(SoftLimitDirection.kForward, true);
   }
 
   @Override
-  public void setReverseSoftLimit(float sofLimit) {
-    _master.setSoftLimit(SoftLimitDirection.kReverse, sofLimit);
+  public void setReverseSoftLimit(double sofLimit) {
+    _master.setSoftLimit(SoftLimitDirection.kReverse, (float)sofLimit);
     _master.enableSoftLimit(SoftLimitDirection.kReverse, true);
   }
 
@@ -173,5 +174,7 @@ public class GenericSparkMaxSubsystem extends NinjaMotorController {
   public static GenericSparkMaxSubsystem createSparkMaxMotorGroup(final NinjaMotorSubsystemConstants constants){
     return new GenericSparkMaxSubsystem(constants);
   }
+
+  
   
 }
