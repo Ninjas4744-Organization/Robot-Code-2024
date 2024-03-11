@@ -1,15 +1,20 @@
 package frc.robot;
 
+import java.io.IOException;
+
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.path.PathConstraints;
 import com.revrobotics.CANSparkBase.IdleMode;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.drivers.NinjaMotorController;
 import frc.lib.drivers.NinjaMotorController.MotorControllerConstants;
 import frc.lib.util.SwerveModuleConstants;
@@ -290,5 +295,31 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
 
     // Constraint for the motion profilied robot angle controller
+  }
+
+  public static class FieldConstants{
+    public static final double FIELD_LENGTH_M = Units.feetToMeters(54.0);
+    public static AprilTagFieldLayout BLUE_FIELD_LAYOUT;
+    public static AprilTagFieldLayout RED_FIELD_LAYOUT;
+    private static DriverStation.Alliance storedAlliance = DriverStation.Alliance.Blue;
+
+    static {
+        try {
+            BLUE_FIELD_LAYOUT = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
+            BLUE_FIELD_LAYOUT.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
+            RED_FIELD_LAYOUT = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
+            RED_FIELD_LAYOUT.setOrigin(AprilTagFieldLayout.OriginPosition.kRedAllianceWallRightSide);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static AprilTagFieldLayout getFieldLayout() {
+      if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+          return BLUE_FIELD_LAYOUT;
+      } else {
+          return RED_FIELD_LAYOUT;
+      }
+  }
   }
 }
