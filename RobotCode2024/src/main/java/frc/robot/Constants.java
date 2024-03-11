@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -8,6 +9,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import frc.lib.drivers.NinjaMotorController;
 import frc.lib.util.SwerveModuleConstants;
 
 public final class Constants {
@@ -72,6 +74,29 @@ public final class Constants {
   }
 
   public static final class Elevator {
+    public static final NinjaMotorController.NinjaMotorSubsystemConstants kElevatorConstants = new NinjaMotorController.NinjaMotorSubsystemConstants();
+    static {
+        kElevatorConstants.kSubsystemName = "Forks";
+
+        kElevatorConstants.kMasterConstants.id = 1;
+        
+
+        // kElevatorConstants.kNeutralMode = NeutralModeValue.Brake;
+
+        kElevatorConstants.kHomePosition = 1.3; // Stowed Position (inches)
+        kElevatorConstants.kRotationsPerUnitDistance = 10.6154;
+        kElevatorConstants.kSoftLimitDeadband = 0.05;
+
+        kElevatorConstants.kPositionKp = 1.5;
+        kElevatorConstants.kPositionKd = 0.0;
+        kElevatorConstants.kPositionKi = 0.0;
+
+        kElevatorConstants.kEnableSupplyCurrentLimit = true;
+        kElevatorConstants.kSupplyCurrentLimit = 100;
+
+        kElevatorConstants.kMinUnitsLimit = 0;
+        kElevatorConstants.kMaxUnitsLimit = (float) 8.8;
+    }
     public static final int kMotorID = 24;
     public static final int kLimitSwitchID = 7;
 
@@ -80,6 +105,7 @@ public final class Constants {
       public static final double kSourceOpenHeight = 0.1;
       public static final double kAmpOpenHeight = 0.4;
       public static final double kTrapOpenHeight = 0.38;
+      public static final double Close = 0;
     }
 
     public static final class ControlConstants {

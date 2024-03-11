@@ -3,106 +3,85 @@ package frc.robot;
 import java.util.function.BooleanSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Climber;
-import frc.robot.subsystems.Intake.Elevator;
+import frc.robot.subsystems.Intake.Lift;
 import frc.robot.subsystems.Intake.Rollers;
 import frc.robot.subsystems.Intake.Rotation;
 
 public class CommandBuilder {
-  private Swerve _swerve;
-  private Climber _climber;
-  private Elevator _elevator;
-  private Rotation _rotation;
-  private Rollers _rollers;
+ 
 
-  public CommandBuilder(Swerve swerve, Climber climber, Elevator elevator, Rotation rotation, Rollers rollers){
-    _swerve = swerve;
-    _climber = climber;
-    _elevator = elevator;
-    _rotation = rotation;
-    _rollers = rollers;
-  }
-
-  public Command runInOutTake(double elevatorHeight, double rotation, BooleanSupplier condition) {
+  public static Command runInOutTake( Lift _elevator ,Rotation _rotation, Rollers _rollers, BooleanSupplier condition) {
     return Commands.either(
-      runIntake(),
-      runOutake(elevatorHeight, rotation, condition),
+      runIntake(_elevator, _rotation, _rollers),
+      runOutakeAmp(_elevator, _rotation, _rollers, condition),
       () -> { return !_rollers.isNote(); }
     );
   }
+  public Command runInOutT(double elevatorHeight, double rotation, BooleanSupplier condition) {
+    return Commands.none();
+  }
 
-  public Command runIntake() {
+  public static Command runIntake( Lift _elevator ,Rotation _rotation, Rollers _rollers) {
     return Commands.sequence(
       Commands.parallel(
-        _elevator.runOpen(Constants.Elevator.States.kSourceOpenHeight),
-        _rotation.runOpen(Constants.Rotation.States.kSourceOpenRotation)
+        _elevator.runProfile(new State(Constants.Elevator.States.kSourceOpenHeight,0)),
+        _rotation.runOpenClose(Constants.Rotation.States.kSourceOpenRotation)
       ),
 
       _rollers.runIntake().until(_rollers::isNote),
 
-      Commands.parallel(
-        _elevator.runClose(),
-        _rotation.runOpen(Constants.Rotation.States.kUpRotation)
+      Commands.runOnce(
+        () ->{
+          _elevator.close();
+        _rotation.runOpenClose(Constants.Rotation.States.kUpRotation);
+        },
+        _elevator,_rollers,_rotation
       )
     );
   }
 
-  public Command runOutake(double height, double rotation, BooleanSupplier condition) {
+  public static Command runOutakeAmp(Lift _elevator ,Rotation _rotation, Rollers _rollers, BooleanSupplier condition) {
     return Commands.sequence(
       Commands.parallel(
-        _elevator.runOpen(height),
-        _rotation.runOpen(rotation)
+        _elevator.openAmp(),
+        _rotation.runOpenClose(Constants.Rotation.States.kAmpOpenRotation)
       ),
       Commands.waitUntil(condition),
 
-      Commands.either(
-        _rollers.runIntake(1).raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
-        _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
-        () -> {return height == Constants.Rotation.States.kTrapOpenRotation;}
-      ),
+      _rollers.runIntake(),
 
       Commands.parallel(
-        _elevator.runClose(),
-        Commands.either(
-          _rotation.runOpen(Constants.Rotation.States.kUpRotation),
-          _rotation.runClose(),
-          () -> {return height == Constants.Rotation.States.kTrapOpenRotation;}
-        )
+        _elevator.close(),
+        _rotation.runOpenClose(Constants.Rotation.States.kUpRotation)
+
       )
     );
   }
-
-  public Command runAutoOutake() {
+  public static Command runOutakeTrap(Lift _elevator ,Rotation _rotation, Rollers _rollers, BooleanSupplier condition) {
     return Commands.sequence(
       Commands.parallel(
-        _elevator.runOpen(Constants.Elevator.States.kAmpOpenHeight),
-        _rotation.runOpen(Constants.Rotation.States.kAmpOpenRotation)
+        _elevator.openAmp(),
+        _rotation.runOpenClose(Constants.Rotation.States.kTrapOpenRotation)
       ),
+      Commands.waitUntil(condition),
 
-      Commands.waitUntil(
-        () -> {
-          return _elevator.isHeight(Constants.Elevator.States.kAmpOpenHeight)
-              && _rotation.isRotation(Constants.Rotation.States.kAmpOpenRotation);
-        }
-      ),
-
-      Commands.waitSeconds(0.1),
-
-      _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
+      _rollers.runIntake(),
 
       Commands.parallel(
-        _elevator.runClose(),
-        _rotation.runOpen(Constants.Rotation.States.kUpRotation)
-        // _rotation.runClose()
+        _elevator.close(),
+        _rotation.runOpenClose(Constants.Rotation.States.kUpRotation)
+
       )
     );
   }
+
 
   public Command autoCommand(String auto) {
     // PathPlannerPath _path = PathPlannerPath.fromPathFile("Score");
@@ -111,14 +90,14 @@ public class CommandBuilder {
     return AutoBuilder.buildAuto(auto);
   }
 
-  public Command Reset() {
+  public static Command reset(Lift _elevator ,Rotation _rotation, Rollers _rollers,Climber _climber,Swerve _swerve) {
     _swerve.zeroGyro();
     _swerve.resetOdometry(new Pose2d());
 
     return Commands.parallel(
-      _elevator.Reset(),
-      _rotation.Reset(),
-      _climber.Reset()
-  ).until(() -> {return _elevator.isHeight(0) && _rotation.isRotation(0) && _climber.isLimitSwitch();});
+      _elevator.reset(),
+      _rotation.reset(),
+      _climber.reset()
+  );
   }
 }
