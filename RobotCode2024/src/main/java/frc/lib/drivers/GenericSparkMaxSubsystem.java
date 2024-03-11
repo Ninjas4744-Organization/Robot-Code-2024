@@ -165,6 +165,10 @@ public class GenericSparkMaxSubsystem extends NinjaMotorController {
 
   @Override
   public void setPosition(double pos) {
+    _relEncoder.setPosition(pos);
+  }
+  @Override
+  public void setHomingPosition(double pos) {
     if (_controlState != ControlState.POSITION_PID) {
       _controlState = ControlState.POSITION_PID;
     }

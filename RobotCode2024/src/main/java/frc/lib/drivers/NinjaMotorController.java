@@ -98,6 +98,7 @@ public abstract class NinjaMotorController {
   public abstract void stop();
 
   public abstract void setPosition(double pos);
+  public abstract void setHomingPosition(double pos);
 
   public abstract double getVelError();
 
