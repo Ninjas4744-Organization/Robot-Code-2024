@@ -78,7 +78,7 @@ public class Rotation extends SubsystemBase {
       _motor.getEncoder().setPosition(0);
 
     // Shuffleboard.getTab("Game").add("Rotation Limit", !_limitSwitch.get());
-
+    SmartDashboard.putBoolean("Rotation limit", !_limitSwitch.get());
     // Shuffleboard.getTab("Debug").add("Rotation Limit", !_limitSwitch.get());
     // Shuffleboard.getTab("Debug").add("Rotation Angle", getRotation());
   }

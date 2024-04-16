@@ -46,6 +46,12 @@
           "data": {
             "pathName": "AmpExit"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Reset"
+          }
         }
       ]
     }

@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.4,
-      "y": 5.55
+      "x": 0.7,
+      "y": 7.2
     },
-    "rotation": 90.0
+    "rotation": 0.0
   },
   "command": {
     "type": "sequential",
@@ -18,32 +18,20 @@
           }
         },
         {
-          "type": "path",
+          "type": "wait",
           "data": {
-            "pathName": "AmpScoreCenter"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Outake"
+            "waitTime": 11.0
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "AmpExit"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Reset"
+            "pathName": "AmpFullExit"
           }
         }
       ]
     }
   },
-  "folder": "Center Autos",
+  "folder": "Amp Autos",
   "choreoAuto": false
 }

@@ -6,15 +6,24 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.util.LimelightHelpers;
 import frc.robot.Constants;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Vision;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.PathPoint;
 
 public class TeleopSwerve extends Command {
   private Swerve _swerve;
@@ -26,8 +35,9 @@ public class TeleopSwerve extends Command {
   private DoubleSupplier _strafeSup;
   private DoubleSupplier _rotationSup;
 
-  private PIDController _controller_x;
-  private PIDController _controller_theta_pid;
+  private PIDController _xController;
+  private PIDController _yController;
+  private PIDController _aController;
 
   private SlewRateLimiter _translationRateLimiter;
   private SlewRateLimiter _strafeRateLimiter;
@@ -51,8 +61,9 @@ public class TeleopSwerve extends Command {
     _strafeSup = strafeSup;
     _rotationSup = rotationSup;
 
-    _controller_theta_pid = new PIDController(0.01111111 * 3.5, 0, 0);
-    _controller_x = new PIDController(0.6666666666666667 * 2.5, 0, 0.1);
+    _aController = new PIDController(0.03, 0, 0);
+    _xController = new PIDController(1, 0, 0);
+    _yController = new PIDController(1, 0, 0);
 
     _translationRateLimiter = new SlewRateLimiter(3);
     _strafeRateLimiter = new SlewRateLimiter(3);
@@ -63,49 +74,53 @@ public class TeleopSwerve extends Command {
 
   @Override
   public void execute() {
-    Pose2d targetPose = _vision.getTagPose();
-    Pose2d current_pos = _swerve.getLastCalculatedPosition();
+    if(_withTag.getAsBoolean())
+      LimelightHelpers.setLEDMode_ForceOn(null);
 
-    // double error = _vision.isAmp() ? (targetPose.getX() - current_pos.getX()) : _vision.getCalculatedError(current_pos);
-    double error = _vision.getAlliance()?1:-1*(targetPose.getX() - current_pos.getX()) ;
-    double degree_error = targetPose.rotateBy(Rotation2d.fromDegrees(180)).getRotation()
-        .minus(current_pos.getRotation()).getDegrees();
+    Pose2d tagPos = _vision.getTagPose();
+    Pose2d Pos = _swerve.getLastCalculatedPosition();
+    Pose2d targetPos = tagPos;
+
+    SmartDashboard.putNumber("PosX", Pos.getX());
+    SmartDashboard.putNumber("PosY", Pos.getY());
+    SmartDashboard.putNumber("Target PosX", targetPos.getX());
+    SmartDashboard.putNumber("Target PosY", targetPos.getY());
+  
+    double aError = targetPos.rotateBy(Rotation2d.fromDegrees(180)).getRotation().minus(Pos.getRotation()).getDegrees();
+
+    // int allianceMinus = _vision.getAlliance() ? 1 : -1;
 
     /* Get Values, Deadband */
     double translationVal = MathUtil.applyDeadband(_translationSup.getAsDouble(), Constants.Swerve.stickDeadband);
     double strafeVal = MathUtil.applyDeadband(_strafeSup.getAsDouble(), Constants.Swerve.stickDeadband);
     double rotationVal = MathUtil.applyDeadband(_rotationSup.getAsDouble(), Constants.Swerve.stickDeadband);
 
-    translationVal = 
-    _withTag.getAsBoolean() && LimelightHelpers.getTV(null)  && _vision.isAmp()
-            ? -_controller_x.calculate(error)
-            :
-            _translationRateLimiter.calculate(
+    ArrayList<PathPoint> pathPoints = new ArrayList<PathPoint>();
+    pathPoints.add(new PathPoint(new Translation2d(Pos.getX(), Pos.getY())));
+    pathPoints.add(new PathPoint(new Translation2d(targetPos.getX(), targetPos.getY() - 2)));
 
-            
-             translationVal );
-    strafeVal = _strafeRateLimiter.calculate(
-        _withTag.getAsBoolean() && LimelightHelpers.getTV(null)  && _vision.isAmp() ? MathUtil.clamp(strafeVal, -0.5, 0.5): 
-        strafeVal );
+    GoalEndState endState = new GoalEndState(0, targetPos.rotateBy(Rotation2d.fromDegrees(180)).getRotation());
 
-    rotationVal = _withTag.getAsBoolean() ?-_controller_theta_pid.calculate(degree_error):_rotationRateLimiter.calculate(
-       
-         rotationVal * Constants.Swerve.maxAngularVelocity);
+    PathPlannerPath path = PathPlannerPath.fromPathPoints(pathPoints, AutoConstants.constraints, endState);
+    AutoBuilder.followPath(path);
+
+    // translationVal = _withTag.getAsBoolean() && LimelightHelpers.getTV(null)
+    // ? _xController.calculate(Pos.getX(), targetPos.getX()) :
+    //   _translationRateLimiter.calculate(translationVal);
+
+    // strafeVal = _withTag.getAsBoolean() && LimelightHelpers.getTV(null)
+    // ? _yController.calculate(Pos.getY(), targetPos.getY()) :
+    //   _strafeRateLimiter.calculate(strafeVal);
+
+    // rotationVal = _withTag.getAsBoolean()
+    // ? -_aController.calculate(aError)
+    // : /*_rotationRateLimiter.calculate(*/rotationVal/*)*/;
     
     _swerve.drive(
-        new Translation2d(
-            translationVal,
-            strafeVal).times(Constants.Swerve.maxSpeed),
-            // .rotateBy(
-            //     // _withTag.getAsBoolean() && !_vision.isAmp() ? targetPose.getRotation() : Rotation2d.fromDegrees(0)
-            //     Rotation2d.fromDegrees(0)
-            //     ),
-        rotationVal,
-        !_robotCentricSup.getAsBoolean(),
-        true);
-
+      new Translation2d(translationVal, strafeVal).times(Constants.Swerve.maxSpeed),
+      rotationVal * Constants.Swerve.maxAngularVelocity,
+      !_robotCentricSup.getAsBoolean(),
+      true
+    );
   }
-private boolean inrange(Pose2d targetPose,Pose2d current_pos){//check delta
-  return Math.abs(targetPose.getX() - current_pos.getX()) > 1.5;
-}
 }

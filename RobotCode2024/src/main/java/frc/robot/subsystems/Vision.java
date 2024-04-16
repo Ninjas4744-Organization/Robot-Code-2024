@@ -116,6 +116,14 @@ public class Vision extends SubsystemBase {
   public Pose2d getTagPose() {
     return CURRENT_FIELD_LAYOUT.getTagPose(_currentTag.ID ).get().toPose2d();
   }
+  // public Pose2d getRobotCentricTagPose(){
+  //   double[] pos = LimelightHelpers.getTargetPose_RobotSpace(null);
+  //   return new Pose2d(pos[0], pos[1], new Rotation2d());
+  // }
+  // public Pose2d getRobotCentricRobotPose(){
+  //   double[] pos = LimelightHelpers.getBotPose(null);
+  //   return new Pose2d(pos[0], pos[1], new Rotation2d());
+  // }
 
   public void estimatePosition() {
     if (LimelightHelpers.getTV(null)) {
@@ -168,7 +176,7 @@ public class Vision extends SubsystemBase {
 
     LimelightHelpers.setLEDMode_ForceOff(null);
     if (LimelightHelpers.getTV(null) && (int) LimelightHelpers.getFiducialID(null) != -1) {
-      LimelightHelpers.setLEDMode_ForceOn(null);
+      LimelightHelpers.setLEDMode_ForceBlink(null);
 
       int proccesed_id = (int) LimelightHelpers.getFiducialID(null);
       _currentTag = CURRENT_FIELD_LAYOUT.getTags().get(proccesed_id-1);

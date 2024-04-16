@@ -1,5 +1,6 @@
 package frc.robot;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -7,17 +8,27 @@ import java.util.Optional;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.PathPoint;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.util.LimelightHelpers;
+import frc.robot.Constants.AutoConstants;
+import frc.robot.Constants.pathFollowingConstants;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Swerve;
@@ -43,15 +54,18 @@ public class RobotContainer {
   private Boolean withTag = false;
   private Boolean onTag = false;
   private String Mode = "";
+  private PathPlannerPath _path;
 
   public RobotContainer() {
     // Shuffleboard.getTab("Game").add("Mode", Mode);
     // Shuffleboard.getTab("Debug").add("Mode", Mode);
-
+    
     _joystick = new CommandPS5Controller(Constants.kJoystickPort);
     _joystick2 = new CommandPS5Controller(Constants.kJoystick2Port);
     _vision = new Vision();
     _swerve = new Swerve(_vision::estimationsSupplier);
+
+    _path = PathPlannerPath.fromPathFile("Empty");
 
     _climber = new Climber();
     _elevator = new Elevator();
@@ -111,44 +125,96 @@ public class RobotContainer {
       )
     );
 
-    _joystick.R2().whileTrue(
-      new TeleopSwerve(
-        _swerve,
-        _vision,
-        () -> { return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient; },
-        () -> { return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient; },
-        () -> { return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient * Constants.Swerve.kDriveRotationCoefficient; },
-        () -> { return true; },
-        () -> { return false; }
+    // _joystick.R2().whileTrue(
+    //   new TeleopSwerve(
+    //     _swerve,
+    //     _vision,
+    //     () -> { return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient; },
+    //     () -> { return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient; },
+    //     () -> { return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient * Constants.Swerve.kDriveRotationCoefficient; },
+    //     () -> { return true; },
+    //     () -> { return false; }
+    //   )
+    // );
+
+    // _joystick.R2().whileTrue(
+    //   Commands.sequence(
+    //     Commands.run(() -> {
+    //       LimelightHelpers.setLEDMode_ForceOn(null);
+
+    //       Pose2d tagPos = _vision.getTagPose();
+    //       Pose2d Pos = _swerve.getLastCalculatedPosition();
+    //       Pose2d targetPos = tagPos;
+
+    //       SmartDashboard.putNumber("PosX", Pos.getX());
+    //       SmartDashboard.putNumber("PosY", Pos.getY());
+    //       SmartDashboard.putNumber("Target PosX", targetPos.getX());
+    //       SmartDashboard.putNumber("Target PosY", targetPos.getY());
+        
+    //       double aError = targetPos.rotateBy(Rotation2d.fromDegrees(180)).getRotation().minus(Pos.getRotation()).getDegrees();
+
+    //       // int allianceMinus = _vision.getAlliance() ? 1 : -1;
+
+    //       ArrayList<PathPoint> pathPoints = new ArrayList<PathPoint>();
+    //       pathPoints.add(new PathPoint(new Translation2d(Pos.getX(), Pos.getY())));
+    //       pathPoints.add(new PathPoint(new Translation2d(targetPos.getX(), targetPos.getY() - 2)));
+
+    //       GoalEndState endState = new GoalEndState(0, targetPos.rotateBy(Rotation2d.fromDegrees(180)).getRotation());
+
+    //       _path = PathPlannerPath.fromPathPoints(pathPoints, AutoConstants.constraints, endState);
+    //       System.out.println("Path is ready");
+    //     }, _swerve, _vision),
+
+    //     AutoBuilder.followPath(_path)
+    //   )
+    // );
+
+    _joystick.R2().whileTrue(Commands.sequence(
+        Test(),
+        _commandBuilder.runAutoOutake()
       )
     );
-   
-    _joystick.L1().onTrue(Commands.runOnce(() -> { _swerve.zeroGyro(); }, _swerve));
+
+    _joystick.L1().onTrue(Commands.runOnce(() -> { _swerve.zeroGyro(); _swerve.zeroModules(); }, _swerve));
   }
 
   private void configureOperatorBindings(){
     // _joystick2.cross().onTrue(Commands.select(getAcceptCommands(), () -> {return getAcceptId();}));
 
-    _joystick2.cross().onTrue(
+    // _joystick2.circle().onTrue(
+    //   Commands.parallel(
+    //     _elevator.Reset(),
+    //     _rotation.Reset()
+    //   )
+    // );
+
+    // _joystick2.square().onTrue(
+    //   Commands.parallel(
+    //     _elevator.runClose(),
+    //     _rotation.runOpen(Constants.Rotation.States.kUpRotation)
+    //   )
+    // );
+
+    _joystick.cross().onTrue(
       Commands.parallel(
         _elevator.Reset(),
         _rotation.Reset()
       )
     );
 
-    _joystick2.square().onTrue(
+    _joystick.square().onTrue(
       Commands.parallel(
         _elevator.runClose(),
         _rotation.runOpen(Constants.Rotation.States.kUpRotation)
       )
     );
 
-    _joystick2.triangle().onTrue(_commandBuilder.runInOutTake(
+    _joystick.triangle().onTrue(_commandBuilder.runInOutTake(
         Constants.Elevator.States.kAmpOpenHeight, Constants.Rotation.States.kAmpOpenRotation,
-        _joystick2.getHID()::getTriangleButton));
+        _joystick.getHID()::getTriangleButton));
 
-    _joystick2.circle().onTrue(_commandBuilder.runOutake(Constants.Elevator.States.kTrapOpenHeight,
-        Constants.Rotation.States.kTrapOpenRotation, _joystick2.getHID()::getCircleButton));
+    _joystick.circle().onTrue(_commandBuilder.runOutake(Constants.Elevator.States.kTrapOpenHeight-0.04,
+        Constants.Rotation.States.kTrapOpenRotation + 13, _joystick.getHID()::getCircleButton));
   }
 
   private void configureManualBindings(){
@@ -168,7 +234,7 @@ public class RobotContainer {
       )
     );
 
-    _joystick2.povUp().whileTrue(
+    _joystick.povUp().whileTrue(
       Commands.startEnd(
         () -> {_climber.setMotor(1);},
         () -> {_climber.setMotor(0);},
@@ -176,7 +242,7 @@ public class RobotContainer {
       )
     );
 
-    _joystick2.povDown().whileTrue(
+    _joystick.povDown().whileTrue(
       Commands.startEnd(
         () -> {_climber.setMotor(-1);},
         () -> {_climber.setMotor(0);},
@@ -218,7 +284,7 @@ public class RobotContainer {
   }
 
   public void periodic(){
-    
+  
   }
 
   private HashMap<Integer, Command> getAcceptCommands() {
@@ -270,5 +336,14 @@ public class RobotContainer {
 
   public Command autoCommand(String auto) {
     return _commandBuilder.autoCommand(auto);
+  }
+
+  public Command Test(){
+    ArrayList<PathPoint> pathPoints = new ArrayList<PathPoint>();
+    pathPoints.add(new PathPoint(new Translation2d(_swerve.getLastCalculatedPosition().getX(), _swerve.getLastCalculatedPosition().getY())));
+    pathPoints.add(new PathPoint(new Translation2d(_vision.getTagPose().getX(), _vision.getTagPose().getY() - 1)));
+    
+    PathPlannerPath path = PathPlannerPath.fromPathPoints(pathPoints, pathFollowingConstants.constraints, new GoalEndState(0, _vision.getTagPose().getRotation().plus(Rotation2d.fromDegrees(180))));
+    return AutoBuilder.followPath(path);
   }
 }

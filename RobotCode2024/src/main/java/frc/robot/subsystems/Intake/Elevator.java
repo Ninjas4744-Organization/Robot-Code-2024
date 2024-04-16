@@ -82,7 +82,7 @@ public class Elevator extends SubsystemBase {
       _motor.getEncoder().setPosition(0);
 
     // Shuffleboard.getTab("Game").add("Elevator Limit", !_limitSwitch.get());
-
+    SmartDashboard.putBoolean("Elevator limit", !_limitSwitch.get());
     // Shuffleboard.getTab("Debug").add("Elevator Limit", _limitSwitch.get());
     // Shuffleboard.getTab("Debug").add("Elevator Height", getHeight());
   }

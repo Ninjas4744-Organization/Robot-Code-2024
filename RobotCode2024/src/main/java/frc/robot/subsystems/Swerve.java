@@ -63,7 +63,7 @@ public class Swerve extends SubsystemBase {
     _estimator = new SwerveDrivePoseEstimator(Constants.Swerve.swerveKinematics, getYaw(), getPositions(), new Pose2d());
 
     AutoBuilder.configureHolonomic(
-        this::getPose, // Robot pose supplier
+        this::getLastCalculatedPosition, // Robot pose supplier
         this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
         this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
         this::drive, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
@@ -180,6 +180,13 @@ public class Swerve extends SubsystemBase {
 
   public void zeroGyro() {
     gyro.zeroYaw();
+  }
+
+  public void zeroModules(){
+    System.out.println("---------------Reseting to Absolute---------------");
+    for(SwerveModule mod : mSwerveMods)
+      mod.resetToAbsolute();
+    System.out.println("---------------Reseting to Absolute---------------");
   }
 
   public Rotation2d getYaw() {

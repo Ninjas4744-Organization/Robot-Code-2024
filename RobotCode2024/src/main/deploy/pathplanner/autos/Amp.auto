@@ -30,15 +30,15 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 5.0
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "AmpExit"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Reset"
           }
         }
       ]

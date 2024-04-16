@@ -243,4 +243,14 @@ public final class Constants {
 
     // Constraint for the motion profilied robot angle controller
   }
+
+  public static final class pathFollowingConstants {
+    public static final double maxVelocity = 1.5;
+    public static final double maxAcceleration = 1.0;
+
+    public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
+    public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
+    public static final PathConstraints constraints = new PathConstraints(maxVelocity, maxAcceleration,
+        kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
+  }
 }

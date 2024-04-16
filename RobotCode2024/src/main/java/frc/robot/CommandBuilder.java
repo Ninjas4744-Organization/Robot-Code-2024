@@ -62,7 +62,7 @@ public class CommandBuilder {
       Commands.waitUntil(condition),
 
       Commands.either(
-        _rollers.runIntake(1).raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
+        _rollers.runIntake(0.4).raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
         _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
         () -> {return height == Constants.Rotation.States.kTrapOpenRotation;}
       ),
@@ -94,13 +94,12 @@ public class CommandBuilder {
 
       Commands.waitSeconds(0.1),
 
-      _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake)),
+      _rollers.runIntake().raceWith(Commands.waitSeconds(Constants.Rollers.kTimeToOutake))
 
-      Commands.parallel(
-        _elevator.runClose(),
-        _rotation.runOpen(Constants.Rotation.States.kUpRotation)
-        // _rotation.runClose()
-      )
+      // Commands.parallel(
+      //   _elevator.runClose(),
+      //   _rotation.runOpen(Constants.Rotation.States.kUpRotation)
+      // )
     );
   }
 

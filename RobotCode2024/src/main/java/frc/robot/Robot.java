@@ -26,10 +26,12 @@ public class Robot extends TimedRobot {
     _chooser.addOption("Amp", "Amp");
     _chooser.addOption("Amp Alt", "Amp Alt");
     _chooser.addOption("Amp Alt 2", "Amp Alt 2");
+    _chooser.addOption("Amp Alt 3", "Amp Alt 3");
 
     _chooser.addOption("AmpExit", "AmpExit");
     _chooser.addOption("CenterExit", "CenterExit");
     _chooser.addOption("SourceExit", "SourceExit");
+    _chooser.addOption("SourceOutake", "SourceOutake");
 
     _chooser.addOption("CenterAmp", "CenterAmp");
     _chooser.addOption("CenterAmp Alt", "CenterAmp Alt");

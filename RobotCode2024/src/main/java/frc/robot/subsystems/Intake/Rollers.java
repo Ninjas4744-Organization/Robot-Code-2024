@@ -48,7 +48,7 @@ public class Rollers extends SubsystemBase {
   @Override
   public void periodic() {
     // Shuffleboard.getTab("Game").add("Intake Note", isNote());
-
+    SmartDashboard.putBoolean("Intake note", !_beamBreaker.get());
     // Shuffleboard.getTab("Debug").add("Intake Note", isNote());
     // Shuffleboard.getTab("Debug").add("Rollers Percent", getMotor());
   }
