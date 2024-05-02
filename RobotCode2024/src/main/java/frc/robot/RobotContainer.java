@@ -122,6 +122,7 @@ public class RobotContainer {
         () -> { return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient; },
         () -> { return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient; },
         () -> { return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient * Constants.Swerve.kDriveRotationCoefficient; },
+        () -> { return -_joystick.getRightY() * Constants.Swerve.kDriveCoefficient * Constants.Swerve.kDriveRotationCoefficient; },
         () -> { return false; },
         () -> { return false; }
       )

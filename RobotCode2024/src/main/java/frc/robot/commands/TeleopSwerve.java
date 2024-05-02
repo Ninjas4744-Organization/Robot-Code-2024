@@ -33,7 +33,8 @@ public class TeleopSwerve extends Command {
 
   private DoubleSupplier _translationSup;
   private DoubleSupplier _strafeSup;
-  private DoubleSupplier _rotationSup;
+  private DoubleSupplier _rotationXSup;
+  private DoubleSupplier _rotationYSup;
 
   private PIDController _xController;
   private PIDController _yController;
@@ -48,7 +49,8 @@ public class TeleopSwerve extends Command {
       Vision vision,
       DoubleSupplier translationSup,
       DoubleSupplier strafeSup,
-      DoubleSupplier rotationSup,
+      DoubleSupplier rotationXSup,
+      DoubleSupplier rotationYSup,
       BooleanSupplier withTag,
       BooleanSupplier robotCentricSup) {
 
@@ -59,9 +61,11 @@ public class TeleopSwerve extends Command {
 
     _translationSup = translationSup;
     _strafeSup = strafeSup;
-    _rotationSup = rotationSup;
+    _rotationXSup = rotationXSup;
+    _rotationYSup = rotationYSup;
 
-    _aController = new PIDController(0.03, 0, 0);
+    _aController = new PIDController(0.2, 0, 2);
+    _aController.enableContinuousInput(-1.5 * Math.PI, 0.5 * Math.PI);
     _xController = new PIDController(1, 0, 0);
     _yController = new PIDController(1, 0, 0);
 
@@ -80,20 +84,22 @@ public class TeleopSwerve extends Command {
     Pose2d tagPos = _vision.getTagPose();
     Pose2d Pos = _swerve.getLastCalculatedPosition();
     Pose2d targetPos = tagPos;
+    
+    double currentRotation = _swerve.getYaw().getRadians();
+    double targetRotation = currentRotation;
+    if(Math.abs(_rotationYSup.getAsDouble()) >= 0.1 || Math.abs(_rotationXSup.getAsDouble()) >= 0.1)
+      targetRotation = -Math.atan2(_rotationYSup.getAsDouble(), _rotationXSup.getAsDouble()) + 0.5 * Math.PI;
 
-    SmartDashboard.putNumber("PosX", Pos.getX());
-    SmartDashboard.putNumber("PosY", Pos.getY());
-    SmartDashboard.putNumber("Target PosX", targetPos.getX());
-    SmartDashboard.putNumber("Target PosY", targetPos.getY());
-  
-    double aError = targetPos.rotateBy(Rotation2d.fromDegrees(180)).getRotation().minus(Pos.getRotation()).getDegrees();
+    //add snap to 45 angles
 
-    // int allianceMinus = _vision.getAlliance() ? 1 : -1;
+    SmartDashboard.putNumber("TargetRotation", targetRotation * 57.29578);
+    SmartDashboard.putNumber("CurrentRotation", currentRotation * 57.29578);
+    SmartDashboard.putNumber("RotationPID", _aController.calculate(currentRotation, targetRotation));
 
     /* Get Values, Deadband */
     double translationVal = MathUtil.applyDeadband(_translationSup.getAsDouble(), Constants.Swerve.stickDeadband);
     double strafeVal = MathUtil.applyDeadband(_strafeSup.getAsDouble(), Constants.Swerve.stickDeadband);
-    double rotationVal = MathUtil.applyDeadband(_rotationSup.getAsDouble(), Constants.Swerve.stickDeadband);
+    double rotationVal = _aController.calculate(currentRotation, targetRotation);
 
     ArrayList<PathPoint> pathPoints = new ArrayList<PathPoint>();
     pathPoints.add(new PathPoint(new Translation2d(Pos.getX(), Pos.getY())));
@@ -103,18 +109,6 @@ public class TeleopSwerve extends Command {
 
     PathPlannerPath path = PathPlannerPath.fromPathPoints(pathPoints, AutoConstants.constraints, endState);
     AutoBuilder.followPath(path);
-
-    // translationVal = _withTag.getAsBoolean() && LimelightHelpers.getTV(null)
-    // ? _xController.calculate(Pos.getX(), targetPos.getX()) :
-    //   _translationRateLimiter.calculate(translationVal);
-
-    // strafeVal = _withTag.getAsBoolean() && LimelightHelpers.getTV(null)
-    // ? _yController.calculate(Pos.getY(), targetPos.getY()) :
-    //   _strafeRateLimiter.calculate(strafeVal);
-
-    // rotationVal = _withTag.getAsBoolean()
-    // ? -_aController.calculate(aError)
-    // : /*_rotationRateLimiter.calculate(*/rotationVal/*)*/;
     
     _swerve.drive(
       new Translation2d(translationVal, strafeVal).times(Constants.Swerve.maxSpeed),
