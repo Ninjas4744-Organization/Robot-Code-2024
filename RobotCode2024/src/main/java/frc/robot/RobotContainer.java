@@ -24,6 +24,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.util.LimelightHelpers;
@@ -170,8 +172,10 @@ public class RobotContainer {
     // );
 
     _joystick.R2().whileTrue(Commands.sequence(
-        Test(),
-        _commandBuilder.runAutoOutake()
+        Commands.runOnce(() -> {_swerve.resetOdometry(_swerve.getLastCalculatedPosition());}),
+        GoToTag(),
+        GoToTag()
+        // _commandBuilder.runAutoOutake()
       )
     );
 
@@ -338,12 +342,16 @@ public class RobotContainer {
     return _commandBuilder.autoCommand(auto);
   }
 
-  public Command Test(){
+  public Command GoToTag(){
+
     ArrayList<PathPoint> pathPoints = new ArrayList<PathPoint>();
     pathPoints.add(new PathPoint(new Translation2d(_swerve.getLastCalculatedPosition().getX(), _swerve.getLastCalculatedPosition().getY())));
-    pathPoints.add(new PathPoint(new Translation2d(_vision.getTagPose().getX(), _vision.getTagPose().getY() - 1)));
+    pathPoints.add(new PathPoint(new Translation2d(_vision.getTagPose().getX(), _vision.getTagPose().getY() - 1.1)));
     
+    SmartDashboard.putNumber("Tag Angle", _vision.getTagPose().getRotation().getDegrees());
+
     PathPlannerPath path = PathPlannerPath.fromPathPoints(pathPoints, pathFollowingConstants.constraints, new GoalEndState(0, _vision.getTagPose().getRotation().plus(Rotation2d.fromDegrees(180))));
     return AutoBuilder.followPath(path);
+
   }
 }
