@@ -99,7 +99,7 @@ public final class Constants {
   }
 
   public static final class Swerve {
-    public static final double kDriveCoefficient = 1;
+    public static final double kDriveCoefficient = 0.4;
     public static final double kDriveRotationCoefficient = 0.5;
     public static final double kActionCoefficient = 0.25;
     public static final double stickDeadband = 0.05;
@@ -224,7 +224,7 @@ public final class Constants {
   }
 
   public static final class AutoConstants {
-    public static final double maxVelocity = 3.0;
+    public static final double maxVelocity = 3.0/3;
     public static final double maxAcceleration = 3.0;
 
     public static final double kPXController = 1;

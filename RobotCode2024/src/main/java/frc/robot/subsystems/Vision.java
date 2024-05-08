@@ -47,7 +47,7 @@ public class Vision extends SubsystemBase {
         } else {
                   System.out.println("RED");
 
-          CURRENT_FIELD_LAYOUT.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
+          CURRENT_FIELD_LAYOUT.setOrigin(AprilTagFieldLayout.OriginPosition.kRedAllianceWallRightSide);
         }
 
       }
