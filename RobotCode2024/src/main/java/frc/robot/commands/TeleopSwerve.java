@@ -57,7 +57,7 @@ public class TeleopSwerve extends Command {
     _rotationXSup = rotationXSup;
     _rotationYSup = rotationYSup;
 
-    _aController = new PIDController(0.2, 0, 2);
+    _aController = new PIDController(Constants.Swerve.smartAngleKP, Constants.Swerve.smartAngleKI, Constants.Swerve.smartAngleKD);
     _aController.enableContinuousInput(-1.5 * Math.PI, 0.5 * Math.PI);
 
     addRequirements(_swerve, _vision);
@@ -74,13 +74,15 @@ public class TeleopSwerve extends Command {
     double roundedRotation = Math.round(targetRotation / (Math.PI / 4)) * (Math.PI / 4);
     targetRotation = Math.abs(roundedRotation - targetRotation) <= 15 * 0.017453 ? roundedRotation : targetRotation;
 
-    SmartDashboard.putNumber("TargetRotation", targetRotation * 57.29578);
-    SmartDashboard.putNumber("CurrentRotation", currentRotation * 57.29578);
-    SmartDashboard.putNumber("RotationPID", _aController.calculate(currentRotation, targetRotation));
+    // SmartDashboard.putNumber("TargetRotation", targetRotation * 57.29578);
+    // SmartDashboard.putNumber("CurrentRotation", currentRotation * 57.29578);
+    // SmartDashboard.putNumber("RotationPID", _aController.calculate(currentRotation, targetRotation));
 
     double translationVal = MathUtil.applyDeadband(_translationSup.getAsDouble(), Constants.Swerve.stickDeadband);
     double strafeVal = MathUtil.applyDeadband(_strafeSup.getAsDouble(), Constants.Swerve.stickDeadband);
     double rotationVal = _aController.calculate(currentRotation, targetRotation);
+    SmartDashboard.putNumber("Angle Error", targetRotation - currentRotation);
+    SmartDashboard.putNumber("Gyro", _swerve.getYaw().getDegrees());
     
     _swerve.drive(
       new Translation2d(translationVal, strafeVal).times(Constants.Swerve.maxSpeed),

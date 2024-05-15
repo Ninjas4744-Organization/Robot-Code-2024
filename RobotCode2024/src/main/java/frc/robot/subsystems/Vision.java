@@ -103,6 +103,11 @@ public class Vision extends SubsystemBase {
     return _currentTag;
   }
 
+  public boolean isTag(){
+    System.out.println(LimelightHelpers.getFiducialID(null));
+    return LimelightHelpers.getFiducialID(null) != -1;
+  }
+
   public boolean isRelaventTag() {
     return _ids.isRelavent(_currentTag.ID);
   }

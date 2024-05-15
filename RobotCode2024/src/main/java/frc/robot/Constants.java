@@ -138,6 +138,11 @@ public final class Constants {
     public static final double angleKD = 0.005;
     public static final double angleKFF = 0.0;
 
+    /* Angle PID Values */
+    public static final double smartAngleKP = 0.2;
+    public static final double smartAngleKI = 0;
+    public static final double smartAngleKD = 2;
+
     /* Drive Motor PID Values */
     public static final double driveKP = 0.0;
     public static final double driveKI = 0.0;

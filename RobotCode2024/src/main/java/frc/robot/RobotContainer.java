@@ -13,9 +13,9 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.PathPoint;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
-import frc.lib.util.LimelightHelpers;
 import frc.robot.Constants.pathFollowingConstants;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.Climber;
@@ -91,34 +90,10 @@ public class RobotContainer {
       )
     );
 
-    _joystick.R2().whileTrue(Commands.defer(() -> {
-        Pose2d currentPos = _swerve.getLastCalculatedPosition();
-        Pose2d targetPos = _vision.getTagPose();
-        targetPos = targetPos.plus(new Transform2d(
-          -Math.sin(targetPos.getRotation().getRadians()),
-          -Math.cos(targetPos.getRotation().getRadians()),
-          Rotation2d.fromDegrees(0)
-        ));
-        System.out.println(targetPos.getRotation().getDegrees());
-        System.out.println(-Math.sin(targetPos.getRotation().getRadians()));
-        System.out.println(-Math.cos(targetPos.getRotation().getRadians()));
-        System.out.println(targetPos.getX());
-        System.out.println(targetPos.getY());
-
-        List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(currentPos, targetPos);
-
-        PathPlannerPath path = new PathPlannerPath(
-          bezierPoints,
-          Constants.AutoConstants.constraints,
-          new GoalEndState(0, targetPos.getRotation().plus(Rotation2d.fromDegrees(180)))
-        );
-        
-        return Commands.sequence(
-          Commands.runOnce(() -> _swerve.resetOdometry(currentPos), _swerve),
-          AutoBuilder.followPath(path)
-        );
-      }, Set.of(_swerve, _vision))
-    );
+    // _joystick.R2().whileTrue(Commands.defer(() -> {
+    //     return GoToTag();
+    //   }, Set.of(_swerve, _vision))
+    // );
 
     _joystick.R3().toggleOnTrue(Commands.startEnd(
       () -> {Tornado = true;},
@@ -234,12 +209,7 @@ public class RobotContainer {
   }
 
   public void periodic(){
-    SmartDashboard.putNumber("Tag Angle", _vision.getTagPose().getRotation().getDegrees());
-    SmartDashboard.putNumber("Tag X", _vision.getTagPose().getX());
-    SmartDashboard.putNumber("Tag Y", _vision.getTagPose().getY());
-    SmartDashboard.putNumber("Current Angle", _swerve.getLastCalculatedPosition().getRotation().getDegrees());
-    SmartDashboard.putNumber("Current X", _swerve.getLastCalculatedPosition().getX());
-    SmartDashboard.putNumber("Current Y", _swerve.getLastCalculatedPosition().getY());
+
   }
 
   private HashMap<Integer, Command> getAcceptCommands() {
@@ -285,8 +255,37 @@ public class RobotContainer {
   }
 
   public void Reset(){
-    _swerve.resetOdometry(new Pose2d());
     _commandBuilder.Reset().schedule();
+
+    _swerve.resetOdometry(new Pose2d());
+
+    // if(_vision.isTag() && false){
+    //   // GoTo(
+    //   //   new Pose2d(
+    //   //     _swerve.getLastCalculatedPosition().getX(),
+    //   //     _swerve.getLastCalculatedPosition().getY(),
+    //   //     Rotation2d.fromDegrees(45)
+    //   //   ),
+    //   //   0
+    //   // ).schedule();
+
+    //   Commands.run(() -> {
+    //     try (PIDController _aController = new PIDController(Constants.Swerve.smartAngleKP, Constants.Swerve.smartAngleKI, Constants.Swerve.smartAngleKD)) {
+    //       _aController.enableContinuousInput(-1.5 * Math.PI, 0.5 * Math.PI);
+          
+    //       _swerve.drive(
+    //         new Translation2d(0, 0),
+    //         _aController.calculate(_swerve.getLastCalculatedPosition().getRotation().getRadians(), 0),
+    //         false,
+    //         true
+    //       );
+    //     }
+    //   }, _swerve, _vision)
+    //   .until(() -> {return Math.abs(_swerve.getLastCalculatedPosition().getRotation().getRadians()) <= 0.5;})
+    //   .schedule();
+
+    //   // _swerve.zeroGyro();
+    // }
   }
 
   public Command autoCommand(String auto) {
@@ -294,23 +293,38 @@ public class RobotContainer {
   }
 
   public Command GoToTag(){
-    System.out.println("1");
+    Pose2d targetPos = _vision.getTagPose();
+    return GoTo(targetPos, 1);
+  }
 
-    ArrayList<PathPoint> pathPoints = new ArrayList<PathPoint>();
-    pathPoints.add(new PathPoint(new Translation2d(_swerve.getLastCalculatedPosition().getX(), _swerve.getLastCalculatedPosition().getY())));
-    pathPoints.add(new PathPoint(new Translation2d(_vision.getTagPose().getX(), _vision.getTagPose().getY())));
+  public Command GoTo(Pose2d targetPos, double Offset){
+    Pose2d currentPos = _swerve.getLastCalculatedPosition();
+    System.out.println(currentPos.getX());
+    System.out.println(currentPos.getY());
+    System.out.println(currentPos.getRotation().getDegrees());
+    System.out.println(targetPos.getX());
+    System.out.println(targetPos.getY());
+    System.out.println(targetPos.getRotation().getDegrees());
     
-    System.out.println("2");
+    Pose2d distFromTag = new Pose2d(
+      Offset * Math.cos(targetPos.getRotation().getRadians()),
+      Offset * Math.sin(targetPos.getRotation().getRadians()),
+      new Rotation2d()
+    );
 
-    PathPlannerPath path = PathPlannerPath.fromPathPoints(pathPoints, pathFollowingConstants.constraints, new GoalEndState(0, _vision.getTagPose().getRotation().plus(Rotation2d.fromDegrees(180))));
+    targetPos = new Pose2d(targetPos.getX() + distFromTag.getX(), targetPos.getY() + distFromTag.getY(), targetPos.getRotation());
 
-    SmartDashboard.putNumber("Path Point 1 X", path.getAllPathPoints().get(0).position.getX());
-    SmartDashboard.putNumber("Path Point 1 Y", path.getAllPathPoints().get(0).position.getY());
-    SmartDashboard.putNumber("Path Point 2 X", path.getAllPathPoints().get(1).position.getX());
-    SmartDashboard.putNumber("Path Point 2 Y", path.getAllPathPoints().get(1).position.getY());
+    List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(currentPos, targetPos);
 
-    System.out.println("3");
-
-    return AutoBuilder.followPath(path);
+    PathPlannerPath path = new PathPlannerPath(
+      bezierPoints,
+      Constants.AutoConstants.constraints,
+      new GoalEndState(0, targetPos.getRotation().plus(Rotation2d.fromDegrees(180)))
+    );
+    
+    return Commands.sequence(
+      Commands.runOnce(() -> _swerve.resetOdometry(currentPos), _swerve),
+      AutoBuilder.followPath(path)
+    );
   }
 }
