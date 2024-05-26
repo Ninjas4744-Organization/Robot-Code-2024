@@ -81,8 +81,9 @@ public class TeleopSwerve extends Command {
     double translationVal = MathUtil.applyDeadband(_translationSup.getAsDouble(), Constants.Swerve.stickDeadband);
     double strafeVal = MathUtil.applyDeadband(_strafeSup.getAsDouble(), Constants.Swerve.stickDeadband);
     double rotationVal = _aController.calculate(currentRotation, targetRotation);
-    SmartDashboard.putNumber("Angle Error", targetRotation - currentRotation);
-    SmartDashboard.putNumber("Gyro", _swerve.getYaw().getDegrees());
+    SmartDashboard.putNumber("rotationVal", rotationVal);
+    SmartDashboard.putNumber("targetRotationABC", targetRotation);
+    SmartDashboard.putNumber("currentRotationABC", currentRotation);
     
     _swerve.drive(
       new Translation2d(translationVal, strafeVal).times(Constants.Swerve.maxSpeed),
