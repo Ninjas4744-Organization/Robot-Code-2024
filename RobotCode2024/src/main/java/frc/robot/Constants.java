@@ -250,7 +250,7 @@ public final class Constants {
   }
 
   public static final class pathFollowingConstants {
-    public static final double maxVelocity = 2.5;
+    public static final double maxVelocity = 1;
     public static final double maxAcceleration = 1.25;
 
     public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI*2;

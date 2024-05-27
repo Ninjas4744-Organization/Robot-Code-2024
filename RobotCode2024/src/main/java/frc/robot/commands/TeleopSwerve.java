@@ -74,16 +74,13 @@ public class TeleopSwerve extends Command {
     double roundedRotation = Math.round(targetRotation / (Math.PI / 4)) * (Math.PI / 4);
     targetRotation = Math.abs(roundedRotation - targetRotation) <= 15 * 0.017453 ? roundedRotation : targetRotation;
 
-    // SmartDashboard.putNumber("TargetRotation", targetRotation * 57.29578);
-    // SmartDashboard.putNumber("CurrentRotation", currentRotation * 57.29578);
-    // SmartDashboard.putNumber("RotationPID", _aController.calculate(currentRotation, targetRotation));
+    SmartDashboard.putNumber("TargetRotation", targetRotation * 57.29578);
+    SmartDashboard.putNumber("CurrentRotation", currentRotation * 57.29578);
+    SmartDashboard.putNumber("RotationPID", _aController.calculate(currentRotation, targetRotation));
 
     double translationVal = MathUtil.applyDeadband(_translationSup.getAsDouble(), Constants.Swerve.stickDeadband);
     double strafeVal = MathUtil.applyDeadband(_strafeSup.getAsDouble(), Constants.Swerve.stickDeadband);
     double rotationVal = _aController.calculate(currentRotation, targetRotation);
-    SmartDashboard.putNumber("rotationVal", rotationVal);
-    SmartDashboard.putNumber("targetRotationABC", targetRotation);
-    SmartDashboard.putNumber("currentRotationABC", currentRotation);
     
     _swerve.drive(
       new Translation2d(translationVal, strafeVal).times(Constants.Swerve.maxSpeed),
