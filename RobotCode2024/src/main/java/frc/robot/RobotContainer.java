@@ -284,10 +284,11 @@ public class RobotContainer {
 
   public Command GoToTag(){
     Pose2d targetPos = _vision.getTagPose();
-    return _commandBuilder.runInOutTake(Constants.Elevator.States.kAmpOpenHeight, Constants.Rotation.States.kAmpOpenRotation,
-        _joystick.getHID()::getTriangleButton)
-    .andThen(GoTo(targetPos, 0.25))
-    .andThen(GoTo(targetPos, 0.25));
+    // return _commandBuilder.runInOutTake(Constants.Elevator.States.kAmpOpenHeight, Constants.Rotation.States.kAmpOpenRotation,
+    //     _joystick.getHID()::getTriangleButton)
+    // .andThen(GoTo(targetPos, 0.25))
+    // .andThen(GoTo(targetPos, 0.25));
+    return GoTo(targetPos, 0.25);
   }
 
   public Command GoTo(Pose2d targetPos, double Offset){
