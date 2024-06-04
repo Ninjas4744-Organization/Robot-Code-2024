@@ -99,7 +99,7 @@ public final class Constants {
   }
 
   public static final class Swerve {
-    public static final double kDriveCoefficient = 0.4;
+    public static final double kDriveCoefficient = 1;
     public static final double kDriveRotationCoefficient = 0.5;
     public static final double kActionCoefficient = 0.25;
     public static final double stickDeadband = 0.05;
