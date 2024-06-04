@@ -138,6 +138,11 @@ public final class Constants {
     public static final double angleKD = 0.005;
     public static final double angleKFF = 0.0;
 
+    /* Angle PID Values */
+    public static final double smartAngleKP = 0.2;
+    public static final double smartAngleKI = 0;
+    public static final double smartAngleKD = 2;
+
     /* Drive Motor PID Values */
     public static final double driveKP = 0.0;
     public static final double driveKI = 0.0;
@@ -224,7 +229,7 @@ public final class Constants {
   }
 
   public static final class AutoConstants {
-    public static final double maxVelocity = 3.0;
+    public static final double maxVelocity = 3.0/3;
     public static final double maxAcceleration = 3.0;
 
     public static final double kPXController = 1;
@@ -245,7 +250,7 @@ public final class Constants {
   }
 
   public static final class pathFollowingConstants {
-    public static final double maxVelocity = 2.5;
+    public static final double maxVelocity = 1;
     public static final double maxAcceleration = 1.25;
 
     public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI*2;

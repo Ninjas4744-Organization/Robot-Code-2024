@@ -47,7 +47,7 @@ public class Vision extends SubsystemBase {
         } else {
                   System.out.println("RED");
 
-          CURRENT_FIELD_LAYOUT.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
+          CURRENT_FIELD_LAYOUT.setOrigin(AprilTagFieldLayout.OriginPosition.kRedAllianceWallRightSide);
         }
 
       }
@@ -101,6 +101,11 @@ public class Vision extends SubsystemBase {
 
   public AprilTag getTag() {
     return _currentTag;
+  }
+
+  public boolean isTag(){
+    System.out.println(LimelightHelpers.getFiducialID(null));
+    return LimelightHelpers.getFiducialID(null) != -1;
   }
 
   public boolean isRelaventTag() {
