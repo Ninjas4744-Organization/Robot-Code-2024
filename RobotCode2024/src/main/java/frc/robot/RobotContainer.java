@@ -44,14 +44,15 @@ public class RobotContainer {
   // Misc
   private CommandBuilder _commandBuilder;
   private CommandPS5Controller _joystick;
-  // private CommandPS5Controller _joystick2;
+  private CommandPS5Controller _joystick2;
   private boolean Tornado = false;
 
   public RobotContainer() {
     _joystick = new CommandPS5Controller(Constants.kJoystickPort);
-    // _joystick2 = new CommandPS5Controller(Constants.kJoystick2Port);
+    _joystick2 = new CommandPS5Controller(Constants.kJoystick2Port);
     _vision = new Vision();
     _swerve = new Swerve(_vision::estimationsSupplier);
+
 
     _climber = new Climber();
     _elevator = new Elevator();
@@ -159,7 +160,7 @@ public class RobotContainer {
     //   )
     // );
 
-    _joystick.povUp().whileTrue(
+    _joystick2.povUp().whileTrue(
       Commands.startEnd(
         () -> {_climber.setMotor(1);},
         () -> {_climber.setMotor(0);},
@@ -167,7 +168,7 @@ public class RobotContainer {
       )
     );
 
-    _joystick.povDown().whileTrue(
+    _joystick2.povDown().whileTrue(
       Commands.startEnd(
         () -> {_climber.setMotor(-1);},
         () -> {_climber.setMotor(0);},
