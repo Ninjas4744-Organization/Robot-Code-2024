@@ -16,6 +16,8 @@ import com.pathplanner.lib.path.PathPoint;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -28,6 +30,10 @@ import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Vision;
+import frc.robot.subsystems.VisionIO;
+import frc.robot.subsystems.VisionIOPhoton;
+// import frc.robot.subsystems.VisionIOPhoton;
+import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.Intake.Elevator;
 import frc.robot.subsystems.Intake.Rollers;
 import frc.robot.subsystems.Intake.Rotation;
@@ -40,6 +46,7 @@ public class RobotContainer {
   private Elevator _elevator;
   private Rotation _rotation;
   private Rollers _rollers;
+  private VisionSubsystem _photonVision;
 
   // Misc
   private CommandBuilder _commandBuilder;
@@ -50,9 +57,12 @@ public class RobotContainer {
   public RobotContainer() {
     _joystick = new CommandPS5Controller(Constants.kJoystickPort);
     _joystick2 = new CommandPS5Controller(Constants.kJoystick2Port);
-    _vision = new Vision();
-    _swerve = new Swerve(_vision::estimationsSupplier);
 
+    // _vision = new Vision();
+    VisionIOPhoton[] cameras = { new VisionIOPhoton("Front", new Transform3d(0.37, 0, 0, new Rotation3d())) };
+    _photonVision = new VisionSubsystem(cameras);
+
+    _swerve = new Swerve(_photonVision::estimationSupplier, _photonVision::hasTargets);
 
     _climber = new Climber();
     _elevator = new Elevator();
@@ -81,7 +91,6 @@ public class RobotContainer {
     _swerve.setDefaultCommand(
       new TeleopSwerve(
         _swerve,
-        _vision,
         () -> { return -_joystick.getLeftY() * Constants.Swerve.kDriveCoefficient; },
         () -> { return -_joystick.getLeftX() * Constants.Swerve.kDriveCoefficient; },
         () -> { return -_joystick.getRightX() * Constants.Swerve.kDriveCoefficient * Constants.Swerve.kDriveRotationCoefficient; },
@@ -91,10 +100,10 @@ public class RobotContainer {
       )
     );
 
-    _joystick.R2().whileTrue(Commands.defer(() -> {
-        return GoToTag();
-      }, Set.of(_swerve, _vision))
-    );
+    // _joystick.R2().whileTrue(Commands.defer(() -> {
+    //     return GoToTag();
+    //   }, Set.of(_swerve, _vision))
+    // );
 
     _joystick.R3().toggleOnTrue(Commands.startEnd(
       () -> {Tornado = true;},
@@ -210,7 +219,9 @@ public class RobotContainer {
   }
 
   public void periodic(){
-
+    SmartDashboard.putNumber("Photon X", _photonVision.getRobotPose().getX());
+    SmartDashboard.putNumber("Photon Y", _photonVision.getRobotPose().getY());
+    SmartDashboard.putNumber("Photon 0", _photonVision.getRobotPose().getRotation().getDegrees());
   }
 
   private HashMap<Integer, Command> getAcceptCommands() {

@@ -27,6 +27,7 @@ import frc.lib.util.LimelightHelpers;
 import frc.lib.util.PointWithTime;
 import frc.robot.Constants;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 public class Swerve extends SubsystemBase {
@@ -35,6 +36,7 @@ public class Swerve extends SubsystemBase {
   private SwerveModule[] mSwerveMods;
   private AHRS gyro;
   private Supplier<PointWithTime> _estimationSupplier;
+  private BooleanSupplier _hasVisionMeasurement;
 
   StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault()
       .getStructTopic("MyPose", Pose2d.struct).publish();
@@ -42,12 +44,13 @@ public class Swerve extends SubsystemBase {
   private Field2d m_field_solution = new Field2d();
   public SwerveDrivePoseEstimator _estimator;
 
-  public Swerve(Supplier<PointWithTime> estimationSupplier) {
+  public Swerve(Supplier<PointWithTime> estimationSupplier, BooleanSupplier hasVisionMeasurement) {
     log_modules();
     gyro = new AHRS();
     
     
     _estimationSupplier = estimationSupplier;
+    _hasVisionMeasurement = hasVisionMeasurement;
 
     // Creates all four swerve modules into a swerve drive
     mSwerveMods = new SwerveModule[] {
@@ -251,7 +254,7 @@ public class Swerve extends SubsystemBase {
     publisher.set(getLastCalculatedPosition());
     _estimator.update(getYaw(), getPositions());
 
-    if(LimelightHelpers.getTV(null) && _estimationSupplier.get() != null)
+    if(_hasVisionMeasurement.getAsBoolean() && _estimationSupplier.get() != null)
       _estimator.addVisionMeasurement(_estimationSupplier.get().getPoint(),_estimationSupplier.get().getTime());
 
     swerveOdometry.update(getYaw(), getPositions());

@@ -26,7 +26,6 @@ import com.pathplanner.lib.path.PathPoint;
 
 public class TeleopSwerve extends Command {
   private Swerve _swerve;
-  private Vision _vision;
   private BooleanSupplier _robotCentricSup;
   private BooleanSupplier _tornadoSup;
 
@@ -39,7 +38,6 @@ public class TeleopSwerve extends Command {
 
   public TeleopSwerve(
       Swerve swerve,
-      Vision vision,
       DoubleSupplier translationSup,
       DoubleSupplier strafeSup,
       DoubleSupplier rotationXSup,
@@ -48,7 +46,6 @@ public class TeleopSwerve extends Command {
       BooleanSupplier tornadoSup) {
 
     _swerve = swerve;
-    _vision = vision;
     _robotCentricSup = robotCentricSup;
     _tornadoSup = tornadoSup;
 
@@ -60,7 +57,7 @@ public class TeleopSwerve extends Command {
     _aController = new PIDController(Constants.Swerve.smartAngleKP, Constants.Swerve.smartAngleKI, Constants.Swerve.smartAngleKD);
     _aController.enableContinuousInput(-1.5 * Math.PI, 0.5 * Math.PI);
 
-    addRequirements(_swerve, _vision);
+    addRequirements(_swerve);
   }
 
   @Override

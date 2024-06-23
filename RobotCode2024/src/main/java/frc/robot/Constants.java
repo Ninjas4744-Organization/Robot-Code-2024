@@ -258,4 +258,8 @@ public final class Constants {
     public static final PathConstraints constraints = new PathConstraints(maxVelocity, maxAcceleration,
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
   }
+
+  public static final class VisionConstants {
+    public static final double maxAmbiguity = 0.7;
+  }
 }

@@ -7,6 +7,7 @@ import com.revrobotics.CANSparkMax;
 // import com.revrobotics.SparkPIDController;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.AnalogInput;
 // import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,9 +24,15 @@ public class Climber extends SubsystemBase {
   private CANSparkMax _motor1;
   private CANSparkMax _motor2;
   private DigitalInput _limitSwitch;
+
+  private AnalogInput _ultra;
+
 //   private SparkPIDController _controller;
 
   public Climber() {
+
+    _ultra = new AnalogInput(0);
+
     _motor1 = new CANSparkMax(Constants.Climber.kMotor1ID, MotorType.kBrushless);
     _motor1.restoreFactoryDefaults();
     _motor1.setSmartCurrentLimit(Constants.kCurrentLimit);
@@ -96,6 +103,7 @@ public class Climber extends SubsystemBase {
       Stop();
 
     SmartDashboard.putBoolean("Climb limit", isLimitSwitch());
+    SmartDashboard.putNumber("ULTRA", _ultra.getValue());
   }
 
   public Command Reset(){
