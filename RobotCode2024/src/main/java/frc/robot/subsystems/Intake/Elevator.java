@@ -6,7 +6,10 @@ import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,7 +23,15 @@ public class Elevator extends SubsystemBase {
   private DigitalInput _limitSwitch;
   private SparkPIDController _controller;
 
+  private AnalogInput _ultra;
+
   public Elevator() {
+
+    _ultra = new AnalogInput(0);
+
+    
+
+
     _motor = new CANSparkMax(Constants.Elevator.kMotorID, MotorType.kBrushless);
     _motor.restoreFactoryDefaults();
     _motor.setInverted(true);
@@ -85,6 +96,11 @@ public class Elevator extends SubsystemBase {
     SmartDashboard.putBoolean("Elevator limit", !_limitSwitch.get());
     // Shuffleboard.getTab("Debug").add("Elevator Limit", _limitSwitch.get());
     // Shuffleboard.getTab("Debug").add("Elevator Height", getHeight());
+    // double voltage_scale_factor = 5/RobotController.getVoltage5V();
+    double distCM = 0.237 * _ultra.getValue() + 11.3;
+    SmartDashboard.putNumber("ULTRA Val", _ultra.getValue());
+    SmartDashboard.putNumber("ULTRA Vol", _ultra.getVoltage());
+    SmartDashboard.putNumber("ULTRA Distance cm", distCM);
   }
 
   public Command runOpen(double height) {
